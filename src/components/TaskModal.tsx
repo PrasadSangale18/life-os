@@ -216,7 +216,7 @@ export const TaskModal = ({
         </div>
 
         {/* Destination Switcher */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 14, background: "rgba(0,0,0,0.25)", padding: 3, borderRadius: 9, border: "1px solid var(--border-subtle)" }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 14, background: "var(--bg-surface-elevated)", padding: 4, borderRadius: 10, border: "1px solid var(--border-subtle)" }}>
           <button 
             type="button"
             onClick={() => setDestination('inbox')}
@@ -228,8 +228,9 @@ export const TaskModal = ({
               gap: 6,
               padding: "7px 10px",
               borderRadius: 7,
-              border: "none",
-              background: destination === 'inbox' ? "rgba(255,255,255,0.12)" : "transparent",
+              border: destination === 'inbox' ? "1px solid var(--border-default)" : "1px solid transparent",
+              background: destination === 'inbox' ? "var(--bg-surface)" : "transparent",
+              boxShadow: destination === 'inbox' ? "var(--shadow-sm)" : "none",
               color: destination === 'inbox' ? "var(--text-primary)" : "var(--text-secondary)",
               fontWeight: destination === 'inbox' ? 600 : 450,
               fontSize: 12.5,
@@ -251,8 +252,9 @@ export const TaskModal = ({
               gap: 6,
               padding: "7px 10px",
               borderRadius: 7,
-              border: "none",
-              background: destination === 'direct' ? "rgba(255,255,255,0.12)" : "transparent",
+              border: destination === 'direct' ? "1px solid var(--border-default)" : "1px solid transparent",
+              background: destination === 'direct' ? "var(--bg-surface)" : "transparent",
+              boxShadow: destination === 'direct' ? "var(--shadow-sm)" : "none",
               color: destination === 'direct' ? "var(--text-primary)" : "var(--text-secondary)",
               fontWeight: destination === 'direct' ? 600 : 450,
               fontSize: 12.5,
@@ -382,7 +384,7 @@ export const TaskModal = ({
                         padding: "4px 10px",
                         borderRadius: 6,
                         border: `1px solid ${isSel ? st.color : "var(--border-subtle)"}`,
-                        background: isSel ? `${st.color}22` : "rgba(255,255,255,0.03)",
+                        background: isSel ? `${st.color}22` : "var(--bg-surface-elevated)",
                         color: isSel ? st.color : "var(--text-secondary)",
                         fontSize: 11.5,
                         fontWeight: isSel ? 600 : 450,
@@ -415,14 +417,14 @@ export const TaskModal = ({
                       onClick={() => {
                         setPriority(po.id);
                         if (po.id === 'critical' || po.id === 'high') {
-                          setIsPriority(true);
+                           setIsPriority(true);
                         }
                       }}
                       style={{
                         padding: "5px 6px",
                         borderRadius: 6,
                         border: `1px solid ${isSel ? po.color : "var(--border-subtle)"}`,
-                        background: isSel ? `${po.color}22` : "rgba(255,255,255,0.03)",
+                        background: isSel ? `${po.color}22` : "var(--bg-surface-elevated)",
                         color: isSel ? po.color : "var(--text-secondary)",
                         fontSize: 11,
                         fontWeight: isSel ? 650 : 450,

@@ -267,7 +267,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
             width: 20, 
             height: 20, 
             borderRadius: 5, 
-            border: `1.5px solid ${isDone ? "var(--accent-primary)" : "rgba(255,255,255,0.25)"}`, 
+            border: `1.5px solid ${isDone ? "var(--accent-primary)" : "var(--border-strong)"}`, 
             background: isDone ? "var(--accent-primary)" : "transparent", 
             cursor: "pointer", 
             display: "flex", 
@@ -342,7 +342,8 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
                 minHeight: 22, 
                 borderRadius: 5,
                 color: PRIORITY_CONFIG[task.priority || (task.isPriority ? 'high' : 'normal')].color,
-                background: "rgba(255,255,255,0.04)"
+                background: "var(--bg-surface-elevated)",
+                border: "1px solid var(--border-default)"
               }}
             >
               <option value="critical">Critical</option>
@@ -363,7 +364,8 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
                 minHeight: 22, 
                 borderRadius: 5,
                 color: STATUS_CONFIG[task.status || 'todo'].color,
-                background: "rgba(255,255,255,0.04)"
+                background: "var(--bg-surface-elevated)",
+                border: "1px solid var(--border-default)"
               }}
             >
               <option value="todo">To Do</option>
@@ -723,7 +725,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
             </div>
 
             {/* Capacity Progress Bar */}
-            <div style={{ height: 6, background: "rgba(255,255,255,0.06)", borderRadius: 9999, overflow: "hidden" }}>
+            <div style={{ height: 6, background: "var(--bg-surface-elevated)", border: "1px solid var(--border-subtle)", borderRadius: 9999, overflow: "hidden" }}>
               <div 
                 style={{ 
                   height: "100%", 
@@ -773,7 +775,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
                     </div>
                   </div>
                   {/* Progress bar */}
-                  <div style={{ height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 9999, overflow: "hidden" }}>
+                  <div style={{ height: 4, background: "var(--bg-surface-elevated)", border: "1px solid var(--border-subtle)", borderRadius: 9999, overflow: "hidden" }}>
                     <div style={{ height: "100%", width: `${percent}%`, background: pillar.color, borderRadius: 9999, transition: "width 0.3s ease" }} />
                   </div>
                 </div>
@@ -801,7 +803,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
                 style={{ justifyContent: "space-between", padding: "10px 14px", fontSize: 13 }}
               >
                 <span>Triage Unprocessed Inbox</span>
-                <span className="tabular-nums" style={{ fontSize: 11, background: "rgba(255,255,255,0.08)", padding: "2px 7px", borderRadius: 9999 }}>{inboxCount}</span>
+                <span className="tabular-nums" style={{ fontSize: 11, background: "var(--bg-surface-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)", padding: "2px 7px", borderRadius: 9999 }}>{inboxCount}</span>
               </button>
 
               <button 

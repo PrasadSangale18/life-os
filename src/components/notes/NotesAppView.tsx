@@ -222,7 +222,7 @@ export const NotesAppView: React.FC<NotesAppViewProps> = ({
                         padding: '5px 14px',
                         borderRadius: 9999,
                         background: isSelected ? 'var(--accent-primary)' : 'var(--bg-surface-elevated)',
-                        color: isSelected ? 'var(--bg-base)' : 'var(--text-secondary)',
+                        color: isSelected ? '#ffffff' : 'var(--text-secondary)',
                         border: isSelected ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
                         fontSize: 12,
                         fontWeight: isSelected ? 650 : 500,

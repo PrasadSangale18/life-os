@@ -165,7 +165,7 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
         {(task.difficulty || task.estMinutes || task.deadline || task.tags?.length || task.isPrivate) && (
           <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
             {task.isPrivate && (
-              <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-white/[0.04] text-slate-400 border border-white/[0.06]">
+              <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/[0.06]">
                 <Lock size={10} strokeWidth={1.75} />
                 <span>Private</span>
               </span>
@@ -174,9 +174,9 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
             {task.difficulty && (
               <span 
                 className={`text-[10px] font-medium px-1.5 py-0.5 rounded border ${
-                  task.difficulty === 'Hard' ? 'bg-rose-500/10 text-rose-300 border-rose-500/30' :
-                  task.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' :
-                  'bg-white/[0.04] text-slate-300 border-white/[0.06]'
+                  task.difficulty === 'Hard' ? 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30' :
+                  task.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30' :
+                  'bg-slate-100 dark:bg-white/[0.04] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.06]'
                 }`}
               >
                 {task.difficulty}
@@ -184,8 +184,8 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
             )}
 
             {task.estMinutes && (
-              <span className="inline-flex items-center gap-1 text-[10.5px] font-mono text-slate-400 px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/[0.06] tabular-nums">
-                <Clock size={10} strokeWidth={1.75} className="text-slate-500" />
+              <span className="inline-flex items-center gap-1 text-[10.5px] font-mono text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] tabular-nums">
+                <Clock size={10} strokeWidth={1.75} className="text-slate-400" />
                 <span>{task.estMinutes}m</span>
               </span>
             )}
@@ -194,17 +194,17 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
               <span 
                 className={`inline-flex items-center gap-1 text-[10.5px] font-mono px-1.5 py-0.5 rounded border tabular-nums ${
                   isOverdue 
-                    ? 'bg-rose-500/15 text-rose-300 border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.25)]' 
-                    : 'bg-white/[0.04] text-slate-300 border-white/[0.06]'
+                    ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.25)]' 
+                    : 'bg-slate-100 dark:bg-white/[0.04] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.06]'
                 }`}
               >
-                <Calendar size={10} strokeWidth={1.75} className={isOverdue ? 'text-rose-400' : 'text-slate-500'} />
+                <Calendar size={10} strokeWidth={1.75} className={isOverdue ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'} />
                 <span>{new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
               </span>
             )}
 
             {task.tags && task.tags.length > 0 && (
-              <span className="text-[10px] text-slate-400 bg-white/[0.03] px-1.5 py-0.5 rounded border border-white/[0.05]">
+              <span className="text-[10px] text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.03] px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/[0.05]">
                 #{task.tags[0]}
               </span>
             )}
@@ -222,7 +222,7 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
         <button
           type="button"
           onClick={onEdit}
-          className="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+          className="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors"
           title="Edit Task"
         >
           <Edit3 size={12} strokeWidth={1.75} />
@@ -230,7 +230,7 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
         <button
           type="button"
           onClick={onTrash}
-          className="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+          className="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
           title="Trash Task"
         >
           <Trash2 size={12} strokeWidth={1.75} />

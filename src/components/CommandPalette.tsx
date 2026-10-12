@@ -169,8 +169,8 @@ export const CommandPalette = ({
           maxWidth: 580, 
           borderRadius: 14, 
           border: "1px solid var(--border-strong)", 
-          background: "#10131c",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.85)", 
+          background: "var(--bg-surface)",
+          boxShadow: "var(--shadow-modal)", 
           overflow: "hidden",
           display: "flex",
           flexDirection: "column"
@@ -223,7 +223,7 @@ export const CommandPalette = ({
                       justifyContent: "space-between",
                       padding: "9px 12px", 
                       borderRadius: 8, 
-                      background: isSelected ? "rgba(255,255,255,0.08)" : "transparent",
+                      background: isSelected ? "var(--bg-surface-elevated)" : "transparent",
                       color: isSelected ? "var(--text-primary)" : "var(--text-secondary)",
                       cursor: "pointer",
                       transition: "all 0.12s ease"
@@ -260,7 +260,7 @@ export const CommandPalette = ({
                       justifyContent: "space-between",
                       padding: "9px 12px", 
                       borderRadius: 8, 
-                      background: isSelected ? "rgba(255,255,255,0.08)" : "transparent",
+                      background: isSelected ? "var(--bg-surface-elevated)" : "transparent",
                       color: isSelected ? "var(--text-primary)" : "var(--text-secondary)",
                       cursor: "pointer",
                       transition: "all 0.12s ease"
@@ -299,7 +299,7 @@ export const CommandPalette = ({
         </div>
 
         {/* Footer shortcuts */}
-        <div style={{ padding: "8px 14px", borderTop: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11, color: "var(--text-tertiary)", background: "rgba(0,0,0,0.2)" }}>
+        <div style={{ padding: "8px 14px", borderTop: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11, color: "var(--text-secondary)", background: "var(--bg-surface-elevated)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span><kbd>↑</kbd> <kbd>↓</kbd> navigate</span>
             <span><kbd>↵</kbd> select</span>

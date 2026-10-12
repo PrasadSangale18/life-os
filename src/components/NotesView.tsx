@@ -99,7 +99,7 @@ export const NotesView = ({ onEditTask, onNewNote }: NotesViewProps) => {
 
   const getColorStyles = (colorId?: string) => {
     const c = NOTE_COLORS.find(col => col.id === colorId);
-    return c ? { background: c.bg, border: `1px solid ${c.border}` } : { background: "rgba(16, 19, 28, 0.75)", border: "1px solid var(--border-default)" };
+    return c ? { background: c.bg, border: `1px solid ${c.border}` } : { background: "var(--bg-surface)", border: "1px solid var(--border-default)" };
   };
 
   const renderWikiLinksMarkdown = (content: string) => {

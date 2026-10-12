@@ -80,17 +80,17 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <Component
       onClick={onClick}
-      className={`group relative flex flex-col justify-between p-4 rounded-xl text-left transition-all duration-200 outline-none overflow-hidden bg-[#0D1117]/85 backdrop-blur-xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-white/[0.18] hover:-translate-y-[1px] hover:shadow-xl ${className}`}
+      className={`group relative flex flex-col justify-between p-4 rounded-xl text-left transition-all duration-200 outline-none overflow-hidden bg-white dark:bg-[#0D1117]/85 backdrop-blur-xl border border-slate-200/90 dark:border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-slate-300 dark:hover:border-white/[0.18] hover:-translate-y-[1px] hover:shadow-xl ${className}`}
       style={{
         ...style
       }}
     >
       {/* Inner surface elevation top highlight */}
-      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-slate-200/60 dark:via-white/[0.08] to-transparent pointer-events-none" />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-2.5">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
           {title}
         </span>
         <div 
@@ -107,16 +107,16 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
       {/* Main Stat & Trend */}
       <div className="flex items-baseline justify-between gap-2 flex-wrap">
-        <div className="text-2xl font-bold font-mono tracking-tight text-[#F8FAFC] leading-none tabular-nums">
+        <div className="text-2xl font-bold font-mono tracking-tight text-slate-900 dark:text-[#F8FAFC] leading-none tabular-nums">
           {loading ? '...' : value}
         </div>
 
         {trend && (
           <div 
             className={`inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded border tabular-nums ${
-              isUp ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' :
-              isDown ? 'bg-rose-500/10 text-rose-300 border-rose-500/30' :
-              'bg-white/[0.04] text-slate-300 border-white/[0.06]'
+              isUp ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30' :
+              isDown ? 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30' :
+              'bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/[0.06]'
             }`}
           >
             {isUp && <TrendingUp size={11} strokeWidth={1.75} />}
@@ -129,7 +129,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
       {/* Subtitle */}
       {subtitle && (
-        <div className="text-[11px] text-slate-400 tracking-tight mt-1.5">
+        <div className="text-[11px] text-slate-500 dark:text-slate-400 tracking-tight mt-1.5">
           {subtitle}
         </div>
       )}
