@@ -14,97 +14,33 @@ import { CommandPalette } from './components/CommandPalette';
 import { SmartOrganizer } from './components/SmartOrganizer';
 import { WeeklyReview } from './components/WeeklyReview';
 import { LoginScreen } from './components/LoginScreen';
-import { LifeOSLogo } from './components/LifeOSLogo';
 import { ExportModal } from './components/ExportModal';
 import { PromptWiseModal } from './components/PromptWiseModal';
 import { UserProfileMenu } from './components/UserProfileMenu';
 import { SitesView } from './components/SitesView';
+import { TopBar } from './components/TopBar';
+import { Sidebar } from './components/Sidebar';
+import { DimensionFilter } from './components/DimensionFilter';
 
 const MindMap = lazy(() => import('./components/MindMap').then(m => ({ default: m.MindMap })));
-import { PILLARS, FONT_URL } from './theme/tokens';
+import { FONT_URL } from './theme/tokens';
 import type { PillarId } from './theme/tokens';
 import type { Item, ItemType } from './types';
 import { 
   Plus, 
-  LayoutDashboard, 
-  GitBranch, 
-  LogOut, 
-  List as ListIcon, 
-  Trash2, 
-  Inbox, 
-  Download, 
-  Settings, 
-  Wand2, 
-  CalendarCheck,
-  Search,
-  Brain,
-  Activity,
-  HeartHandshake,
-  Coins,
-  Lock,
   Sparkles,
-  Target,
-  X,
   CheckSquare,
   BookOpen,
-  Menu,
-  Building2,
-  Bell,
-  Moon,
-  Sun,
-  MapPin,
-  BarChart3,
-  Radar,
-  CloudDownload,
-  AlertTriangle,
-  FileText
+  GitBranch,
+  Wand2,
+  Settings,
+  X,
+  CalendarCheck,
+  Download,
+  Trash2,
+  Lock
 } from 'lucide-react';
 import './App.css';
-
-const PILLAR_STYLES: Record<string, {
-  name: string;
-  Icon: any;
-  activeClass: string;
-}> = {
-  physical: {
-    name: "Physical",
-    Icon: Activity,
-    activeClass: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.2)]",
-  },
-  mental: {
-    name: "Mental",
-    Icon: Brain,
-    activeClass: "bg-sky-500/15 text-sky-300 border-sky-500/40 shadow-[0_0_12px_rgba(56,189,248,0.2)]",
-  },
-  relational: {
-    name: "Relational",
-    Icon: HeartHandshake,
-    activeClass: "bg-rose-500/15 text-rose-300 border-rose-500/40 shadow-[0_0_12px_rgba(244,63,94,0.2)]",
-  },
-  spiritual: {
-    name: "Spiritual",
-    Icon: Sparkles,
-    activeClass: "bg-purple-500/15 text-purple-300 border-purple-500/40 shadow-[0_0_12px_rgba(168,85,247,0.2)]",
-  },
-  financial: {
-    name: "Financial",
-    Icon: Coins,
-    activeClass: "bg-amber-500/15 text-amber-300 border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.2)]",
-  },
-};
-
-// PRAHARI CONTROL ROOM NAVIGATION (matching media_1791828447029.png)
-const CONTROL_ROOM_SECTIONS = [
-  { id: "dashboard",  label: "Dashboard",       Icon: LayoutDashboard },
-  { id: "tasks",      label: "Safety Reports",  Icon: FileText },
-  { id: "organizer",  label: "AI Analyzer",     Icon: Brain },
-  { id: "import",     label: "CSV Bulk Import", Icon: CloudDownload },
-  { id: "projects",   label: "Analytics",       Icon: BarChart3 },
-  { id: "mindmap",    label: "SIF Risk",        Icon: AlertTriangle },
-  { id: "today",      label: "Shift Radar",     Icon: Radar },
-  { id: "sites",      label: "Sites",           Icon: MapPin },
-  { id: "notes",      label: "My Notes",        Icon: BookOpen },
-] as const;
 
 export default function App() {
   const { isLoaded, init, user, setUser, addItem, updateItem, showPrivate, setShowPrivate } = useStore();
@@ -206,15 +142,10 @@ export default function App() {
   // Metrics
   const pt = useMemo(() => items.filter(t => t.type === 'task' && !t.deletedAt && (showPrivate || !t.isPrivate)), [items, showPrivate]);
   const doneTasks = useMemo(() => pt.filter(t => t.status === 'done').length, [pt]);
-  const pct = pt.length ? Math.round((doneTasks / pt.length) * 100) : 0;
   
   const inboxCount = useMemo(() => {
     return items.filter(i => (!i.pillar || (i.type === 'task' && !i.quadrant)) && !i.deletedAt && !i.isArchived && (showPrivate || !i.isPrivate)).length;
   }, [items, showPrivate]);
-
-  const pendingTasksCount = useMemo(() => {
-    return pt.filter(t => t.status !== 'done').length;
-  }, [pt]);
 
   const totalNotesCount = useMemo(() => {
     return items.filter(t => (t.type === 'note' || t.type === 'idea' || t.type === 'knowledge' || t.type === 'journal') && !t.deletedAt && !t.isArchived && (showPrivate || !t.isPrivate)).length;
@@ -271,296 +202,69 @@ export default function App() {
       />
 
       {isMobile && sidebarOpen && (
-        <div onClick={() => setSidebarOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 40, backdropFilter: "blur(6px)" }} />
+        <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" />
       )}
 
-      {/* Sidebar */}
-      <aside 
-        style={{ 
-          width: isMobile ? (sidebarOpen ? "84vw" : 0) : 250, 
-          maxWidth: isMobile ? 320 : 250,
-          flexShrink: 0, 
-          background: "var(--bg-sidebar)", 
-          borderRight: "1px solid var(--border-default)", 
-          display: "flex", 
-          flexDirection: "column", 
-          zIndex: isMobile ? 50 : 10, 
-          backdropFilter: "blur(24px)", 
-          overflow: "hidden", 
-          transition: isMobile ? "width 0.22s cubic-bezier(0.16, 1, 0.3, 1)" : "none", 
-          position: isMobile ? "fixed" : "relative", 
-          top: 0, 
-          left: 0, 
-          height: "100vh" 
+      {/* Prahari Control Room Sidebar */}
+      <Sidebar 
+        currentTab={activeSection}
+        onTabChange={(tab) => {
+          setActiveSection(tab);
+          if (isMobile) setSidebarOpen(false);
         }}
-      >
-        <div style={{ width: isMobile ? "84vw" : 250, maxWidth: isMobile ? 320 : 250, height: "100%", display: "flex", flexDirection: "column", opacity: isMobile ? (sidebarOpen ? 1 : 0) : 1, transition: "opacity 0.15s ease", pointerEvents: isMobile ? (sidebarOpen ? "auto" : "none") : "auto" }}>
-          
-          {/* Brand Header */}
-          <div style={{ padding: "16px 20px 14px", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <LifeOSLogo variant="full" size={28} />
-            {isMobile && (
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(false)}
-                className="btn-ghost"
-                style={{ padding: 4, borderRadius: 6, color: "var(--text-tertiary)" }}
-                aria-label="Close navigation"
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
-
-          {/* CONTROL ROOM NAVIGATION matching PRAHARI */}
-          <div className="px-3 pt-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            CONTROL ROOM
-          </div>
-          <div style={{ padding: "4px 8px 10px", display: "flex", flexDirection: "column", gap: 3 }}>
-            {CONTROL_ROOM_SECTIONS.map(s => {
-              const isActive = activeSection === s.id;
-              const count = s.id === "tasks" ? pendingTasksCount : s.id === "notes" ? totalNotesCount : undefined;
-
-              return (
-                <button 
-                  key={s.id} 
-                  onClick={() => { setActiveSection(s.id); if (isMobile) setSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all cursor-pointer text-left outline-none ${
-                    isActive 
-                      ? "bg-[#FFF4EC] dark:bg-orange-500/15 text-[#E04F16] dark:text-[#FB923C] border border-[#FFD8BF] dark:border-orange-500/30 font-semibold shadow-xs" 
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.04] border border-transparent font-medium"
-                  }`}
-                >
-                  <s.Icon 
-                    size={17} 
-                    strokeWidth={isActive ? 2.2 : 1.75} 
-                    className={isActive ? "text-[#FF5A1F] shrink-0" : "text-slate-400 dark:text-slate-500 shrink-0"} 
-                  />
-                  <span className="flex-1 min-w-0 truncate">{s.label}</span>
-                  {count !== undefined && count > 0 && (
-                    <span className="font-mono text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300">
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Spacer */}
-          <div style={{ flex: 1 }} />
-
-          {/* Progress Bar & Utility Dock at Bottom */}
-          <div style={{ padding: "12px 14px", borderTop: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column", gap: 10 }}>
-            {/* Minimalist Task Completion Progress */}
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span className="text-label" style={{ fontSize: 10 }}>Task Completion</span>
-                <span className="text-meta" style={{ color: "var(--text-primary)", fontWeight: 600 }}>{doneTasks}/{pt.length} ({pct}%)</span>
-              </div>
-              <div style={{ height: 4, background: "var(--border-default)", borderRadius: 9999, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${pct}%`, background: theme === 'light' ? "linear-gradient(90deg, #181a20, #10b981)" : "linear-gradient(90deg, #a78bfa, #10b981)", borderRadius: 9999, transition: "width 0.4s ease" }} />
-              </div>
-            </div>
-
-            {/* Quick Utilities Button */}
-            <button
-              type="button"
-              onClick={() => setShowUtilitiesModal(true)}
-              className="btn-ghost"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 10px",
-                borderRadius: 8,
-                border: "1px solid var(--border-subtle)",
-                background: "var(--bg-surface)",
-                fontSize: 12,
-                color: "var(--text-secondary)",
-                cursor: "pointer",
-                width: "100%"
-              }}
-            >
-              <Settings size={14} color="var(--text-tertiary)" />
-              <span style={{ flex: 1, textAlign: "left" }}>Utilities & Settings</span>
-            </button>
-
-            {/* User Row */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 2 }}>
-              <div style={{ width: 24, height: 24, borderRadius: "50%", background: "rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", flexShrink: 0 }}>
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 11.5, color: "var(--text-secondary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</div>
-              </div>
-              <button 
-                aria-label="Sign out" 
-                onClick={() => setUser(null)} 
-                className="btn-ghost"
-                style={{ padding: 4, borderRadius: 5, color: "var(--text-tertiary)" }}
-                title="Sign out"
-              >
-                <LogOut size={13} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </aside>
+        isMobile={isMobile}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        onOpenUtilities={() => setShowUtilitiesModal(true)}
+        user={user}
+        onSignOut={() => setUser(null)}
+        notesCount={totalNotesCount}
+        completedCount={doneTasks}
+        totalCount={pt.length}
+      />
 
       {/* Main Content Area */}
       <main style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", position: "relative", zIndex: 1, overflow: "hidden" }}>
         
-        {/* Top Header matching PRAHARI */}
-        <header className="px-4 md:px-8 py-3 flex items-center justify-between border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#0E131F]/95 backdrop-blur-md z-20 gap-3">
-          <div className="flex items-center gap-3">
-            {/* Mobile Menu Toggle Button */}
-            {isMobile && (
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(true)}
-                className="p-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 bg-white dark:bg-[#131924]"
-                aria-label="Open navigation"
-              >
-                <Menu size={18} />
-              </button>
-            )}
-
-            {/* Breadcrumb Icon and Title matching Prahari Header */}
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-xs">
-                {activeSection === "sites" ? <MapPin size={16} className="text-[#FF5A1F]" /> :
-                 activeSection === "tasks" ? <FileText size={16} className="text-[#FF5A1F]" /> :
-                 activeSection === "notes" ? <BookOpen size={16} className="text-[#FF5A1F]" /> :
-                 activeSection === "organizer" ? <Brain size={16} className="text-[#FF5A1F]" /> :
-                 activeSection === "mindmap" ? <AlertTriangle size={16} className="text-[#FF5A1F]" /> :
-                 activeSection === "today" ? <Radar size={16} className="text-[#FF5A1F]" /> :
-                 activeSection === "projects" ? <BarChart3 size={16} className="text-[#FF5A1F]" /> :
-                 activeSection === "import" ? <CloudDownload size={16} className="text-[#FF5A1F]" /> :
-                 <LayoutDashboard size={16} className="text-[#FF5A1F]" />}
-              </div>
-
-              <span className="text-base font-bold text-slate-900 dark:text-white capitalize tracking-tight">
-                {activeSection === "sites" ? "Sites" :
-                 activeSection === "tasks" ? "Safety Reports" :
-                 activeSection === "notes" ? "My Notes" :
-                 activeSection === "organizer" ? "AI Analyzer" :
-                 activeSection === "mindmap" ? "SIF Risk" :
-                 activeSection === "today" ? "Shift Radar" :
-                 activeSection === "projects" ? "Analytics" :
-                 activeSection === "import" ? "CSV Bulk Import" :
-                 activeSection === "review" ? "Weekly Review" :
-                 activeSection === "settings" ? "Settings" :
-                 "Dashboard"}
-              </span>
-
-              {/* If in tasks workspace: show clean segmented switcher [ Matrix | List | Projects | Inbox ] */}
-              {activeSection === "tasks" && (
-                <div className="bg-slate-100 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-200 dark:border-white/[0.06] flex items-center gap-1 ml-2">
-                  {[
-                    { id: 'matrix', label: 'Matrix', icon: LayoutDashboard },
-                    { id: 'list', label: 'List', icon: ListIcon },
-                    { id: 'projects', label: 'Projects', icon: Target },
-                    { id: 'inbox', label: 'Inbox', icon: Inbox, badge: inboxCount }
-                  ].map(tab => {
-                    const isCurrent = taskViewMode === tab.id;
-                    const TabIcon = tab.icon;
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => setTaskViewMode(tab.id as any)}
-                        className={`relative px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 outline-none cursor-pointer ${
-                          isCurrent ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                        }`}
-                      >
-                        <TabIcon size={13} strokeWidth={1.75} />
-                        {!isMobile && <span>{tab.label}</span>}
-                        {tab.badge && tab.badge > 0 ? (
-                          <span className="bg-orange-500/20 text-orange-500 border border-orange-500/30 px-1.5 py-0.5 text-[10px] font-mono rounded-full leading-tight tabular-nums">
-                            {tab.badge}
-                          </span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2.5">
-            {/* Search */}
-            <button
-              onClick={() => setShowCommandPalette(true)}
-              className="bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-500 dark:text-slate-400 rounded-xl text-xs py-1.5 px-3 transition-colors flex items-center gap-2 group outline-none cursor-pointer shadow-xs"
-              title="Open Command & Search Palette (Cmd+K)"
-            >
-              <Search size={14} strokeWidth={1.75} className="group-hover:text-slate-800 dark:group-hover:text-white transition-colors" />
-              {!isMobile && <span className="text-slate-500 dark:text-slate-400">Search</span>}
-              {!isMobile && (
-                <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10">
-                  ⌘K
-                </kbd>
-              )}
-            </button>
-
-            {/* Enterprise Pill matching Prahari (media_1791828447029.png) */}
-            <div className="hidden lg:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 shadow-xs">
-              <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                <Building2 size={13} strokeWidth={2.2} />
-              </div>
-              <div className="flex flex-col text-left leading-tight">
-                <span className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight">
-                  OIL INDIA LIMITED
-                </span>
-                <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">
-                  Govt. of India Enterprise
-                </span>
-              </div>
-            </div>
-
-            {/* Moon / Sun Theme Toggle matching Prahari */}
-            <button 
-              onClick={toggleTheme}
-              className="p-2 rounded-xl bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shadow-xs transition-colors cursor-pointer"
-              title="Toggle Dark / Light Theme"
-            >
-              {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-
-            {/* Notification Bell with red counter badge 3 matching Prahari */}
-            <button 
-              className="relative p-2 rounded-xl bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shadow-xs transition-colors cursor-pointer"
-              title="Notifications (3 active alerts)"
-              onClick={() => alert("3 active safety & execution alerts: Moran Basin inspection scheduled, Bagjan Rig trend alert (+5.7%), Shift review logged.")}
-            >
-              <Bell size={15} />
-              <span className="absolute -top-1 -right-1 bg-[#EF4444] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full border-2 border-white dark:border-[#131924] leading-tight">
-                3
-              </span>
-            </button>
-
-            {/* Quick Capture (PRAHARI Orange CTA) */}
-            <button 
-              onClick={() => { setEditingTask(undefined); setCaptureTarget('inbox'); setNewTaskQuadrant('do'); setShowTaskModal(true); }} 
-              className="bg-[#FF5A1F] hover:bg-[#E04F16] text-white font-semibold px-3 py-1.5 rounded-xl shadow-[0_2px_10px_rgba(255,90,31,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 text-xs outline-none cursor-pointer"
-              title="Capture new item (C)"
-            >
-              <Plus size={14} strokeWidth={2.2} />
-              <span className="hidden md:inline">Capture</span>
-            </button>
-
-            {/* User Profile Menu with Settings, Export, Prompt, Sign Out */}
-            <UserProfileMenu
-              user={user}
-              onSignOut={() => setUser(null)}
-              onOpenSettings={() => setActiveSection('settings')}
-              onOpenExport={() => setShowExportModal(true)}
-              onOpenPrompt={() => setShowPromptModal(true)}
-            />
-          </div>
-        </header>
+        {/* Prahari Top Command Bar */}
+        <TopBar
+          currentView={taskViewMode}
+          onViewChange={(view) => setTaskViewMode(view)}
+          inboxCount={inboxCount}
+          isDarkMode={theme === 'dark'}
+          onToggleDarkMode={toggleTheme}
+          onQuickCapture={() => {
+            setEditingTask(undefined);
+            setCaptureTarget('inbox');
+            setNewTaskQuadrant('do');
+            setShowTaskModal(true);
+          }}
+          pageTitle={
+            activeSection === "sites" ? "Sites" :
+            activeSection === "tasks" ? "To-do list" :
+            activeSection === "notes" ? "My Notes" :
+            activeSection === "organizer" ? "Smart AI Organizer" :
+            activeSection === "mindmap" ? "Mind Map & Graph" :
+            activeSection === "today" ? "Shift Radar" :
+            activeSection === "projects" ? "Analytics" :
+            activeSection === "import" ? "CSV Bulk Import" :
+            activeSection === "review" ? "Weekly Review" :
+            activeSection === "settings" ? "Settings" :
+            "Dashboard"
+          }
+          onSearchClick={() => setShowCommandPalette(true)}
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          isMobile={isMobile}
+          user={user}
+        >
+          <UserProfileMenu
+            user={user}
+            onSignOut={() => setUser(null)}
+            onOpenSettings={() => setActiveSection('settings')}
+            onOpenExport={() => setShowExportModal(true)}
+            onOpenPrompt={() => setShowPromptModal(true)}
+          />
+        </TopBar>
 
         {/* Content Body */}
         <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 14 : 24, paddingBottom: isMobile ? 100 : 80 }}>
@@ -576,28 +280,11 @@ export default function App() {
                   transition={{ duration: 0.18, ease: "easeOut" }}
                   style={{ display: "flex", flexDirection: "column", gap: 14 }}
                 >
-                  {/* Dimension Category Filters (Linear / Raycast Tinted Glow Pills) */}
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
-                    {PILLARS.map(p => {
-                      const isSelected = activePillar === p.id;
-                      const style = PILLAR_STYLES[p.id];
-                      const Icon = style?.Icon || Activity;
-                      return (
-                        <button
-                          key={p.id}
-                          onClick={() => setActivePillar(p.id)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all border cursor-pointer whitespace-nowrap ${
-                            isSelected
-                              ? `${style?.activeClass || "bg-white/10 text-white border-white/20"} font-semibold scale-[1.02]`
-                              : 'text-slate-400 hover:text-white hover:bg-white/[0.04] border-transparent font-medium hover:scale-[1.01]'
-                          }`}
-                        >
-                          <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
-                          <span>{style?.name || p.name}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {/* Prahari Life Dimension Filter Pills */}
+                  <DimensionFilter 
+                    activeDimension={activePillar} 
+                    onSelectDimension={(dim) => setActivePillar(dim)} 
+                  />
 
                   <Dashboard 
                     activePillar={activePillar} 

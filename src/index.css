@@ -1,6 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --color-prahari-orange: #FF5A1F;
+  --color-prahari-orangeHover: #EA580C;
+  --color-prahari-peach: #FFF4EC;
+  --color-prahari-peachBorder: #FFD8BF;
+  --color-prahari-peachText: #E04F16;
+
+  --color-dark-canvas: #0B0F17;
+  --color-dark-sidebar: #0E131F;
+  --color-dark-card: #131924;
+  --color-dark-cardHover: #1A2232;
+  --color-dark-border: rgba(255, 255, 255, 0.08);
+
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.04);
+  --shadow-cardDark: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --shadow-glowOrange: 0 0 20px rgba(255, 90, 31, 0.25);
+}
+
 :root,
 [data-theme="dark"] {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -130,6 +148,20 @@ html, body {
   text-rendering: optimizeLegibility;
   overflow: hidden;
   height: 100%;
+
+  /* Prahari Technical Blueprint Grid Overlay */
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+[data-theme="dark"] body,
+.dark body {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* Typography Scale Classes */
