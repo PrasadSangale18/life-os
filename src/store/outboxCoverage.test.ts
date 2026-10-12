@@ -282,6 +282,35 @@ describe('Store Outbox Coverage (Table-Driven)', () => {
       },
       expectedAction: 'put',
       assertPayload: (p) => p.id === 'restored-backup-1'
+    },
+    {
+      name: 'commitSubtasks',
+      setup: async () => {
+        const id = await useStore.getState().addItem({ title: 'Parent Task', type: 'task' });
+        return id;
+      },
+      action: async (parentId) => {
+        await useStore.getState().commitSubtasks(parentId, [
+          { title: 'Subtask 1', estMinutes: 20, quadrant: 'do', priority: 'high' }
+        ], 'batch-123');
+      },
+      expectedAction: 'put',
+      assertPayload: (p) => p.title === 'Subtask 1' && p.breakdownBatchId === 'batch-123'
+    },
+    {
+      name: 'undoSubtasks',
+      setup: async () => {
+        const id = await useStore.getState().addItem({ title: 'Parent Task', type: 'task' });
+        await useStore.getState().commitSubtasks(id, [
+          { title: 'Subtask 1', estMinutes: 20, quadrant: 'do', priority: 'high' }
+        ], 'batch-456');
+        return 'batch-456';
+      },
+      action: async (batchId) => {
+        await useStore.getState().undoSubtasks(batchId);
+      },
+      expectedAction: 'put',
+      assertPayload: (p) => p.breakdownBatchId === 'batch-456' && !!p.deletedAt
     }
   ];
 

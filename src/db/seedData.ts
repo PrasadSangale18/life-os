@@ -1,0 +1,558 @@
+import type { Item } from '../types';
+
+export const INITIAL_SEED_ITEMS: Omit<Item, 'id' | 'createdAt' | 'updatedAt'>[] = [
+  // --- PHYSICAL PILLAR ---
+  {
+    type: 'task',
+    title: 'Buy Ketoconazole 2% shampoo (dandruff fix - start TODAY)',
+    pillar: 'physical',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['health', 'urgent'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Book urologist appointment for varicocele',
+    pillar: 'physical',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['health'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Book eye exam (weak eyesight + red veins during pushups)',
+    pillar: 'physical',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['health'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Sleep 7+ hours tonight - zero compromise',
+    pillar: 'physical',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['sleep', 'routine'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Build daily workout: 20min run + chest + forearms',
+    pillar: 'physical',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['fitness'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Plan protein-rich meal every day (eggs, dal, paneer)',
+    pillar: 'physical',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['nutrition'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Fix posture while coding - get laptop stand',
+    pillar: 'physical',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['ergonomics'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Get haircut after body starts improving',
+    pillar: 'physical',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['grooming'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Order Ketoconazole + supplements online (ask family)',
+    pillar: 'physical',
+    quadrant: 'delegate',
+    status: 'todo',
+    tags: ['errand'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Overthinking body issues without taking action first',
+    pillar: 'physical',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['mindset'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Skipping sleep to scroll Instagram at midnight',
+    pillar: 'physical',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['bad-habits'],
+    isPrivate: false,
+  },
+
+  // --- MENTAL PILLAR ---
+  {
+    type: 'task',
+    title: 'Write M2 Unit Test 1 short notes (remad) - before test',
+    pillar: 'mental',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['academics', 'exam'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Complete PHY + BXE + Math + PPS + EM assignments',
+    pillar: 'mental',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['college', 'assignments'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Solve 1 LeetCode problem daily (C++ priority)',
+    pillar: 'mental',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['dsa', 'leetcode', 'c++'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Printouts: Math QB, PPS unit 3/4/5, BXE all, PHY all',
+    pillar: 'mental',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['printouts'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Create 2 desktop folders: 1_ACADEMICS + 2_AI_TOOLS',
+    pillar: 'mental',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['organization'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'IITM BS DS - PYQ short notes (1 subject/week)',
+    pillar: 'mental',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['iitm', 'data-science'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Life mind map: ideal day at 27, work backwards',
+    pillar: 'mental',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['vision', 'planning'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'English - read 1 article/day (BBC, The Hindu)',
+    pillar: 'mental',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['reading', 'vocabulary'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Send printout list to campus print shop',
+    pillar: 'mental',
+    quadrant: 'delegate',
+    status: 'todo',
+    tags: ['errand'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: "YouTube 'study with me' videos = procrastination",
+    pillar: 'mental',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['elimination'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Multitasking while studying - kills retention',
+    pillar: 'mental',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['elimination'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Calling yourself dumb - you are overwhelmed, not dumb',
+    pillar: 'mental',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['mindset'],
+    isPrivate: false,
+  },
+
+  // --- RELATIONAL PILLAR ---
+  {
+    type: 'task',
+    title: 'Update LinkedIn: photo, headline, DYPIT + IITM, skills',
+    pillar: 'relational',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['networking', 'linkedin'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Stop isolating - share ONE win today with a friend',
+    pillar: 'relational',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['friendship'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Build HFT/quant community on LinkedIn (connect weekly)',
+    pillar: 'relational',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['hft', 'quant', 'network'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Practice remembering names - repeat name 3x when you meet',
+    pillar: 'relational',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['social-skills'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Join hackathon team or coding club for brotherhood',
+    pillar: 'relational',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['hackathon', 'community'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Attend at least 1 tech event/meetup per semester',
+    pillar: 'relational',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['meetup'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Mindless Instagram scrolling - zero ROI, pure dopamine drain',
+    pillar: 'relational',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['elimination'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Comparing yourself to others without action - pointless spiral',
+    pillar: 'relational',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['mindset'],
+    isPrivate: false,
+  },
+
+  // --- SPIRITUAL PILLAR ---
+  {
+    type: 'task',
+    title: 'Start 10-min morning meditation - breath counting, no apps',
+    pillar: 'spiritual',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['meditation', 'clarity'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Write your WHY: why HFT? What does ideal life look like?',
+    pillar: 'spiritual',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['purpose', 'journal'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Read Atomic Habits (1st mental toughness book)',
+    pillar: 'spiritual',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['books', 'habits'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Study consciousness + philosophy of mind (intro level)',
+    pillar: 'spiritual',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['philosophy'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: '2-hour life planning: direction, goals, 5-year vision',
+    pillar: 'spiritual',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['vision'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Study Stoicism - Marcus Aurelius (free on Project Gutenberg)',
+    pillar: 'spiritual',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['stoicism'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Overthinking without execution - action kills anxiety',
+    pillar: 'spiritual',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['action'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: "Waiting to feel 'motivated' - discipline > motivation always",
+    pillar: 'spiritual',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['discipline'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Planning 100 things, executing 0 - pick 3 tasks max/day',
+    pillar: 'spiritual',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['focus'],
+    isPrivate: false,
+  },
+
+  // --- FINANCIAL PILLAR ---
+  {
+    type: 'task',
+    title: 'LeetCode daily: arrays, hashmaps, heaps, binary search (C++)',
+    pillar: 'financial',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['hft', 'leetcode', 'c++'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Study HFT firms: Graviton, iRage, Quadeye, Tower India',
+    pillar: 'financial',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['hft', 'careers'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Push ALL code to GitHub - this IS your HFT resume',
+    pillar: 'financial',
+    quadrant: 'do',
+    status: 'todo',
+    tags: ['github', 'portfolio'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Learn algo trading Python: backtrader / zipline (1hr/week)',
+    pillar: 'financial',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['algo-trading', 'python'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Build 1 original TradingView Pine Script indicator',
+    pillar: 'financial',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['tradingview', 'pinescript'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'IITM priority: Statistics → Python → ML (in order)',
+    pillar: 'financial',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['iitm', 'ml'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Pick 1 research paper topic (chess+quant signal idea)',
+    pillar: 'financial',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['research', 'quant'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Plan GSoC application for Year 3 (start repo now)',
+    pillar: 'financial',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['gsoc', 'opensource'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'GRE backup: CMU MSCF / Columbia MFE / NYU Tandon',
+    pillar: 'financial',
+    quadrant: 'decide',
+    status: 'todo',
+    tags: ['gre', 'masters'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: "Father's wine shop operations - delegate, not your job",
+    pillar: 'financial',
+    quadrant: 'delegate',
+    status: 'todo',
+    tags: ['family', 'delegate'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Buying 10 courses and finishing 0 - one course, finish it',
+    pillar: 'financial',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['focus'],
+    isPrivate: false,
+  },
+  {
+    type: 'task',
+    title: 'Politics / petrol pump as serious career plan right now',
+    pillar: 'financial',
+    quadrant: 'delete',
+    status: 'todo',
+    tags: ['career-focus'],
+    isPrivate: false,
+  },
+
+  // --- MY NOTES ---
+  {
+    type: 'note',
+    title: 'Instagram Album - 7 Pillars',
+    pinned: true,
+    color: 'purple',
+    category: 'Personal',
+    body: `Organise Instagram saved posts into these 7 collections:
+
+🧘 BODY
+🧠 MIND
+💰 MONEY
+🌍 WORLD
+⚡ SKILLS
+🤝 SOCIAL
+✨ LIFESTYLE
+
+How to: Instagram → Saved → Create collection for each Pillar. Review weekly.`,
+    isPrivate: false,
+  },
+  {
+    type: 'note',
+    title: 'Career Paths After Engineering',
+    pinned: true,
+    color: 'blue',
+    category: 'Career',
+    body: `PRIMARY: HFT Job (Graviton, iRage, Quadeye, Tower)
+BACKUP: MS Abroad → GRE + TOEFL
+
+What to build NOW:
+- DSA on LeetCode + HackerRank
+- GitHub projects (Python ML, C++ DSA)
+- IITM stats + ML courses
+- Research paper (chess+quant signal)
+- GSoC Year 3`,
+    isPrivate: false,
+  },
+  {
+    type: 'note',
+    title: 'Books Roadmap',
+    pinned: false,
+    color: 'yellow',
+    category: 'Study',
+    body: `1. Atomic Habits - James Clear
+2. The Intelligent Investor - Graham
+3. Algorithmic Trading - Ernest Chan
+4. Python for Finance - Yves Hilpisch
+5. Thinking in Bets - Annie Duke
+6. Meditations - Marcus Aurelius (free)
+
+Rule: finish ONE before starting next.`,
+    isPrivate: false,
+  },
+  {
+    type: 'note',
+    title: 'Shopping List (Priority Order)',
+    pinned: false,
+    color: 'green',
+    category: 'Personal',
+    body: `⚡ URGENT:
+- Ketoconazole 2% shampoo
+- Red pens (x2)
+- Toothbrush
+
+📅 MEDIUM:
+- Phone cover
+- Laptop stand (OMOTON LA10)
+- Power bank
+
+✨ LATER:
+- White sneakers
+- New pants
+- Perfume
+- New phone`,
+    isPrivate: false,
+  },
+];

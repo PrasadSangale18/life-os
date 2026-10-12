@@ -4,6 +4,7 @@ export type { PillarId, QuadrantId, NoteColorId };
 export type ItemType = 'task' | 'note' | 'project' | 'goal' | 'habit' | 'idea' | 'knowledge' | 'reference' | 'principle' | 'reminder' | 'question' | 'journal';
 export type TaskStatus = 'todo' | 'doing' | 'done' | 'waiting' | 'dropped' | 'archived';
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
+export type PriorityLevel = 'critical' | 'high' | 'normal' | 'low';
 
 export interface Item {
   id: string;
@@ -24,6 +25,7 @@ export interface Item {
   splitFromId?: string;
   isArchived?: boolean;
   isPriority?: boolean;
+  priority?: PriorityLevel;
 
   // Task specific
   quadrant?: QuadrantId;
@@ -34,15 +36,28 @@ export interface Item {
   delegatedTo?: string;
   goalId?: string;
   projectId?: string;
+  parentId?: string;
   
   // Note specific
   category?: string;
+  thumbnailUrl?: string;
+  hasAudio?: boolean;
+  audioDuration?: string;
+  isLocked?: boolean;
+  drawingData?: string;
+  authorName?: string;
+  authorAvatar?: string;
+  checklists?: Array<{ id: string; text: string; done: boolean; section?: string }>;
+  quoteAuthor?: string;
+  quoteDoodle?: boolean;
   
   // System
   createdAt: number;
   updatedAt: number;
   deletedAt?: number; // For trash
   importBatchId?: string;
+  breakdownBatchId?: string;
+  aiReviewed?: boolean;
   rawText?: string;
   importSource?: string;
 }

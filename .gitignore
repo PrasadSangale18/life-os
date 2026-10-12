@@ -27,3 +27,5 @@ dist-ssr
 /import-data/
 .env
 /legacy/
+.vercel
+.vercel

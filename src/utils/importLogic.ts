@@ -1,5 +1,6 @@
-import type { Item, ItemType, PillarId, QuadrantId } from '../types';
+import type { Item, ItemType, PillarId, QuadrantId, TaskStatus, PriorityLevel } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+import { detectPriority, detectExplicitDeadline } from './aiIntake';
 
 export interface ImportItem {
   id: string; // temp uuid
@@ -10,6 +11,9 @@ export interface ImportItem {
   suggestedType: ItemType;
   suggestedPillar?: PillarId;
   suggestedQuadrant?: QuadrantId;
+  suggestedStatus?: TaskStatus;
+  suggestedPriority?: PriorityLevel;
+  suggestedDeadline?: number;
   suggestedPrivate: boolean;
   confidence: number;
   hasDashChain: boolean;
@@ -28,6 +32,18 @@ export interface ImportResult {
   items: ImportItem[];
   blockedCount: number;
   blockedItems: BlockedItem[];
+}
+
+export const SENSITIVE_REGEXES: { rx: RegExp, reason: string }[] = [
+  { rx: /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/, reason: '12-digit ID' },
+  { rx: /\b[A-Z]{5}\d{4}[A-Z]\b/i, reason: 'PAN-like' },
+  { rx: /(?:(?:password|passwd|pwd)\s*[:=]\s*\S+)|(?:\b(?:otp|one-time\s+password)\b(?:\s*[:=]|\s+is)?\s*\d{4,8})/i, reason: 'Password/OTP' },
+  { rx: /\b(?:\d[ -]*?){13,16}\b/, reason: '13-16 digit Card' },
+  { rx: /\b\d{10,}\b/, reason: 'Long numeric ID' }
+];
+
+export function checkSensitiveData(text: string): boolean {
+  return SENSITIVE_REGEXES.some(r => r.rx.test(text));
 }
 
 export function splitDashChain(item: ImportItem, newIdGenerator: () => string): ImportItem[] {
@@ -75,7 +91,7 @@ export function parseImport(text: string, existingItems: Item[]): ImportResult {
     const sensitiveRegexes: { rx: RegExp, reason: string }[] = [
       { rx: /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/, reason: '12-digit ID' },
       { rx: /\b[A-Z]{5}\d{4}[A-Z]\b/i, reason: 'PAN-like' },
-      { rx: /\b(password|passwd|pwd|otp)\b/i, reason: 'Password/OTP' },
+      { rx: /(?:(?:password|passwd|pwd)\s*[:=]\s*\S+)|(?:\b(?:otp|one-time\s+password)\b(?:\s*[:=]|\s+is)?\s*\d{4,8})/i, reason: 'Password/OTP' },
       { rx: /\b(?:\d[ -]*?){13,16}\b/, reason: '13-16 digit Card' },
       { rx: /\b\d{10,}\b/, reason: 'Long numeric ID' }
     ];
@@ -142,6 +158,14 @@ export function parseImport(text: string, existingItems: Item[]): ImportResult {
     // but KEEP rawText intact as requested!
     let suggestedT = t.split('\n')[0].replace(/^[\d]+\)[\s]+|^[-*][\s]+|^\[[ xX]\][\s]+/i, '').replace(/^~~(.*)~~$/, '$1').trim();
 
+    let sStatus: TaskStatus | undefined = done === true ? 'done' : done === false ? 'todo' : undefined;
+    if (sStatus === undefined && raw.includes('~~') && /^~~.+~~$/.test(raw.trim().replace(/^[-*]\s+/, ''))) {
+      sStatus = 'done';
+    }
+
+    const sPriority = detectPriority(raw);
+    const sDeadline = detectExplicitDeadline(raw);
+
     result.items.push({
       id: uuidv4(),
       rawText: raw,
@@ -150,6 +174,9 @@ export function parseImport(text: string, existingItems: Item[]): ImportResult {
       suggestedType: sType,
       suggestedPillar: sPillar,
       suggestedQuadrant: sQuad,
+      suggestedStatus: sStatus,
+      suggestedPriority: sPriority,
+      suggestedDeadline: sDeadline,
       suggestedPrivate: sPrivate,
       confidence: conf,
       hasDashChain,
@@ -214,7 +241,12 @@ export function parseImport(text: string, existingItems: Item[]): ImportResult {
 
     // Bullets: "- " or "* "
     if (/^[-*]\s+/.test(tline)) {
-      processRawItem(line, i + 1, currentPillar, currentQuadrant);
+      const rest = tline.replace(/^[-*]\s+/, '');
+      let isDone: boolean | undefined = undefined;
+      if (/^\[[xX]\]\s+/.test(rest)) isDone = true;
+      else if (/^\[\s?\]\s+/.test(rest)) isDone = false;
+      else if (/^~~.+~~$/.test(rest)) isDone = true;
+      processRawItem(line, i + 1, currentPillar, currentQuadrant, isDone);
       continue;
     }
 

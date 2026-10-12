@@ -31,4 +31,52 @@ describe('Mind Map Logic', () => {
     expect(dataShown.nodes.find(n => n.id === '1')).toBeDefined();
     expect(dataShown.nodes.find(n => n.id === '2')).toBeDefined();
   });
+
+  it('links real hierarchy: Pillar -> Goal -> Project -> Task', () => {
+    const goal: Item = {
+      ...baseItem,
+      id: 'g1',
+      type: 'goal',
+      title: 'Run Marathon',
+      pillar: 'physical',
+      createdAt: 1000,
+      updatedAt: 1000
+    } as Item;
+
+    const project: Item = {
+      ...baseItem,
+      id: 'p1',
+      type: 'project',
+      title: '12-Week Training Block',
+      goalId: 'g1',
+      pillar: 'physical',
+      createdAt: 1010,
+      updatedAt: 1010
+    } as Item;
+
+    const task: Item = {
+      ...baseItem,
+      id: 't1',
+      type: 'task',
+      title: 'Buy running shoes',
+      projectId: 'p1',
+      pillar: 'physical',
+      createdAt: 1020,
+      updatedAt: 1020
+    } as Item;
+
+    const { links } = generateMindMapData([goal, project, task], true);
+
+    // Goal links to Pillar
+    const goalLink = links.find(l => l.target === 'g1' && l.type === 'hierarchy');
+    expect(goalLink?.source).toBe('pillar-physical');
+
+    // Project links to Goal
+    const projectLink = links.find(l => l.target === 'p1' && l.type === 'hierarchy');
+    expect(projectLink?.source).toBe('g1');
+
+    // Task links to Project
+    const taskLink = links.find(l => l.target === 't1' && l.type === 'hierarchy');
+    expect(taskLink?.source).toBe('p1');
+  });
 });

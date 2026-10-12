@@ -3,11 +3,13 @@ import { useStore } from '../store';
 import { db } from '../db';
 import { supabase, hasSupabase } from '../utils/supabaseClient';
 import { syncState, subscribeSync, triggerSync, type SyncStatus, setSyncPrivate, resolveConflict } from '../utils/syncEngine';
+import { Settings, Cloud, Database, History, AlertTriangle, Download, Upload, RotateCw, Wifi, WifiOff, Sparkles } from 'lucide-react';
 
 export const SettingsView = () => {
   const exportData = useStore(s => s.exportData);
   const importData = useStore(s => s.importData);
   const undoImport = useStore(s => s.undoImport);
+  const seedDefaultData = useStore(s => s.seedDefaultData);
 
   const [snapshots, setSnapshots] = useState<any[]>([]);
   const [backupDate, setBackupDate] = useState<string>(() => {
@@ -30,23 +32,52 @@ export const SettingsView = () => {
   });
   const [status, setStatus] = useState<SyncStatus>('offline');
   const [isPrivateSync, setIsPrivateSync] = useState(syncState.syncPrivate);
+  const [isOnline, setIsOnline] = useState(() => typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [outboxCount, setOutboxCount] = useState(0);
+  const [lastSyncTime, setLastSyncTime] = useState(syncState.lastSyncTime);
+
+  const lastSyncStr = lastSyncTime ? new Date(lastSyncTime).toLocaleString() : 'Never';
 
   useEffect(() => {
     db.snapshots.toArray().then(setSnapshots);
-    
+    db.outbox.count().then(setOutboxCount).catch(() => {});
+
+    const onOnline = () => setIsOnline(true);
+    const onOffline = () => setIsOnline(false);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+
+    const timer = setInterval(() => {
+      db.outbox.count().then(setOutboxCount).catch(() => {});
+      setLastSyncTime(syncState.lastSyncTime);
+    }, 2500);
+
     if (hasSupabase) {
       supabase.auth.getSession().then(({ data }: any) => setSession(data.session));
       const { data: authListener } = supabase.auth.onAuthStateChange((event: any, s: any) => {
         setSession(s);
         if (s && event === 'SIGNED_IN') triggerSync();
       });
-      return () => authListener.subscription.unsubscribe();
+      return () => {
+        window.removeEventListener('online', onOnline);
+        window.removeEventListener('offline', onOffline);
+        clearInterval(timer);
+        authListener.subscription.unsubscribe();
+      };
     }
+
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+      clearInterval(timer);
+    };
   }, []);
 
   useEffect(() => {
     return subscribeSync((st) => {
       setStatus(st);
+      db.outbox.count().then(setOutboxCount).catch(() => {});
+      setLastSyncTime(syncState.lastSyncTime);
     });
   }, []);
 
@@ -83,12 +114,12 @@ export const SettingsView = () => {
             fileBatches: data.snapshots?.length || 0
           });
         } catch {
-          alert('Failed to read backup: Invalid file.');
+          alert('Failed to read backup: Invalid file format.');
         }
       }
     };
     reader.readAsText(file);
-    e.target.value = ''; // Reset input
+    e.target.value = '';
   };
 
   const confirmRestore = async () => {
@@ -112,7 +143,7 @@ export const SettingsView = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthStatus('Loading...');
+    setAuthStatus('Sending link...');
     try {
       const redirectUrl = window.location.origin + import.meta.env.BASE_URL;
       const { error } = await supabase.auth.signInWithOtp({
@@ -120,14 +151,14 @@ export const SettingsView = () => {
         options: { emailRedirectTo: redirectUrl }
       });
       if (error) throw error;
-      setAuthStatus('Check your email for the login link.');
+      setAuthStatus('Check your email for the magic sign-in link.');
     } catch (err: any) {
       setAuthStatus(`Error: ${err.message}`);
     }
   };
 
   const handleSignOutAndClear = async () => {
-    if (window.confirm('Sign out and DELETE ALL LOCAL DATA on this device? Ensure you are synced.')) {
+    if (window.confirm('Sign out and DELETE ALL LOCAL DATA on this device? Ensure your cloud sync is current.')) {
       await db.items.clear();
       await db.outbox.clear();
       await db.snapshots.clear();
@@ -146,7 +177,7 @@ export const SettingsView = () => {
         setSyncPrivate(true);
       }
     } else {
-      if (window.confirm('Stop syncing private items? (Note: existing items on the cloud will stay there unless deleted).')) {
+      if (window.confirm('Stop syncing private items? (Existing items on cloud remain until deleted).')) {
         setIsPrivateSync(false);
         setSyncPrivate(false);
       }
@@ -154,110 +185,274 @@ export const SettingsView = () => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24, padding: 24, color: "#fff", background: "rgba(0,0,0,0.2)", borderRadius: 16 }}>
-      <h2>Settings</h2>
-      
-      {!hasSupabase ? (
-        <div style={{ background: "rgba(255,255,255,0.05)", padding: 16, borderRadius: 8 }}>
-          <h3 style={{ margin: 0, color: "#a0a0c0" }}>Sync is OFF: data is stored only on this device</h3>
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Settings Header */}
+      <div 
+        className="glass-panel" 
+        style={{ 
+          padding: "16px 20px", 
+          display: "flex", 
+          alignItems: "center", 
+          gap: 10,
+          background: "var(--bg-surface)"
+        }}
+      >
+        <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Settings size={15} color="var(--text-secondary)" />
         </div>
-      ) : (
-        <div style={{ background: "rgba(255,255,255,0.05)", padding: 16, borderRadius: 8 }}>
-          <h3>Cloud Sync</h3>
-          
-          <div style={{ marginBottom: 16 }}>
-            Status: <span style={{ fontWeight: 'bold', color: status === 'synced' ? '#00d97e' : status === 'error' ? '#ff4d7e' : '#fbbf24' }}>{status.toUpperCase()}</span>
-            {status === 'error' && <button onClick={() => triggerSync()} style={{ marginLeft: 8, padding: '2px 8px', borderRadius: 4, border: '1px solid #fff', background: 'transparent', color: '#fff' }}>Retry</button>}
+        <div>
+          <div className="card-title" style={{ fontSize: 16 }}>Settings & Storage</div>
+          <div className="text-secondary" style={{ fontSize: 12 }}>Manage local IndexedDB database, cloud synchronization, and full backups.</div>
+        </div>
+      </div>
+
+      {/* Cloud Sync Section */}
+      <div className="glass-panel" style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Cloud size={16} color="var(--accent-hover)" />
+            <span className="card-title" style={{ fontSize: 15 }}>Cloud Synchronization</span>
           </div>
 
-          {!session ? (
-            <form onSubmit={handleLogin} style={{ display: 'flex', gap: 8, flexDirection: 'column', maxWidth: 300 }}>
-              <input type="email" placeholder="Email for Magic Link" value={authEmail} onChange={e => setAuthEmail(e.target.value)} required style={{ padding: 8, borderRadius: 4, border: '1px solid #444', background: '#000', color: '#fff' }} />
-              <button type="submit" style={{ padding: 8, borderRadius: 4, background: '#4d9eff', color: '#000', fontWeight: 'bold', border: 'none' }}>Send Magic Link</button>
-              {authStatus && <div style={{ fontSize: 13, color: '#fbbf24' }}>{authStatus}</div>}
-            </form>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div>Signed in as: <strong>{session.user.email}</strong></div>
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button onClick={() => supabase.auth.signOut()} style={{ padding: '8px 16px', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: 8, cursor: 'pointer' }}>Sign Out</button>
-                <button onClick={handleSignOutAndClear} style={{ padding: '8px 16px', background: 'transparent', color: '#ff4d7e', border: '1px solid #ff4d7e', borderRadius: 8, cursor: 'pointer' }}>Sign out and clear this device</button>
-              </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {/* Online / Offline Network Badge */}
+            <span 
+              className="ui-pill" 
+              style={{ 
+                color: isOnline ? '#10b981' : '#f59e0b',
+                borderColor: isOnline ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)',
+                background: isOnline ? 'rgba(16,185,129,0.08)' : 'rgba(245,158,11,0.08)',
+                fontWeight: 500,
+                fontSize: 11,
+                gap: 5
+              }}
+            >
+              {isOnline ? <Wifi size={11} /> : <WifiOff size={11} />}
+              <span>{isOnline ? 'Online' : 'Offline'}</span>
+            </span>
 
-              <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input type="checkbox" id="privateSync" checked={isPrivateSync} onChange={togglePrivateSync} />
-                <label htmlFor="privateSync">Sync private items</label>
-              </div>
-
-              {syncState.pendingConflictResolution && (
-                <div style={{ marginTop: 16, padding: 16, background: "rgba(255,191,36,0.1)", border: "1px solid #fbbf24", borderRadius: 8 }}>
-                  <h4 style={{ color: "#fbbf24", margin: "0 0 12px 0" }}>⚠️ Sync Conflict</h4>
-                  <p style={{ color: "#e0e0e0", fontSize: 13, marginBottom: 16 }}>
-                    This device has {syncState.conflictCounts.local} items, but your cloud account already has {syncState.conflictCounts.remote} items. How would you like to proceed?
-                  </p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    <button onClick={() => { resolveConflict('merge'); setStatus('syncing'); }} style={{ padding: "8px 12px", background: "#fbbf24", color: "#000", border: "none", borderRadius: 6, fontWeight: "bold", cursor: "pointer", textAlign: "left" }}>
-                      1. Merge (Recommended)<br/>
-                      <span style={{ fontSize: 11, fontWeight: "normal" }}>Combines data from this device and the cloud.</span>
-                    </button>
-                    <button onClick={() => { resolveConflict('use_cloud'); setStatus('syncing'); }} style={{ padding: "8px 12px", background: "transparent", color: "#fbbf24", border: "1px solid #fbbf24", borderRadius: 6, cursor: "pointer", textAlign: "left" }}>
-                      2. Use Cloud Data<br/>
-                      <span style={{ fontSize: 11 }}>Wipes this device and downloads cloud data (creates local backup first).</span>
-                    </button>
-                    <button onClick={() => { resolveConflict('upload'); setStatus('syncing'); }} style={{ padding: "8px 12px", background: "transparent", color: "#fbbf24", border: "1px solid #fbbf24", borderRadius: 6, cursor: "pointer", textAlign: "left" }}>
-                      3. Upload Device Data<br/>
-                      <span style={{ fontSize: 11 }}>Pushes all local data to the cloud.</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+            {/* Sync State Badge */}
+            <span 
+              className="ui-pill" 
+              style={{ 
+                color: status === 'synced' ? '#10b981' : status === 'error' ? '#f43f5e' : status === 'syncing' ? '#3b82f6' : 'var(--text-secondary)',
+                borderColor: status === 'synced' ? 'rgba(16,185,129,0.3)' : status === 'error' ? 'rgba(244,63,94,0.3)' : status === 'syncing' ? 'rgba(59,130,246,0.3)' : 'var(--border-subtle)',
+                background: status === 'synced' ? 'rgba(16,185,129,0.08)' : status === 'syncing' ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.04)',
+                fontWeight: 600,
+                fontSize: 11
+              }}
+            >
+              {status.toUpperCase()}
+            </span>
+          </div>
         </div>
-      )}
 
-      <div style={{ background: "rgba(255,255,255,0.05)", padding: 16, borderRadius: 8 }}>
-        <h3>Backup & Restore</h3>
-        <p style={{ color: "#a0a0c0", marginBottom: 16 }}>Last backup: {backupDate}</p>
-        <div style={{ display: "flex", gap: 12 }}>
-          <button onClick={handleExport} style={{ padding: "8px 16px", background: "#4d9eff", color: "#000", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: "bold" }}>Export JSON</button>
+        {/* Sync Telemetry Bar */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10, background: "rgba(0,0,0,0.25)", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border-subtle)" }}>
+          <div>
+            <div className="text-meta" style={{ fontSize: 11 }}>Outbox Queue</div>
+            <div style={{ fontSize: 13, fontWeight: 550, color: outboxCount > 0 ? "#f59e0b" : "#10b981", marginTop: 2 }}>
+              {outboxCount === 0 ? "0 pending (up to date)" : `${outboxCount} change${outboxCount === 1 ? '' : 's'} queued`}
+            </div>
+          </div>
+          <div>
+            <div className="text-meta" style={{ fontSize: 11 }}>Last Cloud Sync</div>
+            <div style={{ fontSize: 13, fontWeight: 550, color: "var(--text-primary)", marginTop: 2 }}>
+              {lastSyncStr}
+            </div>
+          </div>
+        </div>
+
+        {!hasSupabase ? (
+          <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-subtle)", borderRadius: 8, padding: 14 }}>
+            <div style={{ fontSize: 13.5, color: "var(--text-secondary)" }}>
+              Sync is running in <strong style={{ color: "var(--text-primary)" }}>Local-Only Mode</strong>. Your data is stored entirely on this device in IndexedDB. No items, tasks, notes, or telemetry leave this browser. To enable cross-device cloud sync, supply Supabase credentials in your environment.
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {!session ? (
+              <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 360 }}>
+                <div className="text-secondary" style={{ fontSize: 13 }}>Enter your email to receive a passwordless Magic Link:</div>
+                <input 
+                  type="email" 
+                  placeholder="name@example.com" 
+                  value={authEmail} 
+                  onChange={e => setAuthEmail(e.target.value)} 
+                  required 
+                  className="ui-input"
+                />
+                <button type="submit" className="btn-primary" style={{ padding: "9px 16px" }}>
+                  Send Magic Link
+                </button>
+                {authStatus && <div style={{ fontSize: 12, color: "#f59e0b" }}>{authStatus}</div>}
+              </form>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+                  Signed in as: <strong style={{ color: "var(--text-primary)" }}>{session.user.email}</strong>
+                </div>
+                
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button onClick={() => triggerSync()} className="btn-secondary" style={{ gap: 6, fontSize: 12 }}>
+                    <RotateCw size={13} />
+                    <span>Sync Now</span>
+                  </button>
+                  <button onClick={() => supabase.auth.signOut()} className="btn-ghost" style={{ fontSize: 12 }}>
+                    Sign Out
+                  </button>
+                  <button onClick={handleSignOutAndClear} className="btn-danger" style={{ fontSize: 12 }}>
+                    Sign Out & Clear Device
+                  </button>
+                </div>
+
+                <div style={{ marginTop: 6, padding: "12px 14px", background: "rgba(255,255,255,0.02)", borderRadius: 8, border: "1px solid var(--border-subtle)" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-primary)", cursor: "pointer", fontWeight: 500 }}>
+                    <input type="checkbox" checked={isPrivateSync} onChange={togglePrivateSync} style={{ accentColor: "var(--accent-primary)" }} />
+                    <span>Sync private items to cloud account</span>
+                  </label>
+                  <p style={{ margin: "6px 0 0 24px", fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.45 }}>
+                    {isPrivateSync
+                      ? "Enabled: Items marked 'Private' will be uploaded and synchronized to your personal Supabase account."
+                      : "Disabled: Items marked 'Private' remain strictly local on this device and are never sent to the cloud."}
+                  </p>
+                </div>
+
+                {syncState.pendingConflictResolution && (
+                  <div style={{ marginTop: 12, padding: 16, background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#f59e0b", fontWeight: 600, fontSize: 14 }}>
+                      <AlertTriangle size={16} />
+                      <span>Sync Conflict Detected</span>
+                    </div>
+                    <p style={{ color: "var(--text-secondary)", fontSize: 13, margin: "8px 0 14px 0" }}>
+                      This device has {syncState.conflictCounts.local} items, while your cloud account has {syncState.conflictCounts.remote} items. Choose how to synchronize:
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <button onClick={() => { resolveConflict('merge'); setStatus('syncing'); }} className="btn-primary" style={{ textAlign: "left", padding: "10px 14px", display: "flex", flexDirection: "column", gap: 2 }}>
+                        <span style={{ fontWeight: 600 }}>Merge (Recommended)</span>
+                        <span style={{ fontSize: 12, opacity: 0.85, fontWeight: 400 }}>Combines local and cloud records seamlessly using newest timestamp priority without deleting items.</span>
+                      </button>
+                      <button onClick={() => { resolveConflict('use_cloud'); setStatus('syncing'); }} className="btn-secondary" style={{ textAlign: "left", padding: "10px 14px", display: "flex", flexDirection: "column", gap: 2 }}>
+                        <span style={{ fontWeight: 600 }}>Keep Cloud Data</span>
+                        <span style={{ fontSize: 12, opacity: 0.85, fontWeight: 400 }}>Saves a safety snapshot of current local data to Dexie, then replaces local workspace with cloud records.</span>
+                      </button>
+                      <button onClick={() => { resolveConflict('upload'); setStatus('syncing'); }} className="btn-secondary" style={{ textAlign: "left", padding: "10px 14px", display: "flex", flexDirection: "column", gap: 2 }}>
+                        <span style={{ fontWeight: 600 }}>Upload Local Changes</span>
+                        <span style={{ fontSize: 12, opacity: 0.85, fontWeight: 400 }}>Queues all local workspace items to sync to your cloud account without deleting existing cloud records.</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Backup & Restore Section */}
+      <div className="glass-panel" style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Database size={16} color="#10b981" />
+          <span className="card-title" style={{ fontSize: 15 }}>Full Backup & Restore</span>
+        </div>
+
+        <div className="text-secondary" style={{ fontSize: 13 }}>
+          Export your entire Life OS workspace (tasks, notes, tags, metadata) to a standalone portable JSON file.
+        </div>
+        <div className="text-meta" style={{ fontSize: 11 }}>
+          Last backup: {backupDate}
+        </div>
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 4 }}>
+          <button onClick={handleExport} className="btn-primary" style={{ gap: 6 }}>
+            <Download size={14} />
+            <span>Export Workspace JSON</span>
+          </button>
           
           <input type="file" accept=".json" style={{ display: "none" }} ref={fileRef} onChange={handleImport} />
-          <button onClick={() => fileRef.current?.click()} style={{ padding: "8px 16px", background: "rgba(255,77,126,0.2)", color: "#ff4d7e", border: "1px solid #ff4d7e", borderRadius: 8, cursor: "pointer" }}>Restore from JSON</button>
+          <button onClick={() => fileRef.current?.click()} className="btn-secondary" style={{ gap: 6 }}>
+            <Upload size={14} />
+            <span>Restore from JSON File</span>
+          </button>
+
+          <button 
+            onClick={async () => {
+              if (window.confirm("Seed default Life OS dataset (Prasad's authentic tasks & notes)? This will merge with your current items.")) {
+                await seedDefaultData();
+                alert("Seeded default Life OS dataset successfully!");
+              }
+            }} 
+            className="btn-secondary" 
+            style={{ gap: 6, borderColor: "rgba(0, 217, 126, 0.35)", color: "#00d97e" }}
+          >
+            <Sparkles size={14} color="#00d97e" />
+            <span>Load Prasad's Life OS Data</span>
+          </button>
         </div>
 
         {pendingRestore && (
-          <div style={{ marginTop: 16, padding: 16, background: "rgba(255,77,126,0.1)", border: "1px solid #ff4d7e", borderRadius: 8 }}>
-            <h4 style={{ color: "#ff4d7e", marginTop: 0 }}>⚠️ Confirm Restore</h4>
-            <p style={{ color: "#e0e0e0", fontSize: 13, marginBottom: 12 }}>This will wipe your current database completely. A local snapshot will be taken before wiping.</p>
-            <ul style={{ color: "#a0a0c0", fontSize: 13, marginBottom: 16 }}>
-              <li>Total Items in file: {pendingRestore.fileItems}</li>
-              <li>Tasks in file: {pendingRestore.fileTasks}</li>
-              <li>Notes in file: {pendingRestore.fileNotes}</li>
-              <li>Snapshots in file: {pendingRestore.fileBatches}</li>
-            </ul>
+          <div style={{ marginTop: 12, padding: 16, background: "rgba(244,63,94,0.08)", border: "1px solid rgba(244,63,94,0.3)", borderRadius: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#f43f5e", fontWeight: 600, fontSize: 14 }}>
+              <AlertTriangle size={16} />
+              <span>Confirm Database Overwrite</span>
+            </div>
+            <p style={{ color: "var(--text-secondary)", fontSize: 13, margin: "8px 0 12px 0" }}>
+              Restoring will replace current items. A safety snapshot will be created automatically prior to wiping.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 14 }}>
+              <div style={{ background: "rgba(0,0,0,0.3)", padding: "6px 10px", borderRadius: 6, fontSize: 12 }}>
+                <span className="text-tertiary">Total Items:</span> <strong style={{ color: "#fff" }}>{pendingRestore.fileItems}</strong>
+              </div>
+              <div style={{ background: "rgba(0,0,0,0.3)", padding: "6px 10px", borderRadius: 6, fontSize: 12 }}>
+                <span className="text-tertiary">Tasks:</span> <strong style={{ color: "#fff" }}>{pendingRestore.fileTasks}</strong>
+              </div>
+              <div style={{ background: "rgba(0,0,0,0.3)", padding: "6px 10px", borderRadius: 6, fontSize: 12 }}>
+                <span className="text-tertiary">Notes:</span> <strong style={{ color: "#fff" }}>{pendingRestore.fileNotes}</strong>
+              </div>
+              <div style={{ background: "rgba(0,0,0,0.3)", padding: "6px 10px", borderRadius: 6, fontSize: 12 }}>
+                <span className="text-tertiary">Batches:</span> <strong style={{ color: "#fff" }}>{pendingRestore.fileBatches}</strong>
+              </div>
+            </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={confirmRestore} style={{ padding: "6px 12px", background: "#ff4d7e", color: "#000", border: "none", borderRadius: 6, fontWeight: "bold", cursor: "pointer" }}>Wipe and Restore</button>
-              <button onClick={() => setPendingRestore(null)} style={{ padding: "6px 12px", background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, cursor: "pointer" }}>Cancel</button>
+              <button onClick={confirmRestore} className="btn-danger" style={{ padding: "8px 16px", fontWeight: 600 }}>
+                Wipe and Restore
+              </button>
+              <button onClick={() => setPendingRestore(null)} className="btn-ghost">
+                Cancel
+              </button>
             </div>
           </div>
         )}
       </div>
 
-      <div style={{ background: "rgba(255,255,255,0.05)", padding: 16, borderRadius: 8 }}>
-        <h3>Automatic Snapshots</h3>
-        <p style={{ color: "#a0a0c0", marginBottom: 16 }}>Snapshots are created automatically before every mass import.</p>
+      {/* Automatic Snapshots Section */}
+      <div className="glass-panel" style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <History size={16} color="#a855f7" />
+          <span className="card-title" style={{ fontSize: 15 }}>Automatic Snapshots</span>
+        </div>
+        <div className="text-secondary" style={{ fontSize: 13 }}>
+          Snapshots are captured automatically before every batch import and restore operation.
+        </div>
+
         {snapshots.length === 0 ? (
-          <p style={{ color: "#666" }}>No snapshots found.</p>
+          <div style={{ color: "var(--text-tertiary)", fontSize: 13, padding: "12px 0" }}>
+            No snapshots recorded yet.
+          </div>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {snapshots.map(s => (
-              <li key={s.id} style={{ display: "flex", justifyContent: "space-between", background: "rgba(0,0,0,0.3)", padding: "8px 12px", borderRadius: 6, alignItems: "center" }}>
-                <span>Import Batch: {new Date(s.timestamp).toLocaleString()}</span>
-                <button onClick={() => handleRestoreSnapshot(s.id)} style={{ padding: "4px 8px", background: "rgba(255,77,126,0.2)", color: "#ff4d7e", border: "1px solid #ff4d7e", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>Undo Batch</button>
-              </li>
+              <div key={s.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-subtle)", padding: "10px 14px", borderRadius: 8 }}>
+                <div>
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>Import Batch Snapshot</div>
+                  <div className="text-meta" style={{ fontSize: 11, marginTop: 2 }}>{new Date(s.timestamp).toLocaleString()}</div>
+                </div>
+                <button onClick={() => handleRestoreSnapshot(s.id)} className="btn-danger" style={{ fontSize: 11.5, padding: "4px 10px" }}>
+                  Undo Batch
+                </button>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>

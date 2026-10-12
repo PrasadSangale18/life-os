@@ -6,11 +6,18 @@ export type SyncStatus = 'offline' | 'syncing' | 'synced' | 'error';
 
 // This acts as a background manager, calling back to Zustand or updating DB directly.
 
+const getInitialSyncPrivate = () => {
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('lifeos_sync_private') === 'true';
+  }
+  return false;
+};
+
 export const syncState = {
   status: 'offline' as SyncStatus,
   lastSyncTime: 0,
   lastSyncId: '',
-  syncPrivate: false,
+  syncPrivate: getInitialSyncPrivate(),
   errorMsg: '',
   pendingConflictResolution: false,
   conflictCounts: { local: 0, remote: 0 }
@@ -28,6 +35,9 @@ export function subscribeSync(cb: NotifyCb) {
 
 export function setSyncPrivate(val: boolean) {
   syncState.syncPrivate = val;
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('lifeos_sync_private', String(val));
+  }
   if (val) {
     // Queue all private items
     db.items.filter(i => !!i.isPrivate).toArray().then(privates => {

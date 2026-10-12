@@ -64,4 +64,21 @@ describe('Data Selectors Phase 5 (Condition 0.a)', () => {
     expect(stalled.length).toBe(1);
     expect(stalled[0].id).toBe('3');
   });
+
+  it('excludes archived items from Dashboard and Inbox selectors', () => {
+    const list: Partial<Item>[] = [
+      { id: '1', type: 'task', pillar: 'physical', quadrant: 'do', isArchived: true, isPrivate: false },
+      { id: '2', type: 'task', pillar: 'physical', quadrant: 'do', isArchived: false, isPrivate: false },
+      { id: '3', type: 'task', isArchived: true, isPrivate: false }, // Archived inbox task
+      { id: '4', type: 'task', isArchived: false, isPrivate: false }, // Active inbox task (quick capture)
+    ];
+
+    const dash = selectDashboardTasks(list as Item[], 'physical', true);
+    expect(dash.length).toBe(1);
+    expect(dash[0].id).toBe('2');
+
+    const inbox = selectInboxItems(list as Item[], true);
+    expect(inbox.length).toBe(1);
+    expect(inbox[0].id).toBe('4');
+  });
 });

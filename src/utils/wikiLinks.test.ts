@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractWikiLinks, calculateBacklinks } from './wikiLinks';
+import { extractWikiLinks, calculateBacklinks, calculateForwardLinks, findItemByTitle } from './wikiLinks';
 import type { Item } from '../types';
 
 describe('Wiki Links', () => {
@@ -36,5 +36,41 @@ describe('Wiki Links', () => {
     const backlinks = calculateBacklinks(publicOnly as Item[], 'Target');
     expect(backlinks.length).toBe(1);
     expect(backlinks[0].id).toBe('1');
+  });
+
+  it('calculates forward links distinguishing resolved and unresolved targets', () => {
+    const items: Partial<Item>[] = [
+      { id: 'note-1', title: 'Existing Note', body: '', deletedAt: undefined, updatedAt: 100 },
+      { id: 'note-2', title: 'Trashed Note', body: '', deletedAt: 500, updatedAt: 200 }
+    ];
+
+    const text = 'Mentions [[Existing Note]] and [[Missing Note]] and [[Trashed Note]]';
+    const forwardLinks = calculateForwardLinks(items as Item[], text);
+
+    expect(forwardLinks).toHaveLength(3);
+
+    const existing = forwardLinks.find(f => f.title === 'Existing Note');
+    expect(existing?.item?.id).toBe('note-1');
+    expect(existing?.isAmbiguous).toBe(false);
+
+    const missing = forwardLinks.find(f => f.title === 'Missing Note');
+    expect(missing?.item).toBeUndefined();
+
+    const trashed = forwardLinks.find(f => f.title === 'Trashed Note');
+    expect(trashed?.item).toBeUndefined(); // trashed is not matched
+  });
+
+  it('handles duplicate note titles safely by picking the most recent item', () => {
+    const items: Partial<Item>[] = [
+      { id: 'old-1', title: 'Architecture', updatedAt: 1000, createdAt: 1000 },
+      { id: 'new-2', title: 'Architecture', updatedAt: 2000, createdAt: 1500 }
+    ];
+
+    const match = findItemByTitle(items as Item[], 'Architecture');
+    expect(match?.id).toBe('new-2');
+
+    const forwardLinks = calculateForwardLinks(items as Item[], 'Read [[Architecture]]');
+    expect(forwardLinks[0].item?.id).toBe('new-2');
+    expect(forwardLinks[0].isAmbiguous).toBe(true);
   });
 });

@@ -43,6 +43,13 @@ interface LifeOSState {
   addTag: (id: string, tag: string) => Promise<void>;
   removeTag: (id: string, tag: string) => Promise<void>;
   toggleItemPrivate: (id: string) => Promise<void>;
+  
+  // AI Breakdown Subtasks
+  commitSubtasks: (parentId: string, subtasks: Array<{ title: string; estMinutes?: number; quadrant?: any; priority?: any; pillar?: any }>, batchId: string) => Promise<string[]>;
+  undoSubtasks: (batchId: string) => Promise<void>;
+
+  // Seed default dataset
+  seedDefaultData: () => Promise<void>;
 }
 
 export const useStore = create<LifeOSState>((set) => ({
@@ -67,14 +74,46 @@ export const useStore = create<LifeOSState>((set) => ({
       }
     }
     
-    const items = await db.items.toArray();
+    let items = await db.items.toArray();
     const userRecord = await db.store.get('user');
+
+    // Auto-seed Prasad's life dataset on first run if database is empty (outside unit tests)
+    const isTest = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test';
+    const seededFlag = await db.store.get('has_seeded_prasad_lifeos');
+    if (!isTest && !seededFlag && items.length === 0) {
+      const { INITIAL_SEED_ITEMS } = await import('../db/seedData');
+      const nowTs = Date.now();
+      const seedWithIds = INITIAL_SEED_ITEMS.map((item, idx) => ({
+        ...item,
+        id: uuidv4(),
+        createdAt: nowTs - (idx * 60000),
+        updatedAt: nowTs - (idx * 60000),
+      }));
+      await db.items.bulkAdd(seedWithIds);
+      await db.store.put({ key: 'has_seeded_prasad_lifeos', value: true });
+      items = await db.items.toArray();
+    }
 
     set({
       items,
       user: userRecord ? userRecord.value : null,
       isLoaded: true
     });
+  },
+
+  seedDefaultData: async () => {
+    const { INITIAL_SEED_ITEMS } = await import('../db/seedData');
+    const nowTs = Date.now();
+    const seedWithIds = INITIAL_SEED_ITEMS.map((item, idx) => ({
+      ...item,
+      id: uuidv4(),
+      createdAt: nowTs - (idx * 60000),
+      updatedAt: nowTs - (idx * 60000),
+    }));
+    await db.items.bulkAdd(seedWithIds);
+    await db.store.put({ key: 'has_seeded_prasad_lifeos', value: true });
+    const all = await db.items.toArray();
+    set({ items: all });
   },
 
   setUser: async (user) => {
@@ -271,11 +310,26 @@ export const useStore = create<LifeOSState>((set) => ({
   },
 
   applyCleanup: async (id, cleanedTitle, cleanedBody) => {
-    await useStore.getState().updateItem(id, { cleanedTitle, cleanedBody });
+    const item = await db.items.get(id);
+    if (!item) return;
+    const rawText = item.rawText ?? item.title;
+    await useStore.getState().updateItem(id, {
+      title: cleanedTitle,
+      body: cleanedBody !== undefined ? cleanedBody : item.body,
+      cleanedTitle,
+      cleanedBody,
+      rawText
+    });
   },
 
   revertCleanup: async (id) => {
-    await useStore.getState().updateItem(id, { cleanedTitle: undefined, cleanedBody: undefined });
+    const item = await db.items.get(id);
+    if (!item) return;
+    await useStore.getState().updateItem(id, {
+      title: item.rawText || item.title,
+      cleanedTitle: undefined,
+      cleanedBody: undefined
+    });
   },
 
   addTag: async (id, tag) => {
@@ -301,5 +355,56 @@ export const useStore = create<LifeOSState>((set) => ({
     if (item) {
       await useStore.getState().updateItem(id, { isPrivate: !item.isPrivate });
     }
+  },
+
+  commitSubtasks: async (parentId, subtasks, batchId) => {
+    const parent = await db.items.get(parentId);
+    const createdIds: string[] = [];
+    const createdItems: Item[] = [];
+    const now = Date.now();
+
+    for (const sub of subtasks) {
+      const newItem: Item = {
+        id: uuidv4(),
+        type: 'task',
+        title: sub.title,
+        estMinutes: sub.estMinutes,
+        quadrant: sub.quadrant || parent?.quadrant || 'do',
+        pillar: sub.pillar || parent?.pillar || 'physical',
+        status: 'todo',
+        parentId: parentId,
+        projectId: parent?.type === 'project' ? parentId : (parent?.projectId || parentId),
+        priority: sub.priority || 'normal',
+        isPriority: sub.priority === 'critical' || sub.priority === 'high',
+        breakdownBatchId: batchId,
+        aiReviewed: true,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.items.add(newItem);
+      await pushToOutbox('put', newItem);
+      createdIds.push(newItem.id);
+      createdItems.push(newItem);
+    }
+
+    set(state => ({ items: [...state.items, ...createdItems] }));
+    return createdIds;
+  },
+
+  undoSubtasks: async (batchId) => {
+    const all = await db.items.toArray();
+    const toTrash = all.filter(i => i.breakdownBatchId === batchId && !i.deletedAt);
+    const now = Date.now();
+
+    for (const item of toTrash) {
+      item.deletedAt = now;
+      item.updatedAt = now;
+      await db.items.put(item);
+      await pushToOutbox('put', item);
+    }
+
+    set(state => ({
+      items: state.items.map(i => (i.breakdownBatchId === batchId && !i.deletedAt) ? { ...i, deletedAt: now } : i)
+    }));
   }
 }));

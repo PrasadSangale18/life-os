@@ -98,6 +98,26 @@ describe('Import Logic Phase 4', () => {
       const res = parseImport('Tracking ' + num, []);
       expect(res.blockedCount).toBe(1);
     });
+    it('does not block ordinary text that harmlessly mentions password', () => {
+      const res = parseImport('Remember to reset password on Monday\nRead article about password managers', []);
+      expect(res.blockedCount).toBe(0);
+      expect(res.items.length).toBe(2);
+    });
+  });
+
+  it('imports [x] checked items as completed (done) and [ ] as todo', () => {
+    const text = `
+[x] Finished important project milestone
+[ ] Pending action item to start tomorrow
+- [x] Completed bullet item
+- [ ] Incomplete bullet item
+    `;
+    const res = parseImport(text, []);
+    expect(res.items.length).toBe(4);
+    expect(res.items[0].suggestedStatus).toBe('done');
+    expect(res.items[1].suggestedStatus).toBe('todo');
+    expect(res.items[2].suggestedStatus).toBe('done');
+    expect(res.items[3].suggestedStatus).toBe('todo');
   });
 
   it('is idempotent (duplicate text yields 0 new items)', () => {

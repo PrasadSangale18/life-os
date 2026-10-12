@@ -96,4 +96,35 @@ describe('LifeOS Store Persistence & Logic', () => {
     expect(useStore.getState().items.length).toBe(1);
     expect(useStore.getState().items[0].deletedAt).toBeDefined();
   });
+
+  it('applying cleanup visibly updates title and body while preserving rawText, and revert restores it', async () => {
+    const store = useStore.getState();
+    const id = await store.addItem({
+      title: '  um messy title  ',
+      body: 'uh just body',
+      type: 'task',
+      pillar: 'physical',
+      quadrant: 'do'
+    });
+
+    await store.applyCleanup(id, 'Clean Title', 'Clean Body');
+    
+    // Visibly updated in store
+    const updated = useStore.getState().items.find(i => i.id === id);
+    expect(updated?.title).toBe('Clean Title');
+    expect(updated?.body).toBe('Clean Body');
+    expect(updated?.rawText).toBe('  um messy title  ');
+    expect(updated?.cleanedTitle).toBe('Clean Title');
+
+    // Visibly updated in Dexie
+    const dbItem = await db.items.get(id);
+    expect(dbItem?.title).toBe('Clean Title');
+    expect(dbItem?.body).toBe('Clean Body');
+
+    // Revert restores exact original title
+    await store.revertCleanup(id);
+    const reverted = useStore.getState().items.find(i => i.id === id);
+    expect(reverted?.title).toBe('  um messy title  ');
+    expect(reverted?.cleanedTitle).toBeUndefined();
+  });
 });
