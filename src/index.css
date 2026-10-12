@@ -3,36 +3,36 @@
 
 :root,
 [data-theme="dark"] {
-  --font-sans: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-serif: 'DM Serif Display', Georgia, serif;
   --font-mono: 'IBM Plex Mono', 'JetBrains Mono', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Surfaces (Prasad's Obsidian Dark Canvas #07070F & Acrylic Elevation) */
-  --bg-base: #07070f;
-  --bg-sidebar: #090913;
-  --bg-surface: #0d0d1b;
-  --bg-surface-elevated: #141428;
-  --bg-surface-hover: #1c1c36;
-  --bg-surface-active: #242446;
-  --bg-overlay: rgba(5, 5, 12, 0.85);
+  /* Surfaces (PRAHARI Dark Enterprise Canvas) */
+  --bg-base: #0b0f17;
+  --bg-sidebar: #0e131f;
+  --bg-surface: #131924;
+  --bg-surface-elevated: #1a2232;
+  --bg-surface-hover: #222c3f;
+  --bg-surface-active: #2a374e;
+  --bg-overlay: rgba(5, 8, 14, 0.85);
 
   /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.05);
   --border-default: rgba(255, 255, 255, 0.09);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --border-focus: #a78bfa;
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-focus: #ff5a1f;
 
   /* Text Colors */
-  --text-primary: #f4f5f8;
-  --text-secondary: #9ca3af;
-  --text-tertiary: #6b7280;
-  --text-muted: #4b5563;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-muted: #475569;
 
-  /* Accents */
-  --accent-primary: #f4f5f8;
-  --accent-hover: #e2e8f0;
-  --accent-bg: rgba(255, 255, 255, 0.08);
-  --accent-border: rgba(255, 255, 255, 0.18);
+  /* Accents (PRAHARI Signature Orange) */
+  --accent-primary: #ff5a1f;
+  --accent-hover: #e04f16;
+  --accent-bg: rgba(255, 90, 31, 0.12);
+  --accent-border: rgba(255, 90, 31, 0.28);
   --accent-warm: #f59e0b;
 
   /* Signature Highlights from Mockup */
@@ -54,7 +54,7 @@
   --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
 
   /* Grid Line */
-  --grid-line: rgba(255, 255, 255, 0.02);
+  --grid-line: rgba(255, 255, 255, 0.03);
 
   color-scheme: dark;
 }
@@ -63,32 +63,32 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Surfaces (My Notes aesthetic matching user uploaded images) */
-  --bg-base: #f4f5f7;
+  /* Surfaces (PRAHARI Clean Enterprise White & Blueprint Grid) */
+  --bg-base: #f8f9fa;
   --bg-sidebar: #ffffff;
   --bg-surface: #ffffff;
-  --bg-surface-elevated: #eceef2;
-  --bg-surface-hover: #f1f2f6;
-  --bg-surface-active: #e4e6eb;
-  --bg-overlay: rgba(24, 26, 32, 0.4);
+  --bg-surface-elevated: #f1f5f9;
+  --bg-surface-hover: #f8fafc;
+  --bg-surface-active: #e2e8f0;
+  --bg-overlay: rgba(15, 23, 42, 0.4);
 
   /* Borders */
-  --border-subtle: #f0f1f4;
-  --border-default: #e4e6eb;
-  --border-strong: #cbd0d8;
-  --border-focus: #181a20;
+  --border-subtle: #f1f5f9;
+  --border-default: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-focus: #ff5a1f;
 
   /* Text Colors */
-  --text-primary: #181a20;
-  --text-secondary: #717682;
-  --text-tertiary: #9ca0ac;
-  --text-muted: #b8bac2;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-muted: #94a3b8;
 
-  /* Accents (Solid Carbon Black Primary with Pill Badges) */
-  --accent-primary: #181a20;
-  --accent-hover: #2e323d;
-  --accent-bg: #eceef2;
-  --accent-border: #dcdfe5;
+  /* Accents (PRAHARI Signature Vivid Orange & Soft Peach Pill Active) */
+  --accent-primary: #ff5a1f;
+  --accent-hover: #e04f16;
+  --accent-bg: #fff4ec;
+  --accent-border: #ffd8bf;
   --accent-warm: #f59e0b;
 
   /* Signature Highlights from Mockup */
@@ -103,14 +103,14 @@
   --hl-coral: #ffe4e6;
   --hl-coral-text: #be123c;
 
-  /* Shadows */
+  /* Shadows matching PRAHARI soft elevated card */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
-  --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
-  --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.06), 0 4px 8px rgba(0, 0, 0, 0.03);
+  --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
 
-  /* Grid Line */
-  --grid-line: rgba(0, 0, 0, 0.02);
+  /* Grid Line matching PRAHARI canvas technical blueprint */
+  --grid-line: rgba(0, 0, 0, 0.035);
 
   color-scheme: light;
 }

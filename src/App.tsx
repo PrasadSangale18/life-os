@@ -15,10 +15,10 @@ import { SmartOrganizer } from './components/SmartOrganizer';
 import { WeeklyReview } from './components/WeeklyReview';
 import { LoginScreen } from './components/LoginScreen';
 import { LifeOSLogo } from './components/LifeOSLogo';
-import { ThemeToggle } from './components/ThemeToggle';
 import { ExportModal } from './components/ExportModal';
 import { PromptWiseModal } from './components/PromptWiseModal';
 import { UserProfileMenu } from './components/UserProfileMenu';
+import { SitesView } from './components/SitesView';
 
 const MindMap = lazy(() => import('./components/MindMap').then(m => ({ default: m.MindMap })));
 import { PILLARS, FONT_URL } from './theme/tokens';
@@ -47,7 +47,17 @@ import {
   X,
   CheckSquare,
   BookOpen,
-  Menu
+  Menu,
+  Building2,
+  Bell,
+  Moon,
+  Sun,
+  MapPin,
+  BarChart3,
+  Radar,
+  CloudDownload,
+  AlertTriangle,
+  FileText
 } from 'lucide-react';
 import './App.css';
 
@@ -83,12 +93,17 @@ const PILLAR_STYLES: Record<string, {
   },
 };
 
-// THE 4 CORE WORKSPACES (User explicit requirement)
-const CORE_SECTIONS = [
-  { id: "tasks",      label: "To-do list",        subtitle: "Tasks, matrix & execution", Icon: CheckSquare, badgeColor: "#4d9eff" },
-  { id: "notes",      label: "My Notes",          subtitle: "Rich thoughts & ideas",     Icon: BookOpen,    badgeColor: "#00d97e" },
-  { id: "mindmap",    label: "Mind Map & Graph",  subtitle: "Visual second brain",       Icon: GitBranch,   badgeColor: "#b57bff" },
-  { id: "organizer",  label: "Smart AI Organizer",subtitle: "Bulk input & auto-sorting",  Icon: Wand2,       badgeColor: "#fbbf24" },
+// PRAHARI CONTROL ROOM NAVIGATION (matching media_1791828447029.png)
+const CONTROL_ROOM_SECTIONS = [
+  { id: "dashboard",  label: "Dashboard",       Icon: LayoutDashboard },
+  { id: "tasks",      label: "Safety Reports",  Icon: FileText },
+  { id: "organizer",  label: "AI Analyzer",     Icon: Brain },
+  { id: "import",     label: "CSV Bulk Import", Icon: CloudDownload },
+  { id: "projects",   label: "Analytics",       Icon: BarChart3 },
+  { id: "mindmap",    label: "SIF Risk",        Icon: AlertTriangle },
+  { id: "today",      label: "Shift Radar",     Icon: Radar },
+  { id: "sites",      label: "Sites",           Icon: MapPin },
+  { id: "notes",      label: "My Notes",        Icon: BookOpen },
 ] as const;
 
 export default function App() {
@@ -96,7 +111,7 @@ export default function App() {
 
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeSection, setActiveSection] = useState<string>("tasks");
+  const [activeSection, setActiveSection] = useState<string>("sites");
   const [taskViewMode, setTaskViewMode] = useState<'matrix' | 'list' | 'projects' | 'inbox'>('matrix');
   const [activePillar, setActivePillar] = useState<PillarId>("physical");
   const [showUtilitiesModal, setShowUtilitiesModal] = useState(false);
@@ -106,7 +121,7 @@ export default function App() {
       const stored = localStorage.getItem('lifeos_theme');
       if (stored === 'light' || stored === 'dark') return stored;
     }
-    return 'dark';
+    return 'light';
   });
 
   const [showExportModal, setShowExportModal] = useState(false);
@@ -229,7 +244,7 @@ export default function App() {
 
   return (
     <div style={{ display: "flex", height: "100vh", background: "var(--bg-base)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", overflow: "hidden", position: "relative" }}>
-      {/* Background Ambient Radial Spotlight (Linear / Raycast aesthetic) */}
+      {/* Background Ambient Radial Spotlight (PRAHARI warm aesthetic) */}
       <div 
         style={{ 
           position: "fixed", 
@@ -237,12 +252,12 @@ export default function App() {
           pointerEvents: "none", 
           zIndex: 0, 
           background: theme === 'dark' 
-            ? "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.12), transparent)" 
-            : "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.08), transparent)"
+            ? "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 90, 31, 0.08), transparent)" 
+            : "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 90, 31, 0.03), transparent)"
         }} 
       />
 
-      {/* Subtle Engineering Grid Line Overlay */}
+      {/* PRAHARI Blueprint Engineering Grid Line Overlay */}
       <div 
         style={{ 
           position: "fixed", 
@@ -250,8 +265,8 @@ export default function App() {
           pointerEvents: "none", 
           zIndex: 0, 
           backgroundImage: "linear-gradient(to right, var(--grid-line) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px)", 
-          backgroundSize: "28px 28px",
-          opacity: 0.25
+          backgroundSize: "24px 24px",
+          opacity: 1
         }} 
       />
 
@@ -297,9 +312,12 @@ export default function App() {
             )}
           </div>
 
-          {/* THE 4 CORE WORKSPACES */}
-          <div style={{ padding: "14px 10px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
-            {CORE_SECTIONS.map(s => {
+          {/* CONTROL ROOM NAVIGATION matching PRAHARI */}
+          <div className="px-3 pt-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            CONTROL ROOM
+          </div>
+          <div style={{ padding: "4px 8px 10px", display: "flex", flexDirection: "column", gap: 3 }}>
+            {CONTROL_ROOM_SECTIONS.map(s => {
               const isActive = activeSection === s.id;
               const count = s.id === "tasks" ? pendingTasksCount : s.id === "notes" ? totalNotesCount : undefined;
 
@@ -307,40 +325,20 @@ export default function App() {
                 <button 
                   key={s.id} 
                   onClick={() => { setActiveSection(s.id); if (isMobile) setSidebarOpen(false); }}
-                  style={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    gap: 12, 
-                    padding: "11px 14px", 
-                    borderRadius: 12, 
-                    background: isActive ? "var(--accent-bg)" : "transparent", 
-                    border: isActive ? "1px solid var(--border-default)" : "1px solid transparent", 
-                    cursor: "pointer", 
-                    textAlign: "left", 
-                    width: "100%",
-                    color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
-                    boxShadow: isActive ? "var(--shadow-sm)" : "none",
-                    transition: "all 0.15s ease"
-                  }}
-                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--bg-surface-hover)"; }}
-                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all cursor-pointer text-left outline-none ${
+                    isActive 
+                      ? "bg-[#FFF4EC] dark:bg-orange-500/15 text-[#E04F16] dark:text-[#FB923C] border border-[#FFD8BF] dark:border-orange-500/30 font-semibold shadow-xs" 
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.04] border border-transparent font-medium"
+                  }`}
                 >
-                  <s.Icon size={18} color={isActive ? "var(--text-primary)" : "var(--text-tertiary)"} strokeWidth={isActive ? 2.2 : 1.7} />
-                  <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-                    <span style={{ fontSize: 13.5, fontWeight: isActive ? 650 : 500, letterSpacing: "-0.01em", color: isActive ? "var(--text-primary)" : "var(--text-secondary)" }}>
-                      {s.label}
-                    </span>
-                    <span style={{ fontSize: 10.5, color: "var(--text-tertiary)", marginTop: 1 }}>
-                      {s.subtitle}
-                    </span>
-                  </div>
-                  {s.id === 'organizer' && (
-                    <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 9999, background: "rgba(139, 92, 246, 0.12)", color: "#8b5cf6", letterSpacing: "0.04em" }}>
-                      BULK AI
-                    </span>
-                  )}
+                  <s.Icon 
+                    size={17} 
+                    strokeWidth={isActive ? 2.2 : 1.75} 
+                    className={isActive ? "text-[#FF5A1F] shrink-0" : "text-slate-400 dark:text-slate-500 shrink-0"} 
+                  />
+                  <span className="flex-1 min-w-0 truncate">{s.label}</span>
                   {count !== undefined && count > 0 && (
-                    <span className="tabular-nums" style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 8px", borderRadius: 9999, background: isActive ? "var(--accent-primary)" : "var(--bg-surface-elevated)", color: isActive ? (theme === 'light' ? "#ffffff" : "#0e1015") : "var(--text-tertiary)", border: "1px solid var(--border-subtle)" }}>
+                    <span className="font-mono text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300">
                       {count}
                     </span>
                   )}
@@ -413,48 +411,52 @@ export default function App() {
       {/* Main Content Area */}
       <main style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", position: "relative", zIndex: 1, overflow: "hidden" }}>
         
-        {/* Top Header */}
-        <header style={{ padding: isMobile ? "10px 14px" : "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border-default)", backdropFilter: "blur(20px)", background: "var(--bg-sidebar)", flexWrap: "wrap", gap: 10, zIndex: 20 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {/* Top Header matching PRAHARI */}
+        <header className="px-4 md:px-8 py-3 flex items-center justify-between border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#0E131F]/95 backdrop-blur-md z-20 gap-3">
+          <div className="flex items-center gap-3">
             {/* Mobile Menu Toggle Button */}
             {isMobile && (
               <button
                 type="button"
                 onClick={() => setSidebarOpen(true)}
-                className="btn-ghost"
-                style={{
-                  width: 32,
-                  height: 32,
-                  padding: 0,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: 8,
-                  border: "1px solid var(--border-default)",
-                  background: "var(--bg-surface)",
-                  color: "var(--text-secondary)"
-                }}
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 bg-white dark:bg-[#131924]"
                 aria-label="Open navigation"
               >
                 <Menu size={18} />
               </button>
             )}
 
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span className="page-title" style={{ fontSize: isMobile ? 18 : 20, fontWeight: 700, letterSpacing: "-0.02em" }}>
-                {activeSection === "tasks" ? "To-do list" :
+            {/* Breadcrumb Icon and Title matching Prahari Header */}
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-xs">
+                {activeSection === "sites" ? <MapPin size={16} className="text-[#FF5A1F]" /> :
+                 activeSection === "tasks" ? <FileText size={16} className="text-[#FF5A1F]" /> :
+                 activeSection === "notes" ? <BookOpen size={16} className="text-[#FF5A1F]" /> :
+                 activeSection === "organizer" ? <Brain size={16} className="text-[#FF5A1F]" /> :
+                 activeSection === "mindmap" ? <AlertTriangle size={16} className="text-[#FF5A1F]" /> :
+                 activeSection === "today" ? <Radar size={16} className="text-[#FF5A1F]" /> :
+                 activeSection === "projects" ? <BarChart3 size={16} className="text-[#FF5A1F]" /> :
+                 activeSection === "import" ? <CloudDownload size={16} className="text-[#FF5A1F]" /> :
+                 <LayoutDashboard size={16} className="text-[#FF5A1F]" />}
+              </div>
+
+              <span className="text-base font-bold text-slate-900 dark:text-white capitalize tracking-tight">
+                {activeSection === "sites" ? "Sites" :
+                 activeSection === "tasks" ? "Safety Reports" :
                  activeSection === "notes" ? "My Notes" :
-                 activeSection === "mindmap" ? "Mind Map & Graph" :
-                 activeSection === "organizer" ? "Smart AI Organizer" :
+                 activeSection === "organizer" ? "AI Analyzer" :
+                 activeSection === "mindmap" ? "SIF Risk" :
+                 activeSection === "today" ? "Shift Radar" :
+                 activeSection === "projects" ? "Analytics" :
+                 activeSection === "import" ? "CSV Bulk Import" :
                  activeSection === "review" ? "Weekly Review" :
                  activeSection === "settings" ? "Settings" :
-                 activeSection === "import" ? "Import" :
-                 "Trash & Archive"}
+                 "Dashboard"}
               </span>
 
               {/* If in tasks workspace: show clean segmented switcher [ Matrix | List | Projects | Inbox ] */}
               {activeSection === "tasks" && (
-                <div className="bg-white/[0.04] p-1 rounded-xl border border-white/[0.06] flex items-center gap-1 backdrop-blur-md ml-2">
+                <div className="bg-slate-100 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-200 dark:border-white/[0.06] flex items-center gap-1 ml-2">
                   {[
                     { id: 'matrix', label: 'Matrix', icon: LayoutDashboard },
                     { id: 'list', label: 'List', icon: ListIcon },
@@ -468,26 +470,17 @@ export default function App() {
                         key={tab.id}
                         type="button"
                         onClick={() => setTaskViewMode(tab.id as any)}
-                        className={`relative px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 outline-none ${
-                          isCurrent ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+                        className={`relative px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 outline-none cursor-pointer ${
+                          isCurrent ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                         }`}
                       >
-                        {isCurrent && (
-                          <motion.div
-                            layoutId="activeTab"
-                            className="absolute inset-0 bg-white/10 text-white rounded-lg shadow-sm border border-white/[0.08]"
-                            transition={{ type: "spring", stiffness: 450, damping: 30 }}
-                          />
-                        )}
-                        <span className="relative z-10 flex items-center gap-1.5">
-                          <TabIcon size={13} strokeWidth={1.75} />
-                          {!isMobile && <span>{tab.label}</span>}
-                          {tab.badge && tab.badge > 0 ? (
-                            <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 text-[10px] font-mono rounded-full leading-tight tabular-nums">
-                              {tab.badge}
-                            </span>
-                          ) : null}
-                        </span>
+                        <TabIcon size={13} strokeWidth={1.75} />
+                        {!isMobile && <span>{tab.label}</span>}
+                        {tab.badge && tab.badge > 0 ? (
+                          <span className="bg-orange-500/20 text-orange-500 border border-orange-500/30 px-1.5 py-0.5 text-[10px] font-mono rounded-full leading-tight tabular-nums">
+                            {tab.badge}
+                          </span>
+                        ) : null}
                       </button>
                     );
                   })}
@@ -496,38 +489,66 @@ export default function App() {
             </div>
           </div>
           
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div className="flex items-center gap-2.5">
             {/* Search */}
             <button
               onClick={() => setShowCommandPalette(true)}
-              className="bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.15] text-slate-400 hover:text-slate-200 rounded-lg text-xs py-1.5 px-3 transition-colors flex items-center gap-2 group outline-none cursor-pointer"
+              className="bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-500 dark:text-slate-400 rounded-xl text-xs py-1.5 px-3 transition-colors flex items-center gap-2 group outline-none cursor-pointer shadow-xs"
               title="Open Command & Search Palette (Cmd+K)"
             >
-              <Search size={13} strokeWidth={1.75} className="group-hover:text-white transition-colors" />
-              {!isMobile && <span className="text-slate-400 group-hover:text-slate-200">Search</span>}
+              <Search size={14} strokeWidth={1.75} className="group-hover:text-slate-800 dark:group-hover:text-white transition-colors" />
+              {!isMobile && <span className="text-slate-500 dark:text-slate-400">Search</span>}
               {!isMobile && (
-                <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 border border-white/[0.06]">
+                <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10">
                   ⌘K
                 </kbd>
               )}
             </button>
 
-            {/* Theme Toggle (Sun/Moon) */}
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+            {/* Enterprise Pill matching Prahari (media_1791828447029.png) */}
+            <div className="hidden lg:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 shadow-xs">
+              <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                <Building2 size={13} strokeWidth={2.2} />
+              </div>
+              <div className="flex flex-col text-left leading-tight">
+                <span className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight">
+                  OIL INDIA LIMITED
+                </span>
+                <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">
+                  Govt. of India Enterprise
+                </span>
+              </div>
+            </div>
 
-            {/* Quick Capture Button (Linear/Raycast Gradient CTA) */}
+            {/* Moon / Sun Theme Toggle matching Prahari */}
+            <button 
+              onClick={toggleTheme}
+              className="p-2 rounded-xl bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shadow-xs transition-colors cursor-pointer"
+              title="Toggle Dark / Light Theme"
+            >
+              {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+
+            {/* Notification Bell with red counter badge 3 matching Prahari */}
+            <button 
+              className="relative p-2 rounded-xl bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shadow-xs transition-colors cursor-pointer"
+              title="Notifications (3 active alerts)"
+              onClick={() => alert("3 active safety & execution alerts: Moran Basin inspection scheduled, Bagjan Rig trend alert (+5.7%), Shift review logged.")}
+            >
+              <Bell size={15} />
+              <span className="absolute -top-1 -right-1 bg-[#EF4444] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full border-2 border-white dark:border-[#131924] leading-tight">
+                3
+              </span>
+            </button>
+
+            {/* Quick Capture (PRAHARI Orange CTA) */}
             <button 
               onClick={() => { setEditingTask(undefined); setCaptureTarget('inbox'); setNewTaskQuadrant('do'); setShowTaskModal(true); }} 
-              className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-medium px-3.5 py-1.5 rounded-lg shadow-[0_0_20px_rgba(249,115,22,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 text-xs outline-none cursor-pointer"
+              className="bg-[#FF5A1F] hover:bg-[#E04F16] text-white font-semibold px-3 py-1.5 rounded-xl shadow-[0_2px_10px_rgba(255,90,31,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 text-xs outline-none cursor-pointer"
               title="Capture new item (C)"
             >
-              <Plus size={14} strokeWidth={1.75} />
-              <span>Capture</span>
-              {!isMobile && (
-                <kbd className="bg-black/30 text-white/80 px-1.5 py-0.5 rounded text-[10px] font-mono ml-2">
-                  C
-                </kbd>
-              )}
+              <Plus size={14} strokeWidth={2.2} />
+              <span className="hidden md:inline">Capture</span>
             </button>
 
             {/* User Profile Menu with Settings, Export, Prompt, Sign Out */}
@@ -683,6 +704,21 @@ export default function App() {
           {/* 4. SMART AI ORGANIZER WORKSPACE */}
           {activeSection === "organizer" && (
             <SmartOrganizer />
+          )}
+
+          {/* PRAHARI SITES WORKSPACE matching media_1791828447029.png */}
+          {activeSection === "sites" && (
+            <SitesView />
+          )}
+
+          {/* DASHBOARD OVERVIEW */}
+          {activeSection === "dashboard" && (
+            <Dashboard 
+              activePillar={activePillar} 
+              isMobile={isMobile} 
+              onAddTaskClick={(q) => { setEditingTask(undefined); setCaptureTarget('quadrant'); setNewTaskQuadrant(q); setShowTaskModal(true); }}
+              onEditTask={(task) => { setEditingTask(task); setShowTaskModal(true); }}
+            />
           )}
 
           {/* UTILITY VIEWS (accessible from Utilities dialog or User Menu) */}

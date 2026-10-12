@@ -48,65 +48,31 @@ export const UserProfileMenu = ({
 
   return (
     <div style={{ position: "relative" }} ref={dropdownRef}>
-      {/* Profile Pill matching Prahari Header (media_1791716917550.png) */}
+      {/* Profile Pill matching Prahari Header (media_1791828447029.png) */}
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 9,
-          padding: "4px 10px 4px 6px",
-          borderRadius: 9999,
-          background: "var(--bg-surface)",
-          border: "1px solid var(--border-default)",
-          color: "var(--text-primary)",
-          cursor: "pointer",
-          transition: "all 0.15s ease",
-          boxShadow: "var(--shadow-sm)"
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.borderColor = "var(--border-strong)";
-          e.currentTarget.style.background = "var(--bg-surface-elevated)";
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.borderColor = "var(--border-default)";
-          e.currentTarget.style.background = "var(--bg-surface)";
-        }}
+        className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 shadow-xs hover:border-slate-300 dark:hover:border-white/20 transition-all cursor-pointer outline-none"
         title="Account & System Profile"
       >
-        {/* Avatar Badge */}
+        {/* Avatar Badge matching Prahari */}
         <div 
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-            color: "#ffffff",
-            fontSize: 11,
-            fontWeight: 700,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            letterSpacing: "0.02em",
-            boxShadow: "0 2px 5px rgba(37, 99, 235, 0.35)",
-            flexShrink: 0
-          }}
+          className="w-7 h-7 rounded-lg bg-[#DBEAFE] dark:bg-blue-950/80 border border-[#BFDBFE] dark:border-blue-800 text-[#1D4ED8] dark:text-blue-300 text-xs font-bold flex items-center justify-center shrink-0"
         >
           {initials}
         </div>
 
         {/* Name & Subtitle */}
-        <div style={{ display: "flex", flexDirection: "column", textAlign: "left", lineHeight: 1.15 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", whiteSpace: "nowrap" }}>
-            {user.name}
+        <div className="flex flex-col text-left leading-tight">
+          <span className="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">
+            {user.name || "Prasad Sangale"}
           </span>
-          <span style={{ fontSize: 9.5, color: "var(--text-tertiary)", letterSpacing: "-0.01em" }}>
-            Life OS Executive
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">
+            Chief HSE Superintendent
           </span>
         </div>
 
-        <ChevronDown size={12} color="var(--text-tertiary)" style={{ marginLeft: 2 }} />
+        <ChevronDown size={12} className="text-slate-400 ml-1" />
       </button>
 
       {/* Floating Dropdown Card matching Prahari (media_1791717165817.png) */}

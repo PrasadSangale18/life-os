@@ -109,8 +109,8 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
       style={{ ...style }}
       className={`group/task relative flex items-start gap-2.5 p-3 rounded-xl transition-all duration-200 cursor-pointer ${
         isDone 
-          ? 'bg-white/[0.02] border border-white/[0.04]' 
-          : 'bg-[#161B22] border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] hover:bg-[#1a212a] hover:border-white/[0.16] hover:shadow-lg hover:-translate-y-[1px]'
+          ? 'bg-slate-100/60 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/[0.04]' 
+          : 'bg-white dark:bg-[#161B22] border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:border-slate-300 dark:hover:border-white/[0.16] hover:shadow-md hover:-translate-y-[1px]'
       }`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -121,7 +121,7 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
         {...attributes} 
         {...listeners} 
         onClick={(e) => e.stopPropagation()}
-        className="cursor-grab text-slate-500 hover:text-slate-300 mt-0.5 touch-none transition-colors"
+        className="cursor-grab text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 mt-0.5 touch-none transition-colors"
         title="Drag to rearrange"
       >
         <GripVertical size={13} strokeWidth={1.75} />
@@ -138,14 +138,14 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
         className={`w-4 h-4 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0 transition-all duration-200 ${
           isDone 
             ? 'border-transparent shadow-sm' 
-            : 'border border-white/25 hover:border-white/60 bg-white/[0.03]'
+            : 'border border-slate-300 dark:border-white/25 hover:border-slate-500 dark:hover:border-white/60 bg-white dark:bg-white/[0.03]'
         }`}
         style={{
           backgroundColor: isDone ? qColor : undefined,
           boxShadow: isDone ? `0 0 10px ${qColor}40` : undefined
         }}
       >
-        {isDone && <Check size={10} color="#000" strokeWidth={3} />}
+        {isDone && <Check size={10} color="#fff" strokeWidth={3} />}
       </button>
 
       {/* Title & Micro-Chips */}
@@ -153,8 +153,8 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
         <span 
           className={`text-[13px] leading-snug tracking-tight transition-all ${
             isDone 
-              ? 'text-slate-500 line-through font-normal' 
-              : 'text-[#F8FAFC] font-medium'
+              ? 'text-slate-400 dark:text-slate-500 line-through font-normal' 
+              : 'text-slate-900 dark:text-[#F8FAFC] font-medium'
           }`}
           style={{ wordBreak: 'break-word' }}
         >
@@ -285,7 +285,7 @@ export const QuadrantCard = ({ quadrantId, activePillar, isMobile, onAddTaskClic
   return (
     <div 
       ref={setNodeRef} 
-      className={`group/quadrant relative flex flex-col rounded-2xl bg-[#0D1117]/80 backdrop-blur-xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.2] overflow-hidden ${themeStyle.topBorder} ${themeStyle.surfaceClass}`}
+      className={`group/quadrant relative flex flex-col rounded-2xl bg-white dark:bg-[#0D1117]/90 border border-slate-200/90 dark:border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-slate-300 dark:hover:border-white/[0.2] overflow-hidden ${themeStyle.topBorder} ${themeStyle.surfaceClass}`}
       style={{ 
         height: isMobile ? 'auto' : '100%',
         minHeight: isMobile ? 320 : 280,
@@ -297,7 +297,7 @@ export const QuadrantCard = ({ quadrantId, activePillar, isMobile, onAddTaskClic
       />
 
       {/* Header */}
-      <div className="relative z-10 flex items-center justify-between px-4 py-3.5 border-b border-white/[0.06] bg-white/[0.01]">
+      <div className="relative z-10 flex items-center justify-between px-4 py-3.5 border-b border-slate-100 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.01]">
         <div className="flex items-center gap-2.5">
           {/* Glowing dot indicator */}
           <div 
@@ -309,14 +309,14 @@ export const QuadrantCard = ({ quadrantId, activePillar, isMobile, onAddTaskClic
           />
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[13.5px] font-semibold text-[#F8FAFC] tracking-tight">
+              <span className="text-[13.5px] font-semibold text-slate-900 dark:text-[#F8FAFC] tracking-tight">
                 {q.name}
               </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
                 {q.label}
               </span>
             </div>
-            <div className="text-[11px] text-slate-400 tracking-tight mt-0.5">
+            <div className="text-[11px] text-slate-500 dark:text-slate-400 tracking-tight mt-0.5">
               {q.hint}
             </div>
           </div>
@@ -337,7 +337,7 @@ export const QuadrantCard = ({ quadrantId, activePillar, isMobile, onAddTaskClic
           <button 
             type="button"
             onClick={onAddTaskClick}
-            className="w-7 h-7 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] border border-white/[0.06] flex items-center justify-center text-slate-400 hover:text-white transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.04] dark:hover:bg-white/[0.1] border border-slate-200 dark:border-white/[0.06] flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all hover:scale-105 active:scale-95 cursor-pointer"
             title="Add task to this quadrant"
           >
             <Plus size={14} strokeWidth={1.75} />
@@ -351,13 +351,13 @@ export const QuadrantCard = ({ quadrantId, activePillar, isMobile, onAddTaskClic
           /* Interactive Tactile Dashed Drop Zone */
           <div 
             onClick={onAddTaskClick}
-            className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/[0.06] hover:border-white/[0.15] rounded-xl m-2 transition-all group cursor-pointer bg-white/[0.01] hover:bg-white/[0.02]"
+            className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-white/[0.06] hover:border-slate-300 dark:hover:border-white/[0.15] rounded-xl m-2 transition-all group cursor-pointer bg-slate-50/40 dark:bg-white/[0.01] hover:bg-slate-50 dark:hover:bg-white/[0.02]"
           >
-            <div className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center text-slate-500 group-hover:text-white group-hover:scale-110 transition-all mb-2">
+            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.04] flex items-center justify-center text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-white group-hover:scale-110 transition-all mb-2">
               <Plus className="w-4 h-4" strokeWidth={1.75} />
             </div>
-            <p className="text-xs font-medium text-slate-400 group-hover:text-slate-200">No active tasks</p>
-            <p className="text-[10px] text-slate-600 group-hover:text-slate-500 mt-0.5">Click or drag items here</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200">No active tasks</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-600 group-hover:text-slate-500 mt-0.5">Click or drag items here</p>
           </div>
         ) : (
           <AnimatePresence>
