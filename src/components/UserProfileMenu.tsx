@@ -5,7 +5,8 @@ import {
   LogOut, 
   Download, 
   Sparkles, 
-  ChevronDown 
+  ChevronDown,
+  Sliders
 } from 'lucide-react';
 
 interface UserProfileMenuProps {
@@ -14,6 +15,7 @@ interface UserProfileMenuProps {
   onOpenSettings: () => void;
   onOpenExport: () => void;
   onOpenPrompt: () => void;
+  onOpenUtilities?: () => void;
 }
 
 export const UserProfileMenu = ({
@@ -21,7 +23,8 @@ export const UserProfileMenu = ({
   onSignOut,
   onOpenSettings,
   onOpenExport,
-  onOpenPrompt
+  onOpenPrompt,
+  onOpenUtilities
 }: UserProfileMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -211,6 +214,38 @@ export const UserProfileMenu = ({
             <Sparkles size={14} color="#ea580c" />
             <span>Prompt-Wise AI Decomposition</span>
           </button>
+
+          {onOpenUtilities && (
+            <button
+              type="button"
+              onClick={() => { setIsOpen(false); onOpenUtilities(); }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 9,
+                padding: "8px 10px",
+                borderRadius: 7,
+                background: "transparent",
+                border: "none",
+                color: "var(--text-secondary)",
+                fontSize: 12.5,
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "all 0.12s ease"
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "var(--bg-surface-hover)";
+                e.currentTarget.style.color = "var(--text-primary)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "var(--text-secondary)";
+              }}
+            >
+              <Sliders size={14} color="#8b5cf6" />
+              <span>Utilities & Preferences</span>
+            </button>
+          )}
 
           <button
             type="button"

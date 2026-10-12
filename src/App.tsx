@@ -215,9 +215,6 @@ export default function App() {
         isMobile={isMobile}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        onOpenUtilities={() => setShowUtilitiesModal(true)}
-        user={user}
-        onSignOut={() => setUser(null)}
         notesCount={totalNotesCount}
         completedCount={doneTasks}
         totalCount={pt.length}
@@ -264,6 +261,7 @@ export default function App() {
             onOpenSettings={() => setActiveSection('settings')}
             onOpenExport={() => setShowExportModal(true)}
             onOpenPrompt={() => setShowPromptModal(true)}
+            onOpenUtilities={() => setShowUtilitiesModal(true)}
           />
         </TopBar>
 

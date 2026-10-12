@@ -4,12 +4,10 @@ import {
   BookOpen, 
   Network, 
   Sparkles, 
-  Settings, 
   Layers,
   ChevronLeft,
   LayoutDashboard,
   Radar,
-  LogOut,
   MapPin
 } from 'lucide-react';
 
@@ -19,9 +17,6 @@ interface SidebarProps {
   isMobile?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
-  onOpenUtilities?: () => void;
-  user?: { name: string; email: string } | null;
-  onSignOut?: () => void;
   notesCount?: number;
   completedCount?: number;
   totalCount?: number;
@@ -33,9 +28,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobile = false,
   isOpen = true,
   onClose,
-  onOpenUtilities,
-  user,
-  onSignOut,
   notesCount = 0,
   completedCount = 0,
   totalCount = 0
@@ -159,45 +151,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {totalCount > 0 ? `${completedCount}/${totalCount} (${pct}%)` : 'Active'}
           </span>
         </div>
-        <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
+        <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
           <div 
             className="h-full bg-gradient-to-r from-[#FF5A1F] to-[#10B981] rounded-full transition-all duration-500"
             style={{ width: `${totalCount > 0 ? pct : 100}%` }}
           />
         </div>
-
-        <button 
-          type="button"
-          onClick={onOpenUtilities}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-dark-card border border-slate-200/80 dark:border-dark-border text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shadow-xs mb-2.5"
-        >
-          <Settings className="w-3.5 h-3.5" />
-          <span>Utilities & Settings</span>
-        </button>
-
-        {user && (
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 font-bold text-xs flex items-center justify-center shrink-0">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{user.name}</p>
-                <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
-              </div>
-            </div>
-            {onSignOut && (
-              <button 
-                type="button"
-                onClick={onSignOut}
-                className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
-                title="Sign out"
-              >
-                <LogOut size={13} />
-              </button>
-            )}
-          </div>
-        )}
       </div>
     </aside>
   );
