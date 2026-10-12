@@ -30,6 +30,8 @@ import {
   Sparkles
 } from 'lucide-react';
 
+import { CanvasWorkspace } from './canvas/CanvasWorkspace';
+
 interface MindMapProps {
   onEditTask: (item: Item) => void;
   onNewItem?: (pillarId?: PillarId) => void;
@@ -47,7 +49,7 @@ export const MindMap: React.FC<MindMapProps> = ({ onEditTask, onNewItem }) => {
   const items = useStore(state => state.items);
   const showPrivate = useStore(state => state.showPrivate);
 
-  const [view, setView] = useState<'tree' | 'graph'>('tree');
+  const [view, setView] = useState<'canvas' | 'tree' | 'graph'>('canvas');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'task' | 'note' | 'project' | 'goal'>('all');
 
@@ -78,6 +80,17 @@ export const MindMap: React.FC<MindMapProps> = ({ onEditTask, onNewItem }) => {
     }
     return result;
   }, [validItems, typeFilter, searchQuery]);
+
+  if (view === 'canvas') {
+    return (
+      <CanvasWorkspace 
+        onEditTask={onEditTask} 
+        onNewItem={onNewItem ? () => onNewItem() : undefined}
+        currentView={view}
+        onViewChange={setView}
+      />
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14, height: "100%", minHeight: 650 }}>
@@ -181,8 +194,15 @@ export const MindMap: React.FC<MindMapProps> = ({ onEditTask, onNewItem }) => {
             ))}
           </div>
 
-          {/* Tree vs Graph Toggle */}
+          {/* Canvas vs Tree vs Graph Toggle */}
           <div className="segmented-nav" style={{ padding: 2 }}>
+            <button 
+              onClick={() => setView('canvas')} 
+              className={`segmented-nav-btn ${(view as string) === 'canvas' ? 'active' : ''}`}
+              style={{ fontSize: 12, padding: "5px 12px" }}
+            >
+              Canvas
+            </button>
             <button 
               onClick={() => setView('tree')} 
               className={`segmented-nav-btn ${view === 'tree' ? 'active' : ''}`}
