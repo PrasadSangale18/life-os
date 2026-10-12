@@ -17,7 +17,6 @@ import { LoginScreen } from './components/LoginScreen';
 import { ExportModal } from './components/ExportModal';
 import { PromptWiseModal } from './components/PromptWiseModal';
 import { UserProfileMenu } from './components/UserProfileMenu';
-import { SitesView } from './components/SitesView';
 import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { DimensionFilter } from './components/DimensionFilter';
@@ -47,7 +46,7 @@ export default function App() {
 
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeSection, setActiveSection] = useState<string>("sites");
+  const [activeSection, setActiveSection] = useState<string>("today");
   const [taskViewMode, setTaskViewMode] = useState<'matrix' | 'list' | 'projects' | 'inbox'>('matrix');
   const [activePillar, setActivePillar] = useState<PillarId>("physical");
   const [showUtilitiesModal, setShowUtilitiesModal] = useState(false);
@@ -230,22 +229,16 @@ export default function App() {
         <TopBar
           currentView={taskViewMode}
           onViewChange={(view) => setTaskViewMode(view)}
+          showViewSwitcher={activeSection === 'tasks'}
           inboxCount={inboxCount}
           isDarkMode={theme === 'dark'}
           onToggleDarkMode={toggleTheme}
-          onQuickCapture={() => {
-            setEditingTask(undefined);
-            setCaptureTarget('inbox');
-            setNewTaskQuadrant('do');
-            setShowTaskModal(true);
-          }}
           pageTitle={
-            activeSection === "sites" ? "Sites" :
+            activeSection === "today" ? "Shift Radar" :
             activeSection === "tasks" ? "To-do list" :
             activeSection === "notes" ? "My Notes" :
             activeSection === "organizer" ? "Smart AI Organizer" :
             activeSection === "mindmap" ? "Mind Map & Graph" :
-            activeSection === "today" ? "Shift Radar" :
             activeSection === "projects" ? "Analytics" :
             activeSection === "import" ? "CSV Bulk Import" :
             activeSection === "review" ? "Weekly Review" :
@@ -391,11 +384,6 @@ export default function App() {
           {/* 4. SMART AI ORGANIZER WORKSPACE */}
           {activeSection === "organizer" && (
             <SmartOrganizer />
-          )}
-
-          {/* PRAHARI SITES WORKSPACE matching media_1791828447029.png */}
-          {activeSection === "sites" && (
-            <SitesView />
           )}
 
           {/* DASHBOARD OVERVIEW */}

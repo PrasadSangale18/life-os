@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { 
-  Building2, 
   Sun, 
   Moon, 
   Bell, 
   Search, 
-  Plus, 
   LayoutGrid, 
   List, 
   FolderKanban, 
@@ -17,10 +15,10 @@ import {
 interface TopBarProps {
   currentView: 'matrix' | 'list' | 'projects' | 'inbox';
   onViewChange: (view: 'matrix' | 'list' | 'projects' | 'inbox') => void;
+  showViewSwitcher?: boolean;
   inboxCount?: number;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
-  onQuickCapture: () => void;
   pageTitle?: string;
   onSearchClick?: () => void;
   onToggleSidebar?: () => void;
@@ -32,11 +30,11 @@ interface TopBarProps {
 export const TopBar: React.FC<TopBarProps> = ({
   currentView,
   onViewChange,
+  showViewSwitcher = false,
   inboxCount = 0,
   isDarkMode,
   onToggleDarkMode,
-  onQuickCapture,
-  pageTitle = "Notes for Task",
+  pageTitle = "To-do list",
   onSearchClick,
   onToggleSidebar,
   isMobile = false,
@@ -46,7 +44,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [alerts, setAlerts] = useState([
     { id: 1, title: 'Deep Work Block Scheduled', time: '10m ago', desc: 'Execution matrix: Focus on 2 Urgent tasks.', type: 'orange' },
-    { id: 2, title: 'Weekly Review Pending', time: '2h ago', desc: '14 unorganized notes waiting in Inbox triage.', type: 'blue' }
+    { id: 2, title: 'Weekly Review Pending', time: '2h ago', desc: 'Notes and inbox ready for triage.', type: 'blue' }
   ]);
 
   const initials = user?.name
@@ -61,7 +59,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="p-1.5 rounded-lg border border-slate-200 dark:border-dark-border text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card"
+            className="p-1.5 rounded-lg border border-slate-200 dark:border-dark-border text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card cursor-pointer"
             aria-label="Open navigation"
           >
             <Menu size={18} />
@@ -72,47 +70,51 @@ export const TopBar: React.FC<TopBarProps> = ({
           {pageTitle}
         </h1>
 
-        {/* Segmented View Switcher */}
-        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-[#131924] p-1 rounded-xl border border-slate-200/60 dark:border-dark-border">
-          {[
-            { id: 'matrix', label: 'Matrix', icon: LayoutGrid },
-            { id: 'list', label: 'List', icon: List },
-            { id: 'projects', label: 'Projects', icon: FolderKanban },
-            { id: 'inbox', label: 'Inbox', icon: Inbox, badge: inboxCount }
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = currentView === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => onViewChange(tab.id as any)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-white dark:bg-[#1E2638] text-slate-900 dark:text-white shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
-                {tab.badge !== undefined && tab.badge > 0 && (
-                  <span className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
-                    isActive 
-                      ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold'
-                      : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+        {/* Segmented View Switcher - Only shown when in tasks / To-do list view */}
+        {showViewSwitcher && (
+          <div className="hidden sm:flex items-center bg-slate-100 dark:bg-[#131924] p-1 rounded-xl border border-slate-200/60 dark:border-dark-border">
+            {[
+              { id: 'matrix', label: 'Matrix', icon: LayoutGrid },
+              { id: 'list', label: 'List', icon: List },
+              { id: 'projects', label: 'Projects', icon: FolderKanban },
+              { id: 'inbox', label: 'Inbox', icon: Inbox, badge: inboxCount }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = currentView === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => onViewChange(tab.id as any)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-white dark:bg-[#1E2638] text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{tab.label}</span>
+                  {tab.badge !== undefined && tab.badge > 0 && (
+                    <span className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                      isActive 
+                        ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                    }`}>
+                      {tab.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 md:gap-3">
         {/* Quick Search */}
         <button 
+          type="button"
           onClick={onSearchClick}
           className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#131924] border border-slate-200 dark:border-dark-border text-xs text-slate-500 hover:border-slate-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
         >
@@ -121,21 +123,9 @@ export const TopBar: React.FC<TopBarProps> = ({
           <kbd className="text-[10px] font-mono bg-white dark:bg-slate-800 px-1 rounded border border-slate-200 dark:border-slate-700">⌘K</kbd>
         </button>
 
-        {/* Prahari Enterprise Badge */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-[#131924] border border-slate-200/90 dark:border-dark-border shadow-xs">
-          <Building2 className="w-3.5 h-3.5 text-amber-500" />
-          <div className="text-left leading-none">
-            <span className="text-[10px] font-black tracking-wider text-slate-800 dark:text-slate-200 block uppercase">
-              LIFE OS ENTERPRISE
-            </span>
-            <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">
-              Autonomous Intelligence
-            </span>
-          </div>
-        </div>
-
         {/* Theme Toggle */}
         <button
+          type="button"
           onClick={onToggleDarkMode}
           className="p-2 rounded-xl bg-slate-100 dark:bg-[#131924] border border-slate-200 dark:border-dark-border text-slate-500 hover:text-orange-500 transition-colors cursor-pointer"
           title="Toggle Theme"
@@ -146,6 +136,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Notifications Dropdown */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowNotifications(!showNotifications)}
             className="p-2 rounded-xl bg-slate-100 dark:bg-[#131924] border border-slate-200 dark:border-dark-border text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors relative cursor-pointer"
             title="System Alerts"
@@ -170,6 +161,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                 {alerts.map(a => (
                   <div key={a.id} className="p-3 rounded-xl bg-slate-50 dark:bg-[#161D2B] border border-slate-200/60 dark:border-slate-800 text-xs relative group">
                     <button
+                      type="button"
                       onClick={() => setAlerts(alerts.filter(x => x.id !== a.id))}
                       className="absolute top-2 right-2 text-slate-400 hover:text-slate-600"
                     >
@@ -185,17 +177,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           )}
         </div>
 
-        {/* Quick Capture Button (Prahari Vivid Orange) */}
-        <button
-          onClick={onQuickCapture}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FF5A1F] hover:bg-[#EA580C] text-white text-xs font-bold shadow-[0_2px_12px_rgba(255,90,31,0.35)] transition-all active:scale-95 cursor-pointer"
-        >
-          <Plus className="w-3.5 h-3.5 stroke-[3]" />
-          <span>Capture</span>
-          <kbd className="hidden sm:inline-block bg-black/20 text-white/90 text-[10px] font-mono px-1 rounded ml-1">C</kbd>
-        </button>
-
-        {/* User Profile Pill */}
+        {/* User Profile Menu */}
         {children ? (
           children
         ) : (
@@ -208,7 +190,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                 {user?.name || "Prasad Sangale"}
               </span>
               <span className="text-[10px] text-slate-400 font-medium block">
-                Life OS Executive
+                Life OS
               </span>
             </div>
           </div>

@@ -7,7 +7,6 @@ import {
   Settings, 
   Layers,
   ChevronLeft,
-  MapPin,
   LayoutDashboard,
   Radar,
   LogOut
@@ -41,13 +40,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   totalCount = 0
 }) => {
   const navItems = [
+    { id: 'today', name: 'Shift Radar', icon: Radar, subtitle: 'Daily focus & routines' },
     { id: 'tasks', name: 'To-do list', icon: CheckSquare, subtitle: 'Tasks, matrix & execution' },
     { id: 'notes', name: 'My Notes', icon: BookOpen, subtitle: 'Rich thoughts & ideas', count: notesCount > 0 ? notesCount : undefined },
+    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, subtitle: 'Pillars & metric radar' },
     { id: 'mindmap', name: 'Mind Map & Graph', icon: Network, subtitle: 'Visual second brain' },
     { id: 'organizer', name: 'Smart AI Organizer', icon: Sparkles, subtitle: 'Bulk input & auto-sorting', badge: 'BULK AI' },
-    { id: 'sites', name: 'Sites', icon: MapPin, subtitle: 'Asset SIF density rankings' },
-    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, subtitle: 'Pillars & metric radar' },
-    { id: 'today', name: 'Shift Radar', icon: Radar, subtitle: 'Daily focus & routines' },
   ];
 
   const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -156,13 +154,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex items-center justify-between mb-2 text-xs">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Task Completion</span>
           <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 tabular-nums">
-            {completedCount}/{totalCount} ({pct}%)
+            {totalCount > 0 ? `${completedCount}/${totalCount} (${pct}%)` : 'Active'}
           </span>
         </div>
         <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
           <div 
             className="h-full bg-gradient-to-r from-[#FF5A1F] to-[#10B981] rounded-full transition-all duration-500"
-            style={{ width: `${pct}%` }}
+            style={{ width: `${totalCount > 0 ? pct : 100}%` }}
           />
         </div>
 
