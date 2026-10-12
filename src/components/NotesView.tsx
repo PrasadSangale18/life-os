@@ -347,7 +347,7 @@ export const NotesView = ({ onEditTask, onNewNote }: NotesViewProps) => {
                   gap: 14, 
                   cursor: "pointer",
                   borderLeft: pObj ? `3px solid ${pObj.color}` : "3px solid var(--border-strong)",
-                  background: isPinned ? "rgba(245,158,11,0.03)" : "rgba(16, 19, 28, 0.75)",
+                  background: isPinned ? "rgba(245,158,11,0.06)" : "var(--bg-surface)",
                   transition: "all 0.15s ease"
                 }}
               >

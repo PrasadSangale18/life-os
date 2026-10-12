@@ -56,8 +56,9 @@ export default function App() {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('lifeos_theme');
       if (stored === 'light' || stored === 'dark') return stored;
+      if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
     }
-    return 'light';
+    return 'dark';
   });
 
   const [showExportModal, setShowExportModal] = useState(false);

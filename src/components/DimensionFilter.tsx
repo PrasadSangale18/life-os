@@ -29,13 +29,13 @@ export const DimensionFilter: React.FC<DimensionFilterProps> = ({
             key={dim.id}
             type="button"
             onClick={() => onSelectDimension(dim.id)}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap border ${
               isActive
-                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs scale-102 font-bold'
-                : 'bg-white dark:bg-dark-card text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-dark-border hover:border-slate-300 dark:hover:border-slate-700'
+                ? 'bg-[#FFF4EC] border-[#FFD8BF] text-[#E04F16] dark:bg-[#FF5A1F]/15 dark:border-[#FF5A1F]/40 dark:text-[#FF5A1F] shadow-xs dark:shadow-[0_0_12px_rgba(255,90,31,0.25)] scale-102 font-bold'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:bg-dark-card dark:text-slate-400 dark:border-dark-border dark:hover:border-slate-700 dark:hover:bg-dark-cardHover'
             }`}
           >
-            <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-orange-400 dark:text-orange-500' : dim.color}`} strokeWidth={1.8} />
+            <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#FF5A1F]' : dim.color}`} strokeWidth={1.8} />
             <span>{dim.label}</span>
           </button>
         );
