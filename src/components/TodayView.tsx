@@ -803,6 +803,15 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
                 <span>Triage Unprocessed Inbox</span>
                 <span className="tabular-nums" style={{ fontSize: 11, background: "rgba(255,255,255,0.08)", padding: "2px 7px", borderRadius: 9999 }}>{inboxCount}</span>
               </button>
+
+              <button 
+                onClick={onAddTask}
+                className="btn-secondary"
+                style={{ justifyContent: "space-between", padding: "10px 14px", fontSize: 13 }}
+              >
+                <span>Quick Capture New Task</span>
+                <Plus size={14} color="var(--text-tertiary)" />
+              </button>
             </div>
           </div>
         </div>

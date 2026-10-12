@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { 
+  Building2, 
   Sun, 
   Moon, 
   Bell, 
   Search, 
+  Plus, 
   LayoutGrid, 
   List, 
   FolderKanban, 
@@ -19,6 +21,7 @@ interface TopBarProps {
   inboxCount?: number;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
+  onQuickCapture?: () => void;
   pageTitle?: string;
   onSearchClick?: () => void;
   onToggleSidebar?: () => void;
@@ -30,11 +33,12 @@ interface TopBarProps {
 export const TopBar: React.FC<TopBarProps> = ({
   currentView,
   onViewChange,
-  showViewSwitcher = false,
+  showViewSwitcher = true,
   inboxCount = 0,
   isDarkMode,
   onToggleDarkMode,
-  pageTitle = "To-do list",
+  onQuickCapture,
+  pageTitle = "Shift Radar",
   onSearchClick,
   onToggleSidebar,
   isMobile = false,
@@ -44,12 +48,12 @@ export const TopBar: React.FC<TopBarProps> = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [alerts, setAlerts] = useState([
     { id: 1, title: 'Deep Work Block Scheduled', time: '10m ago', desc: 'Execution matrix: Focus on 2 Urgent tasks.', type: 'orange' },
-    { id: 2, title: 'Weekly Review Pending', time: '2h ago', desc: 'Notes and inbox ready for triage.', type: 'blue' }
+    { id: 2, title: 'Weekly Review Pending', time: '2h ago', desc: '14 unorganized notes waiting in Inbox triage.', type: 'blue' }
   ]);
 
   const initials = user?.name
     ? user.name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()
-    : 'PR';
+    : 'PO';
 
   return (
     <header className="h-16 border-b border-slate-200/80 dark:border-dark-border bg-white/80 dark:bg-dark-sidebar/80 backdrop-blur-md px-4 md:px-6 flex items-center justify-between sticky top-0 z-40 transition-colors">
@@ -70,7 +74,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {pageTitle}
         </h1>
 
-        {/* Segmented View Switcher - Only shown when in tasks / To-do list view */}
+        {/* Segmented View Switcher */}
         {showViewSwitcher && (
           <div className="hidden sm:flex items-center bg-slate-100 dark:bg-[#131924] p-1 rounded-xl border border-slate-200/60 dark:border-dark-border">
             {[
@@ -122,6 +126,19 @@ export const TopBar: React.FC<TopBarProps> = ({
           <span>Search</span>
           <kbd className="text-[10px] font-mono bg-white dark:bg-slate-800 px-1 rounded border border-slate-200 dark:border-slate-700">⌘K</kbd>
         </button>
+
+        {/* Prahari Enterprise Badge */}
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-[#131924] border border-slate-200/90 dark:border-dark-border shadow-xs">
+          <Building2 className="w-3.5 h-3.5 text-amber-500" />
+          <div className="text-left leading-none">
+            <span className="text-[10px] font-black tracking-wider text-slate-800 dark:text-slate-200 block uppercase">
+              LIFE OS ENTERPRISE
+            </span>
+            <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">
+              Autonomous Intelligence
+            </span>
+          </div>
+        </div>
 
         {/* Theme Toggle */}
         <button
@@ -177,6 +194,19 @@ export const TopBar: React.FC<TopBarProps> = ({
           )}
         </div>
 
+        {/* Quick Capture Button (Prahari Vivid Orange) */}
+        {onQuickCapture && (
+          <button
+            type="button"
+            onClick={onQuickCapture}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FF5A1F] hover:bg-[#EA580C] text-white text-xs font-bold shadow-[0_2px_12px_rgba(255,90,31,0.35)] transition-all active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[3]" />
+            <span>Capture</span>
+            <kbd className="hidden sm:inline-block bg-black/20 text-white/90 text-[10px] font-mono px-1 rounded ml-1">C</kbd>
+          </button>
+        )}
+
         {/* User Profile Menu */}
         {children ? (
           children
@@ -187,10 +217,10 @@ export const TopBar: React.FC<TopBarProps> = ({
             </div>
             <div className="hidden xl:block text-left">
               <span className="text-xs font-extrabold text-slate-900 dark:text-white block leading-tight">
-                {user?.name || "Prasad Sangale"}
+                {user?.name || "Personal OS"}
               </span>
               <span className="text-[10px] text-slate-400 font-medium block">
-                Life OS
+                Chief HSE Superintendent
               </span>
             </div>
           </div>

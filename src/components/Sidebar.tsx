@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   LayoutDashboard,
   Radar,
-  LogOut
+  LogOut,
+  MapPin
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -43,6 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'today', name: 'Shift Radar', icon: Radar, subtitle: 'Daily focus & routines' },
     { id: 'tasks', name: 'To-do list', icon: CheckSquare, subtitle: 'Tasks, matrix & execution' },
     { id: 'notes', name: 'My Notes', icon: BookOpen, subtitle: 'Rich thoughts & ideas', count: notesCount > 0 ? notesCount : undefined },
+    { id: 'sites', name: 'Sites', icon: MapPin, subtitle: 'Asset SIF density rankings' },
     { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, subtitle: 'Pillars & metric radar' },
     { id: 'mindmap', name: 'Mind Map & Graph', icon: Network, subtitle: 'Visual second brain' },
     { id: 'organizer', name: 'Smart AI Organizer', icon: Sparkles, subtitle: 'Bulk input & auto-sorting', badge: 'BULK AI' },
