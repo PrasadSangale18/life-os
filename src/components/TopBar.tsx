@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Building2, 
   Sun, 
   Moon, 
-  Bell, 
   Search, 
   Plus, 
   LayoutGrid, 
   List, 
   FolderKanban, 
   Inbox,
-  X,
   Menu
 } from 'lucide-react';
 
@@ -45,12 +43,6 @@ export const TopBar: React.FC<TopBarProps> = ({
   user,
   children
 }) => {
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [alerts, setAlerts] = useState([
-    { id: 1, title: 'Deep Work Block Scheduled', time: '10m ago', desc: 'Execution matrix: Focus on 2 Urgent tasks.', type: 'orange' },
-    { id: 2, title: 'Weekly Review Pending', time: '2h ago', desc: '14 unorganized notes waiting in Inbox triage.', type: 'blue' }
-  ]);
-
   const initials = user?.name
     ? user.name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()
     : 'PO';
@@ -150,49 +142,6 @@ export const TopBar: React.FC<TopBarProps> = ({
           {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
         </button>
 
-        {/* Notifications Dropdown */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-[#131924] border border-slate-200 dark:border-dark-border text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors relative cursor-pointer"
-            title="System Alerts"
-          >
-            <Bell className="w-4 h-4" />
-            {alerts.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
-                {alerts.length}
-              </span>
-            )}
-          </button>
-
-          {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border shadow-2xl p-4 z-50">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  System Alerts
-                </span>
-                <span className="text-[10px] text-slate-400 font-mono">{alerts.length} Active</span>
-              </div>
-              <div className="mt-3 space-y-2">
-                {alerts.map(a => (
-                  <div key={a.id} className="p-3 rounded-xl bg-slate-50 dark:bg-[#161D2B] border border-slate-200/60 dark:border-slate-800 text-xs relative group">
-                    <button
-                      type="button"
-                      onClick={() => setAlerts(alerts.filter(x => x.id !== a.id))}
-                      className="absolute top-2 right-2 text-slate-400 hover:text-slate-600"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                    <p className="font-bold text-slate-800 dark:text-slate-200 pr-4">{a.title}</p>
-                    <p className="text-[11px] text-slate-500 mt-1">{a.desc}</p>
-                    <span className="text-[9px] text-slate-400 font-mono mt-2 block">{a.time}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Quick Capture Button (Prahari Vivid Orange) */}
         {onQuickCapture && (
