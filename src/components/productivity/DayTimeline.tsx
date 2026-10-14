@@ -102,11 +102,11 @@ export const DayTimeline: React.FC<DayTimelineProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#0D1117] border border-white/[0.08] rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
+    <div className="w-full bg-[#131924] border border-white/[0.08] rounded-xl p-4 sm:p-5 flex flex-col gap-4">
       {/* Header with Title and Auto-Schedule Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#FF5A1F]/20 text-[#FF5A1F] border border-[#FF5A1F]/30 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center justify-center">
             <Clock className="w-4 h-4" />
           </div>
           <div>
@@ -137,7 +137,7 @@ export const DayTimeline: React.FC<DayTimelineProps> = ({
           <button
             onClick={handleAutoSchedule}
             disabled={unscheduledTasks.length === 0}
-            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#FF5A1F] to-[#EA580C] hover:opacity-90 disabled:opacity-40 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_2px_12px_rgba(255,90,31,0.3)] transition-all"
+            className="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 disabled:opacity-40 font-semibold text-xs flex items-center gap-1.5 shadow-[0_2px_8px_rgba(56,189,248,0.15)] transition-all"
           >
             <Sparkles className="w-3.5 h-3.5 fill-current" />
             Auto-Schedule Day

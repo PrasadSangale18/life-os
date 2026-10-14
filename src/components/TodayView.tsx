@@ -504,7 +504,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          {/* Prompt-Wise Action Button (Prahari Translucent Orange Tint) */}
+          {/* Prompt-Wise Action Button (Refined AI Violet Tint) */}
           <button
             type="button"
             onClick={() => setShowTodayPromptModal(true)}
@@ -514,26 +514,26 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
               gap: 8,
               padding: "9px 16px",
               borderRadius: 10,
-              background: "rgba(255, 90, 31, 0.12)",
-              color: "#FF5A1F",
-              border: "1px solid rgba(255, 90, 31, 0.3)",
+              background: "rgba(139, 92, 246, 0.12)",
+              color: "#A78BFA",
+              border: "1px solid rgba(139, 92, 246, 0.3)",
               fontSize: 13,
               fontWeight: 650,
               cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(255, 90, 31, 0.15)",
+              boxShadow: "0 2px 8px rgba(139, 92, 246, 0.15)",
               transition: "all 0.15s ease"
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(255, 90, 31, 0.2)";
+              e.currentTarget.style.background = "rgba(139, 92, 246, 0.22)";
               e.currentTarget.style.transform = "translateY(-1px)";
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.background = "rgba(255, 90, 31, 0.12)";
+              e.currentTarget.style.background = "rgba(139, 92, 246, 0.12)";
               e.currentTarget.style.transform = "none";
             }}
             title="Format today's workload into a structured prompt for external AI"
           >
-            <Sparkles size={14} color="#FF5A1F" />
+            <Sparkles size={14} color="#A78BFA" />
             <span>⚡ Prompt-Wise AI Breakdown</span>
           </button>
           
@@ -573,10 +573,10 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
       {/* 3 Executive Metric Stat Cards (Matching Prahari media_1791718696966.png) */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
         {/* Card 1: Critical / Do Now */}
-        <div className="glass-panel" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10, borderLeft: "3px solid #FF5A1F" }}>
+        <div className="glass-panel" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10, borderLeft: "3px solid #EF4444" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>CRITICAL / DO NOW</span>
-            <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 7px", borderRadius: 9999, background: "rgba(255, 90, 31, 0.12)", color: "#FF5A1F", border: "1px solid rgba(255, 90, 31, 0.25)" }}>
+            <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 7px", borderRadius: 9999, background: "rgba(239, 68, 68, 0.12)", color: "#EF4444", border: "1px solid rgba(239, 68, 68, 0.25)" }}>
               {overdueTasks.length > 0 ? `${overdueTasks.length} Overdue` : 'Nominal'}
             </span>
           </div>
@@ -587,7 +587,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
             <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>tasks requiring immediate action</span>
           </div>
           <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", display: "flex", alignItems: "center", gap: 5 }}>
-            <AlertTriangle size={12} color="#FF5A1F" />
+            <AlertTriangle size={12} color="#EF4444" />
             <span>Urgent & Important (Eisenhower Q1)</span>
           </div>
         </div>

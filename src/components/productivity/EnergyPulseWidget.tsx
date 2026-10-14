@@ -65,12 +65,16 @@ export const EnergyPulseWidget: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-[#0D1117] border border-white/[0.08] hover:border-white/[0.14] rounded-2xl p-4 transition-all flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div className="w-full bg-[#131924] border border-white/[0.08] hover:border-white/[0.14] rounded-xl p-4 transition-all flex flex-col sm:flex-row items-center justify-between gap-4">
       {/* Left: Indicator & Guidance */}
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-          currentEnergy > 0
-            ? 'bg-[#FF5A1F]/15 text-[#FF5A1F] border border-[#FF5A1F]/30'
+          currentEnergy >= 4
+            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+            : currentEnergy === 3
+            ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
+            : currentEnergy > 0
+            ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
             : 'bg-white/[0.05] text-slate-400 border border-white/[0.08]'
         }`}>
           <BatteryCharging className="w-4 h-4" />
@@ -108,7 +112,11 @@ export const EnergyPulseWidget: React.FC = () => {
               onClick={() => handleSelectEnergy(lvl)}
               className={`w-7 h-7 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center ${
                 currentEnergy === lvl
-                  ? 'bg-[#FF5A1F] text-white shadow-[0_0_12px_rgba(255,90,31,0.35)]'
+                  ? lvl <= 2
+                    ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.25)]'
+                    : lvl === 3
+                    ? 'bg-blue-500/25 text-blue-300 border border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.25)]'
+                    : 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
                   : 'text-slate-400 hover:text-white hover:bg-white/[0.08]'
               }`}
               title={`Energy Level ${lvl}/5`}
