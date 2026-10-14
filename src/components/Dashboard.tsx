@@ -16,9 +16,10 @@ import { QuadrantCard } from './QuadrantCard';
 import { MetricCard } from './common/MetricCard';
 import { selectDashboardTasks } from '../utils/selectors';
 import type { Item } from '../types';
-import { CheckSquare, Flame, TrendingUp, Target } from 'lucide-react';
+import { CheckSquare, Flame, TrendingUp, Target, Swords } from 'lucide-react';
 import { FlowCockpitModal } from './focus/FlowCockpitModal';
 import { ResistanceBusterModal } from './productivity/ResistanceBusterModal';
+import { DecisionDuelModal } from './productivity/DecisionDuelModal';
 
 interface DashboardProps {
   activePillar: PillarId;
@@ -40,6 +41,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showFlowCockpit, setShowFlowCockpit] = useState(false);
   const [resistanceTask, setResistanceTask] = useState<Item | null>(null);
   const [showResistanceBuster, setShowResistanceBuster] = useState(false);
+  const [showDecisionDuel, setShowDecisionDuel] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -163,6 +165,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
             subtitle={`Active in ${activePillar}`}
           />
         </div>
+ 
+        {/* Action bar with Decision Duel */}
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-400 font-mono uppercase tracking-wider">
+              Eisenhower Action Matrix
+            </span>
+            <span className="text-[11px] text-slate-500 font-mono hidden sm:inline">
+              • Drag & drop to reassign urgency
+            </span>
+          </div>
+
+          <button
+            onClick={() => setShowDecisionDuel(true)}
+            className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-[#FF5A1F]/15 border border-[#FF5A1F]/30 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-sm group"
+            title="When paralyzed by choices, use tournament choice to find your #1 priority"
+          >
+            <Swords className="w-3.5 h-3.5 text-[#FF5A1F] group-hover:scale-110 transition-transform" />
+            <span>Decide For Me (Duel)</span>
+          </button>
+        </div>
 
         {/* Symmetrical Eisenhower Matrix Quadrants */}
         <div 
@@ -221,6 +244,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
           onStartFocus={(t) => {
             setFlowTask(t);
             setShowFlowCockpit(true);
+          }}
+        />
+      )}
+
+      {/* Binary Decision Duel Modal */}
+      {showDecisionDuel && (
+        <DecisionDuelModal
+          tasks={items.filter(i => (i.type === 'task' || !i.type) && !i.deletedAt && !i.isArchived)}
+          isOpen={showDecisionDuel}
+          onClose={() => setShowDecisionDuel(false)}
+          onStartFocus={(t) => {
+            setFlowTask(t);
+            setShowFlowCockpit(true);
+          }}
+          onBustResistance={(t) => {
+            setResistanceTask(t);
+            setShowResistanceBuster(true);
           }}
         />
       )}

@@ -29,6 +29,10 @@ import { FlowCockpitModal } from './focus/FlowCockpitModal';
 import { ResistanceBusterModal } from './productivity/ResistanceBusterModal';
 import { EnergyPulseWidget } from './productivity/EnergyPulseWidget';
 import { DayTimeline } from './productivity/DayTimeline';
+import { CognitiveLoadBalancer } from './productivity/CognitiveLoadBalancer';
+import { DecisionDuelModal } from './productivity/DecisionDuelModal';
+import { EveningChronicleModal } from './productivity/EveningChronicleModal';
+import { BacklogDecayModal } from './productivity/BacklogDecayModal';
 
 interface TodayViewProps {
   onEditTask: (task: Item) => void;
@@ -67,6 +71,9 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
   const [showFlowCockpit, setShowFlowCockpit] = useState(false);
   const [resistanceTask, setResistanceTask] = useState<Item | null>(null);
   const [showResistanceBuster, setShowResistanceBuster] = useState(false);
+  const [showDecisionDuel, setShowDecisionDuel] = useState(false);
+  const [showEveningChronicle, setShowEveningChronicle] = useState(false);
+  const [showDecayRadar, setShowDecayRadar] = useState(false);
 
   // Time boundaries for today
   const [{ startOfToday, endOfToday, todayFormatted }] = useState(() => {
@@ -539,6 +546,14 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
       {/* 10-Second Circadian Energy & Sentiment Pulse Tracker */}
       <EnergyPulseWidget />
 
+      {/* Dynamic Cognitive Capacity & Overload Balancer */}
+      <CognitiveLoadBalancer 
+        tasks={activeTasks}
+        onOpenDecisionDuel={() => setShowDecisionDuel(true)}
+        onOpenEveningChronicle={() => setShowEveningChronicle(true)}
+        onOpenDecayRadar={() => setShowDecayRadar(true)}
+      />
+
       {/* Circadian 24-Hour Day Timeline & Auto-Scheduler */}
       <DayTimeline 
         tasks={activeTasks}
@@ -896,6 +911,43 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
           onStartFocus={(t) => {
             setFlowTask(t);
             setShowFlowCockpit(true);
+          }}
+        />
+      )}
+
+      {/* Binary Decision Duel Modal */}
+      {showDecisionDuel && (
+        <DecisionDuelModal
+          tasks={activeTasks}
+          isOpen={showDecisionDuel}
+          onClose={() => setShowDecisionDuel(false)}
+          onStartFocus={(t) => {
+            setFlowTask(t);
+            setShowFlowCockpit(true);
+          }}
+          onBustResistance={(t) => {
+            setResistanceTask(t);
+            setShowResistanceBuster(true);
+          }}
+        />
+      )}
+
+      {/* Autonomous Evening Chronicle Modal */}
+      {showEveningChronicle && (
+        <EveningChronicleModal
+          isOpen={showEveningChronicle}
+          onClose={() => setShowEveningChronicle(false)}
+        />
+      )}
+
+      {/* Cognitive Drift & Backlog Decay Radar Modal */}
+      {showDecayRadar && (
+        <BacklogDecayModal
+          isOpen={showDecayRadar}
+          onClose={() => setShowDecayRadar(false)}
+          onBustResistance={(t) => {
+            setResistanceTask(t);
+            setShowResistanceBuster(true);
           }}
         />
       )}

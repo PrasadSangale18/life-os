@@ -61,6 +61,7 @@ export interface Item {
   habitStreak?: number;
   energyRating?: number; // 1-5 scale
   moodSentiment?: 'great' | 'good' | 'neutral' | 'tired' | 'stressed';
+  postponedCount?: number;
   
   // System
   createdAt: number;
