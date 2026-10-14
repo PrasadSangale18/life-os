@@ -20,6 +20,7 @@ import { UserProfileMenu } from './components/UserProfileMenu';
 import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { DimensionFilter } from './components/DimensionFilter';
+import { HabitsView } from './components/habits/HabitsView';
 
 const MindMap = lazy(() => import('./components/MindMap').then(m => ({ default: m.MindMap })));
 import { FONT_URL } from './theme/tokens';
@@ -247,6 +248,7 @@ export default function App() {
           pageTitle={
             activeSection === "dashboard" || activeSection === "today" ? "Dashboard" :
             activeSection === "tasks" ? "To-do list" :
+            activeSection === "habits" ? "Habits & Routines" :
             activeSection === "notes" ? "My Notes" :
             activeSection === "organizer" ? "Smart AI Organizer" :
             activeSection === "mindmap" ? "Canvas & Graph" :
@@ -396,6 +398,11 @@ export default function App() {
           {/* 4. SMART AI ORGANIZER WORKSPACE */}
           {activeSection === "organizer" && (
             <SmartOrganizer />
+          )}
+
+          {/* 5. ATOMIC HABITS & ROUTINES WORKSPACE */}
+          {activeSection === "habits" && (
+            <HabitsView />
           )}
 
           {/* PRAHARI DASHBOARD: Unified Command Center & Daily Focus */}

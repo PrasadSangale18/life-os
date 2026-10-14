@@ -8,7 +8,9 @@ import {
   Plus, 
   Clock, 
   Calendar, 
-  Lock 
+  Lock,
+  Radio,
+  Flame
 } from 'lucide-react';
 import { useStore } from '../store';
 import { QUADRANTS } from '../theme/tokens';
@@ -24,6 +26,8 @@ interface QuadrantCardProps {
   isMobile: boolean;
   onAddTaskClick: () => void;
   onEditTask: (task: Item) => void;
+  onStartFocus?: (task: Item) => void;
+  onBustResistance?: (task: Item) => void;
 }
 
 interface SortableTaskItemProps {
@@ -33,6 +37,8 @@ interface SortableTaskItemProps {
   onToggle: () => void;
   onTrash: () => void;
   onEdit: () => void;
+  onStartFocus?: (task: Item) => void;
+  onBustResistance?: (task: Item) => void;
 }
 
 const QUADRANT_STYLES: Record<QuadrantId, {
@@ -82,7 +88,16 @@ const QUADRANT_STYLES: Record<QuadrantId, {
   }
 };
 
-const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: SortableTaskItemProps) => {
+const SortableTaskItem = ({ 
+  task, 
+  qColor, 
+  now, 
+  onToggle, 
+  onTrash, 
+  onEdit,
+  onStartFocus,
+  onBustResistance
+}: SortableTaskItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
     id: task.id, 
     data: { type: 'Task', task } 
@@ -219,6 +234,26 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
         }`}
         onClick={(e) => e.stopPropagation()}
       >
+        {onStartFocus && !isDone && (
+          <button
+            type="button"
+            onClick={() => onStartFocus(task)}
+            className="w-6 h-6 rounded-md flex items-center justify-center text-[#FF5A1F] hover:bg-[#FF5A1F]/20 transition-colors"
+            title="Launch Flow Focus Cockpit"
+          >
+            <Radio size={12} strokeWidth={2} />
+          </button>
+        )}
+        {onBustResistance && !isDone && (
+          <button
+            type="button"
+            onClick={() => onBustResistance(task)}
+            className="w-6 h-6 rounded-md flex items-center justify-center text-amber-400 hover:bg-amber-400/20 transition-colors"
+            title="Bust Procrastination / 2-Min Action"
+          >
+            <Flame size={12} fill="currentColor" strokeWidth={1.5} />
+          </button>
+        )}
         <button
           type="button"
           onClick={onEdit}
@@ -240,7 +275,15 @@ const SortableTaskItem = ({ task, qColor, now, onToggle, onTrash, onEdit }: Sort
   );
 };
 
-export const QuadrantCard = ({ quadrantId, activePillar, isMobile, onAddTaskClick, onEditTask }: QuadrantCardProps) => {
+export const QuadrantCard = ({ 
+  quadrantId, 
+  activePillar, 
+  isMobile, 
+  onAddTaskClick, 
+  onEditTask,
+  onStartFocus,
+  onBustResistance
+}: QuadrantCardProps) => {
   const q = QUADRANTS.find(x => x.id === quadrantId)!;
   const items = useStore(state => state.items);
   const toggleTaskStatus = useStore(state => state.toggleTaskStatus);
@@ -370,6 +413,8 @@ export const QuadrantCard = ({ quadrantId, activePillar, isMobile, onAddTaskClic
                 onToggle={() => toggleTaskStatus(task.id)}
                 onTrash={() => trashItem(task.id)}
                 onEdit={() => onEditTask(task)}
+                onStartFocus={onStartFocus}
+                onBustResistance={onBustResistance}
               />
             ))}
           </AnimatePresence>

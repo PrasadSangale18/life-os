@@ -51,6 +51,17 @@ export interface Item {
   quoteAuthor?: string;
   quoteDoodle?: boolean;
   
+  // Productivity Extensions (Flow, Habits, Energy, Time-Blocking)
+  scheduledStart?: string; // HH:mm format e.g. "09:30"
+  resistanceReason?: 'ambiguity' | 'dread' | 'scale' | 'dependency';
+  microStarter?: string;
+  subtasksList?: Array<{ id: string; title: string; done: boolean; estMinutes?: number }>;
+  habitAnchor?: string;
+  habitHistory?: Record<string, boolean>; // YYYY-MM-DD -> boolean
+  habitStreak?: number;
+  energyRating?: number; // 1-5 scale
+  moodSentiment?: 'great' | 'good' | 'neutral' | 'tired' | 'stressed';
+  
   // System
   createdAt: number;
   updatedAt: number;
@@ -60,6 +71,25 @@ export interface Item {
   aiReviewed?: boolean;
   rawText?: string;
   importSource?: string;
+}
+
+export interface EnergyPulseEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  energy: number; // 1-5
+  mood: 'great' | 'good' | 'neutral' | 'tired' | 'stressed';
+  note?: string;
+  createdAt: number;
+}
+
+export interface TimeBlock {
+  id: string;
+  taskId?: string;
+  title: string;
+  startTime: string; // HH:mm
+  durationMinutes: number;
+  pillar?: PillarId;
+  quadrant?: QuadrantId;
 }
 
 export interface Snapshot {

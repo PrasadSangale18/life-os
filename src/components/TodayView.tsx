@@ -19,10 +19,16 @@ import {
   FastForward,
   Users,
   Zap,
-  Download
+  Download,
+  Radio,
+  Flame
 } from 'lucide-react';
 import { PromptWiseModal } from './PromptWiseModal';
 import { exportToMarkdown, triggerFileDownload } from '../utils/exportPrompt';
+import { FlowCockpitModal } from './focus/FlowCockpitModal';
+import { ResistanceBusterModal } from './productivity/ResistanceBusterModal';
+import { EnergyPulseWidget } from './productivity/EnergyPulseWidget';
+import { DayTimeline } from './productivity/DayTimeline';
 
 interface TodayViewProps {
   onEditTask: (task: Item) => void;
@@ -57,6 +63,10 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
 
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const [showTodayPromptModal, setShowTodayPromptModal] = useState(false);
+  const [flowTask, setFlowTask] = useState<Item | null>(null);
+  const [showFlowCockpit, setShowFlowCockpit] = useState(false);
+  const [resistanceTask, setResistanceTask] = useState<Item | null>(null);
+  const [showResistanceBuster, setShowResistanceBuster] = useState(false);
 
   // Time boundaries for today
   const [{ startOfToday, endOfToday, todayFormatted }] = useState(() => {
@@ -379,6 +389,35 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
 
         {/* 1-Click Execution & Action Buttons */}
         <div style={{ display: "flex", alignItems: "center", gap: 3, flexShrink: 0 }}>
+          {!isDone && (
+            <button 
+              onClick={() => {
+                setFlowTask(task);
+                setShowFlowCockpit(true);
+              }}
+              className="btn-ghost"
+              style={{ padding: "4px 8px", borderRadius: 6, fontSize: 11, color: "#FF5A1F", background: "rgba(255,90,31,0.12)", gap: 4, fontWeight: 600 }}
+              title="Launch Deep Work Flow State Cockpit"
+            >
+              <Radio size={11} color="#FF5A1F" />
+              <span>Flow</span>
+            </button>
+          )}
+
+          {!isDone && (
+            <button 
+              onClick={() => {
+                setResistanceTask(task);
+                setShowResistanceBuster(true);
+              }}
+              className="btn-ghost"
+              style={{ padding: "4px 6px", borderRadius: 6, fontSize: 11, color: "#f59e0b", background: "rgba(245,158,11,0.1)", gap: 3 }}
+              title="Bust Procrastination / Shrink to 2-Min Action"
+            >
+              <Flame size={12} color="#f59e0b" fill="#f59e0b" />
+            </button>
+          )}
+
           {task.status !== 'doing' && !isDone && (
             <button 
               onClick={() => handleStartTask(task)}
@@ -496,6 +535,19 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
           </button>
         </div>
       </div>
+
+      {/* 10-Second Circadian Energy & Sentiment Pulse Tracker */}
+      <EnergyPulseWidget />
+
+      {/* Circadian 24-Hour Day Timeline & Auto-Scheduler */}
+      <DayTimeline 
+        tasks={activeTasks}
+        onStartFocus={(t) => {
+          setFlowTask(t);
+          setShowFlowCockpit(true);
+        }}
+        onEditTask={onEditTask}
+      />
 
       {/* 3 Executive Metric Stat Cards (Matching Prahari media_1791718696966.png) */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
@@ -823,6 +875,28 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
         <PromptWiseModal 
           isOpen={showTodayPromptModal}
           onClose={() => setShowTodayPromptModal(false)}
+        />
+      )}
+
+      {/* Deep Work Flow State Cockpit */}
+      {showFlowCockpit && flowTask && (
+        <FlowCockpitModal
+          task={flowTask}
+          isOpen={showFlowCockpit}
+          onClose={() => setShowFlowCockpit(false)}
+        />
+      )}
+
+      {/* Task Resistance & Procrastination Buster */}
+      {showResistanceBuster && resistanceTask && (
+        <ResistanceBusterModal
+          task={resistanceTask}
+          isOpen={showResistanceBuster}
+          onClose={() => setShowResistanceBuster(false)}
+          onStartFocus={(t) => {
+            setFlowTask(t);
+            setShowFlowCockpit(true);
+          }}
         />
       )}
     </div>

@@ -17,6 +17,8 @@ import { MetricCard } from './common/MetricCard';
 import { selectDashboardTasks } from '../utils/selectors';
 import type { Item } from '../types';
 import { CheckSquare, Flame, TrendingUp, Target } from 'lucide-react';
+import { FlowCockpitModal } from './focus/FlowCockpitModal';
+import { ResistanceBusterModal } from './productivity/ResistanceBusterModal';
 
 interface DashboardProps {
   activePillar: PillarId;
@@ -34,6 +36,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const items = useStore(state => state.items);
   const updateItem = useStore(state => state.updateItem);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [flowTask, setFlowTask] = useState<Item | null>(null);
+  const [showFlowCockpit, setShowFlowCockpit] = useState(false);
+  const [resistanceTask, setResistanceTask] = useState<Item | null>(null);
+  const [showResistanceBuster, setShowResistanceBuster] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -174,6 +180,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 isMobile={isMobile} 
                 onAddTaskClick={() => onAddTaskClick(q.id)} 
                 onEditTask={onEditTask} 
+                onStartFocus={(t) => {
+                  setFlowTask(t);
+                  setShowFlowCockpit(true);
+                }}
+                onBustResistance={(t) => {
+                  setResistanceTask(t);
+                  setShowResistanceBuster(true);
+                }}
               />
             </SortableContext>
           ))}
@@ -188,6 +202,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         ) : null}
       </DragOverlay>
+
+      {/* Deep Work Flow State Cockpit */}
+      {showFlowCockpit && flowTask && (
+        <FlowCockpitModal
+          task={flowTask}
+          isOpen={showFlowCockpit}
+          onClose={() => setShowFlowCockpit(false)}
+        />
+      )}
+
+      {/* Task Resistance & Procrastination Buster */}
+      {showResistanceBuster && resistanceTask && (
+        <ResistanceBusterModal
+          task={resistanceTask}
+          isOpen={showResistanceBuster}
+          onClose={() => setShowResistanceBuster(false)}
+          onStartFocus={(t) => {
+            setFlowTask(t);
+            setShowFlowCockpit(true);
+          }}
+        />
+      )}
     </DndContext>
   );
 };

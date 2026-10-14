@@ -17,7 +17,9 @@ import {
   ArrowRight,
   CheckCircle2,
   Target,
-  X
+  X,
+  Sparkles,
+  Flame
 } from 'lucide-react';
 
 interface CommandPaletteProps {
@@ -71,6 +73,7 @@ export const CommandPalette = ({
     { id: 'nav-tasks', label: 'To-do list (Eisenhower Matrix)', category: 'Core Workspaces', icon: LayoutDashboard, action: () => onNavigate('tasks') },
     { id: 'nav-list', label: 'Task List View', category: 'Task Views', icon: LayoutDashboard, action: () => onNavigate('list') },
     { id: 'nav-projects', label: 'Projects & Goals', category: 'Task Views', icon: Target, action: () => onNavigate('projects') },
+    { id: 'nav-habits', label: 'Habits & Routines (Atomic Momentum)', category: 'Core Workspaces', icon: Flame, action: () => onNavigate('habits') },
     { id: 'nav-inbox', label: 'Inbox Queue', category: 'Task Views', icon: Inbox, action: () => onNavigate('inbox') },
     { id: 'nav-notes', label: 'My Notes (Rich Ideas & Notes)', category: 'Core Workspaces', icon: FileText, action: () => onNavigate('notes') },
     { id: 'nav-mindmap', label: 'Canvas & Graph (Visual Second Brain)', category: 'Core Workspaces', icon: GitBranch, action: () => onNavigate('mindmap') },
@@ -102,6 +105,40 @@ export const CommandPalette = ({
         (i.category && i.category.toLowerCase().includes(q))
       )
       .slice(0, 8);
+  }, [items, query, showPrivate]);
+
+  // Conversational Personal RAG synthesis
+  const aiSynthesis = useMemo(() => {
+    if (!query.trim() || query.length < 3) return null;
+    const qLower = query.toLowerCase();
+
+    const matched = items.filter(i => 
+      !i.deletedAt && !i.isArchived && (showPrivate || !i.isPrivate) &&
+      (i.title.toLowerCase().includes(qLower) || (i.body && i.body.toLowerCase().includes(qLower)) || (i.tags && i.tags.some(t => t.toLowerCase().includes(qLower))))
+    );
+
+    if (matched.length === 0) return null;
+
+    const taskCount = matched.filter(m => m.type === 'task').length;
+    const noteCount = matched.filter(m => m.type === 'note').length;
+    const topItems = matched.slice(0, 3);
+
+    let summaryText = `Found ${matched.length} related records across your Life OS (${taskCount} tasks, ${noteCount} notes).`;
+    if (qLower.includes('workout') || qLower.includes('fitness') || qLower.includes('gym')) {
+      summaryText = `Physical Dimension: You have ${matched.length} active records tracking workouts, health, and fitness goals.`;
+    } else if (qLower.includes('finance') || qLower.includes('money') || qLower.includes('tax')) {
+      summaryText = `Financial Dimension: Found ${matched.length} items covering financial milestones, budgets, and tax actions.`;
+    } else if (qLower.includes('habit') || qLower.includes('routine')) {
+      summaryText = `Habits Engine: Tracking your daily recurring momentum loops and streaks.`;
+    } else if (topItems[0]?.body) {
+      const excerpt = topItems[0].body.slice(0, 140).replace(/[\n\r]+/g, ' ');
+      summaryText = `Direct Knowledge Match from "${topItems[0].title}": "${excerpt}..."`;
+    }
+
+    return {
+      summary: summaryText,
+      sources: topItems
+    };
   }, [items, query, showPrivate]);
 
   const totalResults = filteredCommands.length + searchedItems.length;
@@ -201,6 +238,58 @@ export const CommandPalette = ({
 
         {/* Results List */}
         <div style={{ maxHeight: 380, overflowY: "auto", padding: "8px 6px" }}>
+          {/* Ask Life OS Copilot Synthesis */}
+          {aiSynthesis && (
+            <div 
+              style={{
+                margin: "4px 6px 12px 6px",
+                padding: "10px 12px",
+                borderRadius: 10,
+                background: "linear-gradient(135deg, rgba(255, 90, 31, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%)",
+                border: "1px solid rgba(255, 90, 31, 0.25)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 8
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--accent-hover)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                <Sparkles size={13} />
+                <span>Ask Life OS Copilot</span>
+              </div>
+              <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.45, color: "var(--text-primary)" }}>
+                {aiSynthesis.summary}
+              </p>
+              {aiSynthesis.sources.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, paddingTop: 2 }}>
+                  <span style={{ fontSize: 10, color: "var(--text-tertiary)", fontWeight: 500 }}>Linked context:</span>
+                  {aiSynthesis.sources.map(src => (
+                    <button
+                      key={src.id}
+                      onClick={() => { onEditItem(src); onClose(); }}
+                      className="btn-ghost"
+                      style={{
+                        padding: "2px 7px",
+                        borderRadius: 6,
+                        fontSize: 10.5,
+                        background: "var(--bg-surface)",
+                        border: "1px solid var(--border-subtle)",
+                        color: "var(--text-secondary)",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4
+                      }}
+                    >
+                      <span style={{ maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {src.title}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Commands */}
           {filteredCommands.length > 0 && (
             <div style={{ marginBottom: searchedItems.length > 0 ? 8 : 0 }}>
