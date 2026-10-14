@@ -312,7 +312,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   // Layout and Split View Controls
   const [showDrawer, setShowDrawer] = useState<boolean>(true);
   const [showDocPanel, setShowDocPanel] = useState<boolean>(true);
-  const [showCompanionPhone, setShowCompanionPhone] = useState<boolean>(true);
+  const [showCompanionPhone, setShowCompanionPhone] = useState<boolean>(false);
   const [activeTool, setActiveTool] = useState<'pointer' | 'text' | 'draw' | 'link' | 'attachment'>('pointer');
   
   // Canvas Viewport Pan & Zoom

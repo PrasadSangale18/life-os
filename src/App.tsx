@@ -249,7 +249,7 @@ export default function App() {
             activeSection === "tasks" ? "To-do list" :
             activeSection === "notes" ? "My Notes" :
             activeSection === "organizer" ? "Smart AI Organizer" :
-            activeSection === "mindmap" ? "Canvas & Second Brain" :
+            activeSection === "mindmap" ? "Canvas & Graph" :
             activeSection === "projects" ? "Analytics" :
             activeSection === "import" ? "CSV Bulk Import" :
             activeSection === "review" ? "Weekly Review" :

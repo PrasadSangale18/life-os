@@ -6,7 +6,12 @@ import { ToastProvider } from './components/common/Toast'
 
 // Register Service Worker
 import { registerSW } from 'virtual:pwa-register'
-registerSW({ immediate: true })
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    updateSW(true)
+  }
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
