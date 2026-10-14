@@ -66,6 +66,8 @@ export interface Item {
   energyRating?: number; // 1-5 scale
   moodSentiment?: 'great' | 'good' | 'neutral' | 'tired' | 'stressed';
   postponedCount?: number;
+  actualMinutes?: number; // Actual elapsed minutes recorded from Flow Cockpit
+  estimationMultiplier?: number; // actualMinutes / estMinutes calibration ratio
   
   // System
   createdAt: number;

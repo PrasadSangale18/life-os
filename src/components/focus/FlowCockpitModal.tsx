@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Play, 
@@ -16,7 +16,8 @@ import {
   Trash2,
   Clock,
   Check,
-  ArrowRight
+  ArrowRight,
+  BookOpen
 } from 'lucide-react';
 import type { Item } from '../../types';
 import { useStore } from '../../store';
@@ -36,7 +37,7 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
   onClose,
   onCompleteTask
 }) => {
-  const { addItem, updateItem, trashItem } = useStore();
+  const { addItem, updateItem, trashItem, items } = useStore();
 
   // Timer Configuration (Default 25 minutes)
   const [totalSeconds, setTotalSeconds] = useState<number>(25 * 60);
@@ -58,6 +59,46 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
   // Subtasks list for active task
   const [subtasks, setSubtasks] = useState<Array<{ id: string; title: string; done: boolean }>>([]);
   const [newSubtaskText, setNewSubtaskText] = useState('');
+
+  // Contextual Knowledge Co-Pilot: Auto-surface notes, principles, & ideas matching active task
+  const contextualKnowledge = useMemo(() => {
+    if (!task) return [];
+    const taskWords = (task.title || '').toLowerCase().split(/[\s,.-]+/).filter(w => w.length > 3);
+    const taskTags = new Set(task.tags || []);
+
+    const candidates = items.filter(i => 
+      !i.deletedAt && 
+      !i.isArchived && 
+      i.id !== task.id && 
+      (i.type === 'note' || i.type === 'principle' || i.type === 'knowledge' || i.type === 'idea')
+    );
+
+    const scored = candidates.map(item => {
+      let score = 0;
+      if (task.projectId && (item.projectId === task.projectId || item.id === task.projectId)) {
+        score += 10;
+      }
+      if (task.pillar && item.pillar === task.pillar) {
+        score += 2;
+      }
+      if (item.tags) {
+        for (const t of item.tags) {
+          if (taskTags.has(t)) score += 5;
+        }
+      }
+      const itemText = ((item.title || '') + ' ' + (item.body || '')).toLowerCase();
+      for (const word of taskWords) {
+        if (itemText.includes(word)) score += 3;
+      }
+      return { item, score };
+    });
+
+    return scored
+      .filter(s => s.score > 2)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map(s => s.item);
+  }, [items, task]);
 
   // Audio Context Ref
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -296,7 +337,16 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
 
   const handleCompleteActiveTask = () => {
     if (task) {
-      updateItem(task.id, { status: 'done' });
+      const elapsedSeconds = totalSeconds - remainingSeconds;
+      const elapsedMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
+      const est = task.estMinutes || 25;
+      const multiplier = Math.round((elapsedMinutes / est) * 100) / 100;
+
+      updateItem(task.id, { 
+        status: 'done',
+        actualMinutes: elapsedMinutes,
+        estimationMultiplier: multiplier
+      });
       if (onCompleteTask) onCompleteTask(task.id);
     }
     if (sessionParkedItems.length > 0) {
@@ -308,6 +358,15 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
   };
 
   const handleRequestExit = () => {
+    if (task) {
+      const elapsedSeconds = totalSeconds - remainingSeconds;
+      const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+      if (elapsedMinutes >= 1) {
+        updateItem(task.id, {
+          actualMinutes: (task.actualMinutes || 0) + elapsedMinutes
+        });
+      }
+    }
     if (sessionParkedItems.length > 0) {
       setShowSessionDebrief(true);
     } else {
@@ -652,6 +711,40 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
                   </button>
                 </form>
               </div>
+
+              {/* Contextual Knowledge Co-Pilot (Second Brain Tray) */}
+              {contextualKnowledge.length > 0 && (
+                <div className="p-3.5 rounded-2xl bg-indigo-500/[0.04] border border-indigo-500/[0.2] flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-mono text-indigo-400 font-semibold flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5" />
+                      Second Brain Intelligence ({contextualKnowledge.length})
+                    </span>
+                    <span className="text-[10px] text-slate-500">Auto-surfaced</span>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto pr-1">
+                    {contextualKnowledge.map(k => (
+                      <div
+                        key={k.id}
+                        className="p-2 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] transition-all flex flex-col gap-0.5"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-slate-200 truncate">{k.title}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase shrink-0">
+                            {k.type}
+                          </span>
+                        </div>
+                        {k.body && (
+                          <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                            {k.body}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Park Distraction (Anti-Context Switch Drawer) */}
               <div className="p-4 rounded-2xl bg-amber-500/[0.04] border border-amber-500/[0.15] flex flex-col gap-2.5">

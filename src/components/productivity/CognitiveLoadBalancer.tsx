@@ -7,7 +7,8 @@ import {
   Swords, 
   BookOpen, 
   Clock,
-  ShieldCheck
+  ShieldCheck,
+  Zap
 } from 'lucide-react';
 import type { Item } from '../../types';
 import { useStore } from '../../store';
@@ -53,14 +54,52 @@ export const CognitiveLoadBalancer: React.FC<CognitiveLoadBalancerProps> = ({
     return energyMap[energyRating] || 240;
   }, [energyRating]);
 
+  // Velocity & Time-Blindness Calibrator: Compare historical actual focus minutes vs estimates
+  const velocityTelemetry = useMemo(() => {
+    const calibratedTasks = items.filter(i => 
+      !i.deletedAt && 
+      i.type === 'task' && 
+      i.status === 'done' && 
+      i.actualMinutes && 
+      i.actualMinutes > 0
+    );
+
+    if (calibratedTasks.length === 0) {
+      return { ratio: 1.0, count: 0, hasData: false };
+    }
+
+    let sumActual = 0;
+    let sumEst = 0;
+    calibratedTasks.forEach(t => {
+      sumActual += t.actualMinutes || 25;
+      sumEst += t.estMinutes || 25;
+    });
+
+    const ratio = sumEst > 0 ? Math.round((sumActual / sumEst) * 100) / 100 : 1.0;
+    return { 
+      ratio: Math.max(0.5, Math.min(3.0, ratio)), 
+      count: calibratedTasks.length, 
+      hasData: true 
+    };
+  }, [items]);
+
+  const [applyVelocityCalibration, setApplyVelocityCalibration] = useState<boolean>(true);
+
   // Active pending tasks assigned or scheduled for today
   const pendingTasks = useMemo(() => {
     return tasks.filter(t => t.status !== 'done' && t.status !== 'dropped');
   }, [tasks]);
 
-  const totalPlannedMinutes = useMemo(() => {
+  const rawPlannedMinutes = useMemo(() => {
     return pendingTasks.reduce((acc, t) => acc + (t.estMinutes || 25), 0);
   }, [pendingTasks]);
+
+  const totalPlannedMinutes = useMemo(() => {
+    if (applyVelocityCalibration && velocityTelemetry.hasData && velocityTelemetry.ratio !== 1.0) {
+      return Math.round(rawPlannedMinutes * velocityTelemetry.ratio);
+    }
+    return rawPlannedMinutes;
+  }, [rawPlannedMinutes, applyVelocityCalibration, velocityTelemetry]);
 
   const loadPercent = Math.round((totalPlannedMinutes / (capacityMinutes || 1)) * 100);
   const isOverloaded = loadPercent > 100;
@@ -141,10 +180,27 @@ export const CognitiveLoadBalancer: React.FC<CognitiveLoadBalancerProps> = ({
               }`}>
                 {loadPercent}% Capacity ({Math.round(totalPlannedMinutes / 60 * 10) / 10}h / {Math.round(capacityMinutes / 60 * 10) / 10}h)
               </span>
+
+              {velocityTelemetry.hasData && velocityTelemetry.ratio !== 1.0 && (
+                <button
+                  onClick={() => setApplyVelocityCalibration(!applyVelocityCalibration)}
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold flex items-center gap-1 transition-all ${
+                    applyVelocityCalibration
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
+                      : 'bg-white/[0.04] text-slate-400 border border-white/[0.08] hover:text-slate-200'
+                  }`}
+                  title="Click to toggle whether capacity accounts for your historical flow focus multiplier"
+                >
+                  <Zap className="w-2.5 h-2.5 text-amber-400" />
+                  <span>{applyVelocityCalibration ? `Calibrated (${velocityTelemetry.ratio}×)` : 'Raw Estimate'}</span>
+                </button>
+              )}
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">
               {isOverloaded 
-                ? `Energy pulse ${energyRating}/5: Workload exceeds cognitive budget by ${totalPlannedMinutes - capacityMinutes} mins. Risk of burnout.`
+                ? (velocityTelemetry.hasData && velocityTelemetry.ratio > 1.0 && applyVelocityCalibration
+                    ? `Planning Fallacy Alert: Flow telemetry shows tasks take ~${velocityTelemetry.ratio}× longer. Calibrated load is ${totalPlannedMinutes}m vs ${capacityMinutes}m budget.`
+                    : `Energy pulse ${energyRating}/5: Workload exceeds cognitive budget by ${totalPlannedMinutes - capacityMinutes} mins. Risk of burnout.`)
                 : loadPercent >= 80 
                 ? `Energy pulse ${energyRating}/5: Near optimal daily throughput. Avoid adding more tasks.`
                 : `Energy pulse ${energyRating}/5: Ample cognitive capacity available for deep focus blocks.`}

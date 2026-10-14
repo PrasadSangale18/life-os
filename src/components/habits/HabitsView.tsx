@@ -15,6 +15,14 @@ import { useStore } from '../../store';
 import type { Item, PillarId } from '../../types';
 import { PILLARS } from '../../theme/tokens';
 
+const PILLAR_DEFAULTS: Record<string, string> = {
+  physical: '2-min stretch / 5 pushups',
+  mental: 'Read 1 paragraph or jot 1 thought',
+  relational: 'Send a 10s check-in text',
+  spiritual: 'Take 3 deep conscious breaths',
+  financial: 'Review balances for 60s'
+};
+
 export const HabitsView: React.FC = () => {
   const { items, addItem, updateItem, trashItem } = useStore();
 
@@ -39,6 +47,18 @@ export const HabitsView: React.FC = () => {
 
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
 
+  const yesterdayStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().split('T')[0];
+  }, []);
+
+  const dayBeforeStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 2);
+    return d.toISOString().split('T')[0];
+  }, []);
+
   // Today's Pulse for Elastic Mode detection
   const todayPulse = useMemo(() => {
     return items.find(i => 
@@ -59,6 +79,15 @@ export const HabitsView: React.FC = () => {
       (filterPillar === 'all' || i.pillar === filterPillar)
     );
   }, [items, filterPillar]);
+
+  // Adaptive Habit Elasticity Governor: Detect 2 consecutive missed days
+  const isTwoDayLapse = (h: Item) => {
+    return !h.habitHistory?.[yesterdayStr] && !h.habitHistory?.[dayBeforeStr] && (h.habitStreak || 0) > 0;
+  };
+
+  const lapsedHabitsCount = useMemo(() => {
+    return habits.filter(h => isTwoDayLapse(h)).length;
+  }, [habits, yesterdayStr, dayBeforeStr]);
 
   // Handle toggling emergency minimum completion
   const handleToggleElastic = async (habit: Item, date: string) => {
@@ -249,6 +278,24 @@ export const HabitsView: React.FC = () => {
         </div>
       )}
 
+      {/* Adaptive Habit Elasticity Governor Banner */}
+      {lapsedHabitsCount > 0 && (
+        <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs flex items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center gap-2.5">
+            <Shield className="w-5 h-5 text-cyan-400 shrink-0" />
+            <div>
+              <span className="font-bold">Habit Elasticity Governor Engaged ({lapsedHabitsCount} at risk)</span>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                2-day lapses detected. Don't let guilt break your identity loop — emergency 2-minute baselines are activated to shield your streaks today!
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0">
+            Anti-Failure Circuit Breaker
+          </span>
+        </div>
+      )}
+
       {/* Pillar Filter Bar */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         <button
@@ -338,15 +385,18 @@ export const HabitsView: React.FC = () => {
                             <Shield className="w-3 h-3 text-amber-400" /> Elastic Save
                           </span>
                         )}
+                        {isTwoDayLapse(habit) && (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1 animate-pulse">
+                            <Shield className="w-3 h-3 text-cyan-400" /> Circuit Breaker (2d lapse)
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">
                         <span className="text-slate-500">Anchor:</span>
                         <span className="text-slate-300 italic">"{habit.habitAnchor || 'Daily routine'}"</span>
-                        {habit.elasticMinimum && (
-                          <span className="text-amber-400/90 text-[11px] font-mono">
-                            • Fallback: {habit.elasticMinimum}
-                          </span>
-                        )}
+                        <span className="text-amber-400/90 text-[11px] font-mono">
+                          • Fallback: {habit.elasticMinimum || PILLAR_DEFAULTS[habit.pillar || 'mental'] || '2-min Baseline'}
+                        </span>
                       </p>
                     </div>
                   </div>
@@ -358,12 +408,14 @@ export const HabitsView: React.FC = () => {
                       className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-semibold transition-all flex items-center gap-1.5 ${
                         habit.elasticDays?.[todayStr]
                           ? 'bg-amber-500 text-slate-950 font-bold shadow-[0_0_10px_rgba(245,158,11,0.5)]'
+                          : isTwoDayLapse(habit)
+                          ? 'bg-cyan-500/15 text-cyan-300 hover:bg-cyan-500/25 border border-cyan-500/40 font-bold shadow-[0_0_8px_rgba(6,182,212,0.25)]'
                           : 'bg-white/[0.03] text-slate-400 hover:text-amber-300 hover:bg-amber-500/10 border border-white/[0.08]'
                       }`}
-                      title="Mark 2-minute Emergency Minimum to protect streak"
+                      title={isTwoDayLapse(habit) ? "2-day lapse detected! Complete 2-min baseline to shield streak" : "Mark 2-minute Emergency Minimum to protect streak"}
                     >
-                      <Zap className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{habit.elasticMinimum || '2-min Baseline'}</span>
+                      <Zap className={`w-3.5 h-3.5 ${isTwoDayLapse(habit) ? 'text-cyan-400' : 'text-amber-400'}`} />
+                      <span>{habit.elasticMinimum || PILLAR_DEFAULTS[habit.pillar || 'mental'] || '2-min Baseline'}</span>
                     </button>
 
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
