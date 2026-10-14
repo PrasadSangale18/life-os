@@ -6,10 +6,11 @@ import { ToastProvider } from './components/common/Toast'
 
 // Register Service Worker
 import { registerSW } from 'virtual:pwa-register'
-const updateSW = registerSW({
+let updateSW: ((reloadPage?: boolean) => Promise<void>) | undefined
+updateSW = registerSW({
   immediate: true,
   onNeedRefresh() {
-    updateSW(true)
+    updateSW?.(true)
   }
 })
 
