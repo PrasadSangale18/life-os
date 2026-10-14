@@ -46,7 +46,7 @@ export default function App() {
 
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeSection, setActiveSection] = useState<string>("today");
+  const [activeSection, setActiveSection] = useState<string>("dashboard");
   const [taskViewMode, setTaskViewMode] = useState<'matrix' | 'list' | 'projects' | 'inbox'>('matrix');
   const [activePillar, setActivePillar] = useState<PillarId>("physical");
   const [showUtilitiesModal, setShowUtilitiesModal] = useState(false);
@@ -245,7 +245,7 @@ export default function App() {
             setShowTaskModal(true);
           }}
           pageTitle={
-            activeSection === "today" ? "Shift Radar" :
+            activeSection === "dashboard" || activeSection === "today" ? "Dashboard" :
             activeSection === "tasks" ? "To-do list" :
             activeSection === "notes" ? "My Notes" :
             activeSection === "organizer" ? "Smart AI Organizer" :
@@ -398,18 +398,8 @@ export default function App() {
             <SmartOrganizer />
           )}
 
-          {/* DASHBOARD OVERVIEW */}
-          {activeSection === "dashboard" && (
-            <Dashboard 
-              activePillar={activePillar} 
-              isMobile={isMobile} 
-              onAddTaskClick={(q) => { setEditingTask(undefined); setCaptureTarget('quadrant'); setNewTaskQuadrant(q); setShowTaskModal(true); }}
-              onEditTask={(task) => { setEditingTask(task); setShowTaskModal(true); }}
-            />
-          )}
-
-          {/* UTILITY VIEWS (accessible from Utilities dialog or User Menu) */}
-          {activeSection === "today" && (
+          {/* PRAHARI DASHBOARD: Unified Command Center & Daily Focus */}
+          {(activeSection === "dashboard" || activeSection === "today") && (
             <TodayView 
               onEditTask={(task) => { setEditingTask(task); setShowTaskModal(true); }}
               onAddTask={() => { setEditingTask(undefined); setCaptureTarget('inbox'); setNewTaskQuadrant('do'); setShowTaskModal(true); }}

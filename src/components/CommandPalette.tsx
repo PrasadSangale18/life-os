@@ -3,7 +3,6 @@ import { useStore } from '../store';
 import type { Item } from '../types';
 import { 
   Search, 
-  Calendar, 
   LayoutDashboard, 
   Inbox, 
   FileText, 
@@ -68,6 +67,7 @@ export const CommandPalette = ({
 
   // Static commands
   const commands = useMemo(() => [
+    { id: 'nav-dashboard', label: 'Dashboard (Command Center)', category: 'Core Workspaces', icon: LayoutDashboard, action: () => onNavigate('dashboard') },
     { id: 'nav-tasks', label: 'To-do list (Eisenhower Matrix)', category: 'Core Workspaces', icon: LayoutDashboard, action: () => onNavigate('tasks') },
     { id: 'nav-list', label: 'Task List View', category: 'Task Views', icon: LayoutDashboard, action: () => onNavigate('list') },
     { id: 'nav-projects', label: 'Projects & Goals', category: 'Task Views', icon: Target, action: () => onNavigate('projects') },
@@ -75,7 +75,6 @@ export const CommandPalette = ({
     { id: 'nav-notes', label: 'My Notes (Rich Ideas & Notes)', category: 'Core Workspaces', icon: FileText, action: () => onNavigate('notes') },
     { id: 'nav-mindmap', label: 'Canvas & Graph (Visual Second Brain)', category: 'Core Workspaces', icon: GitBranch, action: () => onNavigate('mindmap') },
     { id: 'nav-organizer', label: 'Smart AI Organizer (Bulk Intake)', category: 'Core Workspaces', icon: Wand2, action: () => onNavigate('organizer') },
-    { id: 'nav-today', label: 'Today’s Focus', category: 'Utilities & Review', icon: Calendar, action: () => onNavigate('today') },
     { id: 'nav-review', label: 'Weekly Review', category: 'Utilities & Review', icon: CalendarCheck, action: () => onNavigate('review') },
     { id: 'nav-settings', label: 'Settings & Storage', category: 'Utilities & Review', icon: Settings, action: () => onNavigate('settings') },
     { id: 'nav-trash', label: 'Trash & Archive', category: 'Utilities & Review', icon: Trash2, action: () => onNavigate('trash') },

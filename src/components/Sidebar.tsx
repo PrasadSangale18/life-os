@@ -5,7 +5,6 @@ import {
   Layers, 
   ChevronLeft, 
   LayoutDashboard, 
-  Radar, 
   Compass 
 } from 'lucide-react';
 
@@ -31,10 +30,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   totalCount = 0
 }) => {
   const navItems = [
-    { id: 'today', name: 'Shift Radar', icon: Radar, subtitle: 'Daily focus & routines' },
+    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, subtitle: 'Command center & daily focus' },
     { id: 'tasks', name: 'To-do list', icon: CheckSquare, subtitle: 'Tasks, matrix & execution' },
     { id: 'notes', name: 'My Notes', icon: BookOpen, subtitle: 'Rich thoughts & ideas', count: notesCount > 0 ? notesCount : undefined },
-    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, subtitle: 'Pillars & metric radar' },
     { id: 'mindmap', name: 'Canvas & Graph', icon: Compass, subtitle: 'Visual second brain' },
     { id: 'organizer', name: 'Smart AI Organizer', icon: Sparkles, subtitle: 'Bulk input & auto-sorting', badge: 'BULK AI' },
   ];
