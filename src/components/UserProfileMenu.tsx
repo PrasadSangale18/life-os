@@ -42,31 +42,36 @@ export const UserProfileMenu = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const initials = user.name
-    .split(' ')
-    .map(n => n.charAt(0))
-    .join('')
-    .substring(0, 2)
-    .toUpperCase() || 'PR';
+  const getInitials = (name?: string) => {
+    if (!name) return 'PR';
+    const trimmed = name.trim();
+    const parts = trimmed.split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return trimmed.slice(0, 2).toUpperCase() || 'PR';
+  };
+
+  const initials = getInitials(user?.name);
 
   return (
     <div style={{ position: "relative" }} ref={dropdownRef}>
-      {/* Profile Pill matching Prahari Header (media_1791828447029.png) */}
+      {/* Profile Button matching Prahari Header (media_1791975292645.png) */}
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
-        className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#131924] border border-slate-200 dark:border-white/10 shadow-xs hover:border-slate-300 dark:hover:border-white/20 transition-all cursor-pointer outline-none"
+        className="flex items-center gap-2 p-0.5 xl:px-2.5 xl:py-1 rounded-xl bg-transparent xl:bg-white xl:dark:bg-[#131924] xl:border xl:border-slate-200 xl:dark:border-white/10 shadow-none xl:shadow-xs hover:border-slate-300 dark:hover:border-white/20 transition-all cursor-pointer outline-none"
         title="Account & System Profile"
       >
-        {/* Avatar Badge matching Prahari */}
+        {/* Avatar Badge matching Prahari (media_1791975292645.png) */}
         <div 
-          className="w-7 h-7 rounded-lg bg-[#DBEAFE] dark:bg-blue-950/80 border border-[#BFDBFE] dark:border-blue-800 text-[#1D4ED8] dark:text-blue-300 text-xs font-bold flex items-center justify-center shrink-0"
+          className="w-9 h-9 rounded-xl bg-[#DBEAFE] dark:bg-blue-950/80 border border-[#BFDBFE] dark:border-blue-800 text-[#1D4ED8] dark:text-blue-300 text-xs font-bold flex items-center justify-center shrink-0 shadow-xs hover:scale-105 transition-transform"
         >
           {initials}
         </div>
 
-        {/* Name & Subtitle */}
-        <div className="flex flex-col text-left leading-tight">
+        {/* Name & Subtitle - Desktop Only */}
+        <div className="hidden xl:flex flex-col text-left leading-tight pr-1">
           <span className="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">
             {user.name || "Prasad Sangale"}
           </span>
@@ -75,7 +80,7 @@ export const UserProfileMenu = ({
           </span>
         </div>
 
-        <ChevronDown size={12} className="text-slate-400 ml-1" />
+        <ChevronDown size={12} className="hidden xl:block text-slate-400" />
       </button>
 
       {/* Floating Dropdown Card matching Prahari (media_1791717165817.png) */}

@@ -42,9 +42,16 @@ export const TopBar: React.FC<TopBarProps> = ({
   user,
   children
 }) => {
-  const initials = user?.name
-    ? user.name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()
-    : 'PO';
+  const getInitials = (name?: string) => {
+    if (!name) return 'PR';
+    const trimmed = name.trim();
+    const parts = trimmed.split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return trimmed.slice(0, 2).toUpperCase() || 'PR';
+  };
+  const initials = getInitials(user?.name);
 
   return (
     <header className="h-16 border-b border-slate-200/80 dark:border-dark-border bg-white/80 dark:bg-dark-sidebar/80 backdrop-blur-md px-4 md:px-6 flex items-center justify-between sticky top-0 z-40 transition-colors">
@@ -122,23 +129,22 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           type="button"
           onClick={onToggleDarkMode}
-          className="p-2 rounded-xl bg-slate-100 dark:bg-[#131924] border border-slate-200 dark:border-dark-border text-slate-500 hover:text-orange-500 transition-colors cursor-pointer"
+          className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#131924] border border-slate-200 dark:border-dark-border text-slate-500 hover:text-orange-500 transition-colors cursor-pointer flex items-center justify-center shrink-0"
           title="Toggle Theme"
         >
           {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
         </button>
 
-
-        {/* Quick Capture Button (Prahari Vivid Orange) */}
+        {/* Quick Capture Button (Prahari Vivid Orange - Hidden on mobile) */}
         {onQuickCapture && (
           <button
             type="button"
             onClick={onQuickCapture}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FF5A1F] hover:bg-[#EA580C] text-white text-xs font-bold shadow-[0_2px_12px_rgba(255,90,31,0.35)] transition-all active:scale-95 cursor-pointer"
+            className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FF5A1F] hover:bg-[#EA580C] text-white text-xs font-bold shadow-[0_2px_12px_rgba(255,90,31,0.35)] transition-all active:scale-95 cursor-pointer shrink-0"
           >
             <Plus className="w-3.5 h-3.5 stroke-[3]" />
             <span>Capture</span>
-            <kbd className="hidden sm:inline-block bg-black/20 text-white/90 text-[10px] font-mono px-1 rounded ml-1">C</kbd>
+            <kbd className="hidden md:inline-block bg-black/20 text-white/90 text-[10px] font-mono px-1 rounded ml-1">C</kbd>
           </button>
         )}
 
@@ -146,8 +152,8 @@ export const TopBar: React.FC<TopBarProps> = ({
         {children ? (
           children
         ) : (
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-dark-border">
-            <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50 flex items-center justify-center font-bold text-xs shadow-xs">
+          <div className="flex items-center gap-2 pl-1">
+            <div className="w-9 h-9 rounded-xl bg-[#DBEAFE] dark:bg-blue-950/80 border border-[#BFDBFE] dark:border-blue-800 text-[#1D4ED8] dark:text-blue-300 flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
               {initials}
             </div>
             <div className="hidden xl:block text-left">
