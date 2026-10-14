@@ -17,7 +17,6 @@ import { LoginScreen } from './components/LoginScreen';
 import { ExportModal } from './components/ExportModal';
 import { PromptWiseModal } from './components/PromptWiseModal';
 import { UserProfileMenu } from './components/UserProfileMenu';
-import { SitesView } from './components/SitesView';
 import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { DimensionFilter } from './components/DimensionFilter';
@@ -246,7 +245,6 @@ export default function App() {
             setShowTaskModal(true);
           }}
           pageTitle={
-            activeSection === "sites" ? "Sites" :
             activeSection === "today" ? "Shift Radar" :
             activeSection === "tasks" ? "To-do list" :
             activeSection === "notes" ? "My Notes" :
@@ -398,11 +396,6 @@ export default function App() {
           {/* 4. SMART AI ORGANIZER WORKSPACE */}
           {activeSection === "organizer" && (
             <SmartOrganizer />
-          )}
-
-          {/* PRAHARI SITES WORKSPACE matching media_1791828447029.png */}
-          {activeSection === "sites" && (
-            <SitesView />
           )}
 
           {/* DASHBOARD OVERVIEW */}

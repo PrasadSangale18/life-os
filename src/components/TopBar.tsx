@@ -1,6 +1,5 @@
 import React from 'react';
 import { 
-  Building2, 
   Sun, 
   Moon, 
   Search, 
@@ -118,19 +117,6 @@ export const TopBar: React.FC<TopBarProps> = ({
           <span>Search</span>
           <kbd className="text-[10px] font-mono bg-white dark:bg-slate-800 px-1 rounded border border-slate-200 dark:border-slate-700">⌘K</kbd>
         </button>
-
-        {/* Prahari Enterprise Badge */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-[#131924] border border-slate-200/90 dark:border-dark-border shadow-xs">
-          <Building2 className="w-3.5 h-3.5 text-amber-500" />
-          <div className="text-left leading-none">
-            <span className="text-[10px] font-black tracking-wider text-slate-800 dark:text-slate-200 block uppercase">
-              LIFE OS ENTERPRISE
-            </span>
-            <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">
-              Autonomous Intelligence
-            </span>
-          </div>
-        </div>
 
         {/* Theme Toggle */}
         <button

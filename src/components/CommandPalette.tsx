@@ -18,8 +18,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Target,
-  X,
-  Building2
+  X
 } from 'lucide-react';
 
 interface CommandPaletteProps {
@@ -74,8 +73,7 @@ export const CommandPalette = ({
     { id: 'nav-projects', label: 'Projects & Goals', category: 'Task Views', icon: Target, action: () => onNavigate('projects') },
     { id: 'nav-inbox', label: 'Inbox Queue', category: 'Task Views', icon: Inbox, action: () => onNavigate('inbox') },
     { id: 'nav-notes', label: 'My Notes (Rich Ideas & Notes)', category: 'Core Workspaces', icon: FileText, action: () => onNavigate('notes') },
-    { id: 'nav-sites', label: 'Sites (Operational SIF Density Rankings)', category: 'Core Workspaces', icon: Building2, action: () => onNavigate('sites') },
-    { id: 'nav-mindmap', label: 'Mind Map & Graph (Visual Second Brain)', category: 'Core Workspaces', icon: GitBranch, action: () => onNavigate('mindmap') },
+    { id: 'nav-mindmap', label: 'Canvas & Graph (Visual Second Brain)', category: 'Core Workspaces', icon: GitBranch, action: () => onNavigate('mindmap') },
     { id: 'nav-organizer', label: 'Smart AI Organizer (Bulk Intake)', category: 'Core Workspaces', icon: Wand2, action: () => onNavigate('organizer') },
     { id: 'nav-today', label: 'Today’s Focus', category: 'Utilities & Review', icon: Calendar, action: () => onNavigate('today') },
     { id: 'nav-review', label: 'Weekly Review', category: 'Utilities & Review', icon: CalendarCheck, action: () => onNavigate('review') },
