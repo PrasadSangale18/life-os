@@ -13,63 +13,19 @@ export const ThemeToggle = ({ theme, onToggle, className = '' }: ThemeToggleProp
     <button
       type="button"
       onClick={onToggle}
-      className={`btn-ghost ${className}`}
+      className={`group w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#131924] border border-slate-200 dark:border-dark-border text-slate-500 hover:text-amber-400 dark:text-slate-400 dark:hover:text-amber-400 hover:border-amber-400/40 dark:hover:border-amber-400/40 hover:bg-amber-400/10 dark:hover:bg-amber-400/10 hover:shadow-[0_0_14px_rgba(245,158,11,0.22)] transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0 ${className}`}
       aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-      title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-      style={{
-        width: 32,
-        height: 32,
-        padding: 0,
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 8,
-        border: isDark 
-          ? "1px solid rgba(245, 158, 11, 0.25)" 
-          : "1px solid var(--border-default)",
-        background: isDark 
-          ? "rgba(245, 158, 11, 0.08)" 
-          : "var(--bg-surface)",
-        color: isDark ? "#f59e0b" : "var(--text-secondary)",
-        cursor: "pointer",
-        transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
-        boxShadow: isDark 
-          ? "0 0 12px rgba(245, 158, 11, 0.15)" 
-          : "none",
-        flexShrink: 0
-      }}
-      onMouseEnter={e => {
-        if (isDark) {
-          e.currentTarget.style.background = "rgba(245, 158, 11, 0.15)";
-          e.currentTarget.style.borderColor = "rgba(245, 158, 11, 0.4)";
-        } else {
-          e.currentTarget.style.borderColor = "var(--border-strong)";
-          e.currentTarget.style.color = "var(--text-primary)";
-        }
-      }}
-      onMouseLeave={e => {
-        if (isDark) {
-          e.currentTarget.style.background = "rgba(245, 158, 11, 0.08)";
-          e.currentTarget.style.borderColor = "rgba(245, 158, 11, 0.25)";
-        } else {
-          e.currentTarget.style.borderColor = "var(--border-default)";
-          e.currentTarget.style.color = "var(--text-secondary)";
-        }
-      }}
+      title="Toggle Theme"
     >
       {isDark ? (
-        // Precision Sun icon matching media_1791716803328.png
         <Sun 
-          size={16} 
-          color="#f59e0b" 
-          strokeWidth={2.2} 
+          className="w-4 h-4 text-slate-400 dark:text-slate-400 transition-all duration-200 group-hover:text-amber-400 group-hover:scale-110 group-hover:rotate-12 group-hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" 
+          strokeWidth={2}
         />
       ) : (
-        // Clean Moon icon matching Prahari dashboard
         <Moon 
-          size={16} 
-          color="var(--text-secondary)" 
-          strokeWidth={1.8} 
+          className="w-4 h-4 text-slate-500 transition-all duration-200 group-hover:text-indigo-600 group-hover:scale-110 group-hover:drop-shadow-[0_0_6px_rgba(99,102,241,0.5)]" 
+          strokeWidth={2}
         />
       )}
     </button>
