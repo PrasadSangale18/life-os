@@ -59,6 +59,10 @@ export interface Item {
   habitAnchor?: string;
   habitHistory?: Record<string, boolean>; // YYYY-MM-DD -> boolean
   habitStreak?: number;
+  elasticMinimum?: string; // 2-minute emergency baseline e.g. "Read 1 page"
+  elasticDays?: Record<string, boolean>; // YYYY-MM-DD -> boolean (saved via emergency minimum)
+  targetDate?: number; // Target completion date for Goals
+  isMvpPruned?: boolean;
   energyRating?: number; // 1-5 scale
   moodSentiment?: 'great' | 'good' | 'neutral' | 'tired' | 'stressed';
   postponedCount?: number;

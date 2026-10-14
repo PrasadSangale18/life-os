@@ -15,7 +15,12 @@ import {
   Brain, 
   Heart, 
   Star, 
-  TrendingUp
+  TrendingUp,
+  AlertTriangle,
+  Clock,
+  Scissors,
+  RefreshCw,
+  Calendar
 } from 'lucide-react';
 
 interface ProjectsViewProps {
@@ -42,6 +47,7 @@ export const ProjectsView = ({
   const items = useStore(state => state.items);
   const showPrivate = useStore(state => state.showPrivate);
   const toggleTaskStatus = useStore(state => state.toggleTaskStatus);
+  const updateItem = useStore(state => state.updateItem);
   const trashItem = useStore(state => state.trashItem);
 
   const [filterPillar, setFilterPillar] = useState<string>('all');
@@ -89,6 +95,81 @@ export const ProjectsView = ({
     return map;
   }, [projects, tasks]);
 
+  // Rolling 14-day daily velocity (minutes/day) per pillar
+  const rollingVelocityByPillar = useMemo(() => {
+    const fourteenDaysAgo = Date.now() - 14 * 86400 * 1000;
+    const completedTasks = items.filter(i => 
+      !i.deletedAt && 
+      i.type === 'task' && 
+      i.status === 'done' && 
+      (i.updatedAt >= fourteenDaysAgo)
+    );
+
+    const minutesMap: Record<string, number> = {
+      physical: 0,
+      mental: 0,
+      relational: 0,
+      spiritual: 0,
+      financial: 0
+    };
+
+    completedTasks.forEach(t => {
+      const p = t.pillar || 'mental';
+      const mins = t.estMinutes || 30;
+      minutesMap[p] = (minutesMap[p] || 0) + mins;
+    });
+
+    const dailyVelocity: Record<string, number> = {};
+    Object.keys(minutesMap).forEach(p => {
+      const daily = Math.round(minutesMap[p] / 14);
+      dailyVelocity[p] = Math.max(daily, 45); // default fallback pace 45 mins/day
+    });
+
+    return dailyVelocity;
+  }, [items]);
+
+  const handlePruneToMvp = (projectId: string, projectTasks: Item[]) => {
+    const pending = projectTasks.filter(t => t.status !== 'done');
+    if (pending.length === 0) return;
+
+    let prunedCount = 0;
+    pending.forEach(t => {
+      if (t.quadrant && t.quadrant !== 'do') {
+        updateItem(t.id, { 
+          status: 'waiting', 
+          priority: 'low',
+          isMvpPruned: true,
+          body: (t.body || '') + '\n[Pruned to MVP Phase 2]' 
+        });
+        prunedCount++;
+      }
+    });
+
+    if (prunedCount === 0 && pending.length > 2) {
+      const toPrune = pending.slice(Math.ceil(pending.length * 0.6));
+      toPrune.forEach(t => {
+        updateItem(t.id, { 
+          status: 'waiting', 
+          priority: 'low',
+          isMvpPruned: true,
+          body: (t.body || '') + '\n[Pruned to MVP Phase 2]' 
+        });
+        prunedCount++;
+      });
+    }
+
+    updateItem(projectId, { isMvpPruned: true });
+  };
+
+  const handleRecalibrateDate = (projectId: string, daysNeeded: number) => {
+    const realisticDate = Date.now() + daysNeeded * 86400 * 1000;
+    updateItem(projectId, { 
+      targetDate: realisticDate, 
+      deadline: realisticDate,
+      isMvpPruned: false 
+    });
+  };
+
   // Overall metric stats
   const stats = useMemo(() => {
     let totalTasksInProjects = 0;
@@ -104,14 +185,18 @@ export const ProjectsView = ({
       ? Math.round((completedTasksInProjects / totalTasksInProjects) * 100) 
       : 0;
 
+    const velocities = Object.values(rollingVelocityByPillar);
+    const avgVelocity = Math.round(velocities.reduce((a, b) => a + b, 0) / velocities.length);
+
     return {
       totalGoals: goals.length,
       totalProjects: projects.length,
       totalTasks: totalTasksInProjects,
       completedTasks: completedTasksInProjects,
-      completionRate
+      completionRate,
+      avgVelocity
     };
-  }, [goals, projects, tasksByProject]);
+  }, [goals, projects, tasksByProject, rollingVelocityByPillar]);
 
   // Filtered lists
   const filteredProjects = useMemo(() => {
@@ -173,7 +258,7 @@ export const ProjectsView = ({
       </div>
 
       {/* Progress & Overview summary cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
         <div className="glass-panel" style={{ padding: "14px 16px" }}>
           <div className="text-meta" style={{ fontSize: 11 }}>Active Goals</div>
           <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", marginTop: 4 }}>
@@ -193,6 +278,15 @@ export const ProjectsView = ({
           </div>
           <div className="text-meta" style={{ fontSize: 10, color: "var(--text-tertiary)", marginTop: 2 }}>
             {stats.completedTasks} of {stats.totalTasks} child tasks done
+          </div>
+        </div>
+        <div className="glass-panel" style={{ padding: "14px 16px" }}>
+          <div className="text-meta" style={{ fontSize: 11 }}>Rolling Daily Velocity</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: "#f59e0b", marginTop: 4 }}>
+            {stats.avgVelocity}m/d
+          </div>
+          <div className="text-meta" style={{ fontSize: 10, color: "var(--text-tertiary)", marginTop: 2 }}>
+            14-day historical completion pace
           </div>
         </div>
       </div>
@@ -277,10 +371,21 @@ export const ProjectsView = ({
         {filteredProjects.map(project => {
           const pTasks = tasksByProject.get(project.id) || [];
           const doneTasks = pTasks.filter(t => t.status === 'done').length;
+          const pendingTasks = pTasks.filter(t => t.status !== 'done');
           const pct = pTasks.length > 0 ? Math.round((doneTasks / pTasks.length) * 100) : 0;
           const isExpanded = !!expandedProjects[project.id];
           const pillarObj = PILLARS.find(p => p.id === project.pillar);
           const parentGoal = goals.find(g => g.id === project.goalId || g.title === project.goalId);
+
+          // Velocity & Feasibility Metrics
+          const totalPendingMinutes = pendingTasks.reduce((sum, t) => sum + (t.estMinutes || 40), 0);
+          const pillarVelocity = rollingVelocityByPillar[project.pillar || 'mental'] || 45;
+          const daysNeeded = Math.max(1, Math.ceil(totalPendingMinutes / pillarVelocity));
+          const targetTimestamp = project.targetDate || project.deadline;
+          const daysRemaining = targetTimestamp 
+            ? Math.ceil((targetTimestamp - Date.now()) / (86400 * 1000)) 
+            : null;
+          const isOverdueOrUnrealistic = daysRemaining !== null && daysRemaining < daysNeeded && pendingTasks.length > 0;
 
           return (
             <div 
@@ -340,6 +445,54 @@ export const ProjectsView = ({
                           <span>Goal: {parentGoal.title}</span>
                         </span>
                       )}
+                      {project.isMvpPruned && (
+                        <span 
+                          className="ui-pill" 
+                          style={{ 
+                            fontSize: 10, 
+                            color: "#10b981", 
+                            borderColor: "rgba(16,185,129,0.3)", 
+                            background: "rgba(16,185,129,0.08)",
+                            gap: 4
+                          }}
+                        >
+                          <Scissors size={10} />
+                          <span>MVP Streamlined</span>
+                        </span>
+                      )}
+                      {targetTimestamp ? (
+                        <span 
+                          className="ui-pill" 
+                          style={{ 
+                            fontSize: 10, 
+                            color: isOverdueOrUnrealistic ? "#f59e0b" : "var(--text-secondary)", 
+                            borderColor: isOverdueOrUnrealistic ? "rgba(245,158,11,0.4)" : "var(--border-subtle)", 
+                            background: isOverdueOrUnrealistic ? "rgba(245,158,11,0.1)" : "transparent", 
+                            gap: 4 
+                          }}
+                        >
+                          <Calendar size={10} />
+                          <span>Due: {new Date(targetTimestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                        </span>
+                      ) : (
+                        <button 
+                          onClick={() => handleRecalibrateDate(project.id, daysNeeded)}
+                          className="btn-ghost" 
+                          style={{ 
+                            fontSize: 10, 
+                            padding: "2px 6px", 
+                            borderRadius: 4, 
+                            color: "var(--text-tertiary)", 
+                            gap: 4, 
+                            display: "inline-flex", 
+                            alignItems: "center" 
+                          }} 
+                          title="Click to set realistic target date based on velocity"
+                        >
+                          <Clock size={10} />
+                          <span>Pace ETA: ~{daysNeeded}d</span>
+                        </button>
+                      )}
                     </div>
                     {project.body && (
                       <div className="text-secondary" style={{ fontSize: 13, marginTop: 4, lineHeight: 1.45 }}>
@@ -368,6 +521,73 @@ export const ProjectsView = ({
                   </button>
                 </div>
               </div>
+
+              {/* Velocity Reality Check Alert */}
+              {isOverdueOrUnrealistic && (
+                <div 
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    background: "rgba(245, 158, 11, 0.08)",
+                    border: "1px solid rgba(245, 158, 11, 0.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: 10
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 240 }}>
+                    <AlertTriangle size={15} color="#f59e0b" style={{ flexShrink: 0 }} />
+                    <div style={{ fontSize: 12 }}>
+                      <span style={{ fontWeight: 600, color: "#f59e0b" }}>Velocity Reality Check: </span>
+                      <span style={{ color: "var(--text-secondary)" }}>
+                        {Math.round(totalPendingMinutes / 60)}h remaining work requires ~{daysNeeded}d at your {pillarVelocity}m/d pace in {pillarObj?.name || 'this pillar'}, but only {daysRemaining !== null ? (daysRemaining <= 0 ? '0d (Overdue)' : `${daysRemaining}d`) : 'N/A'} left.
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <button
+                      onClick={() => handlePruneToMvp(project.id, pTasks)}
+                      className="btn-ghost"
+                      style={{
+                        fontSize: 11,
+                        padding: "4px 8px",
+                        borderRadius: 6,
+                        background: "rgba(245, 158, 11, 0.15)",
+                        color: "#f59e0b",
+                        border: "1px solid rgba(245, 158, 11, 0.3)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4
+                      }}
+                      title="Defer secondary tasks to Phase 2 to meet deadline"
+                    >
+                      <Scissors size={11} />
+                      <span>Prune to MVP</span>
+                    </button>
+                    <button
+                      onClick={() => handleRecalibrateDate(project.id, daysNeeded)}
+                      className="btn-ghost"
+                      style={{
+                        fontSize: 11,
+                        padding: "4px 8px",
+                        borderRadius: 6,
+                        background: "rgba(59, 130, 246, 0.15)",
+                        color: "#60a5fa",
+                        border: "1px solid rgba(59, 130, 246, 0.3)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4
+                      }}
+                      title="Extend target date based on real historical speed"
+                    >
+                      <RefreshCw size={11} />
+                      <span>Recalibrate Date</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Progress bar */}
               <div>

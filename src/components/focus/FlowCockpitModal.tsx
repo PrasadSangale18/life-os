@@ -12,7 +12,11 @@ import {
   Radio, 
   Headphones, 
   Send,
-  Sparkles
+  Sparkles,
+  Trash2,
+  Clock,
+  Check,
+  ArrowRight
 } from 'lucide-react';
 import type { Item } from '../../types';
 import { useStore } from '../../store';
@@ -32,7 +36,7 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
   onClose,
   onCompleteTask
 }) => {
-  const { addItem, updateItem } = useStore();
+  const { addItem, updateItem, trashItem } = useStore();
 
   // Timer Configuration (Default 25 minutes)
   const [totalSeconds, setTotalSeconds] = useState<number>(25 * 60);
@@ -45,9 +49,11 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
   const [volume, setVolume] = useState<number>(0.35);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   
-  // Quick Distraction Parking
+  // Quick Distraction Parking & Post-Session Debrief
   const [distractionText, setDistractionText] = useState<string>('');
   const [parkedFeedback, setParkedFeedback] = useState<string | null>(null);
+  const [sessionParkedItems, setSessionParkedItems] = useState<Array<{ id: string; title: string }>>([]);
+  const [showSessionDebrief, setShowSessionDebrief] = useState(false);
 
   // Subtasks list for active task
   const [subtasks, setSubtasks] = useState<Array<{ id: string; title: string; done: boolean }>>([]);
@@ -273,13 +279,16 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
     e.preventDefault();
     if (!distractionText.trim()) return;
     const text = distractionText.trim();
-    await addItem({
+    const createdId = await addItem({
       title: text,
       type: 'task',
       quadrant: 'decide',
       pillar: task?.pillar || 'mental',
       body: `Captured during deep work session on "${task?.title || 'Flow Focus'}"`
     });
+    if (createdId) {
+      setSessionParkedItems(prev => [...prev, { id: createdId, title: text }]);
+    }
     setDistractionText('');
     setParkedFeedback(`Parked to inbox: "${text}"`);
     setTimeout(() => setParkedFeedback(null), 3000);
@@ -290,6 +299,39 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
       updateItem(task.id, { status: 'done' });
       if (onCompleteTask) onCompleteTask(task.id);
     }
+    if (sessionParkedItems.length > 0) {
+      setShowSessionDebrief(true);
+    } else {
+      stopAmbientAudio();
+      onClose();
+    }
+  };
+
+  const handleRequestExit = () => {
+    if (sessionParkedItems.length > 0) {
+      setShowSessionDebrief(true);
+    } else {
+      stopAmbientAudio();
+      onClose();
+    }
+  };
+
+  const handleDiscardParked = (id: string) => {
+    trashItem(id);
+    setSessionParkedItems(prev => prev.filter(i => i.id !== id));
+  };
+
+  const handleScheduleParked = (id: string) => {
+    updateItem(id, { scheduledStart: '15:30', deadline: Date.now() });
+    setSessionParkedItems(prev => prev.filter(i => i.id !== id));
+  };
+
+  const handleKeepParked = (id: string) => {
+    setSessionParkedItems(prev => prev.filter(i => i.id !== id));
+  };
+
+  const handleFinishDebrief = () => {
+    setShowSessionDebrief(false);
     stopAmbientAudio();
     onClose();
   };
@@ -324,10 +366,7 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => {
-                  stopAmbientAudio();
-                  onClose();
-                }}
+                onClick={handleRequestExit}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.08] transition-all"
                 title="Exit Cockpit"
               >
@@ -336,8 +375,108 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
             </div>
           </div>
 
-          {/* Main Grid: Left Timer & Audio | Right Checklist & Distraction Parking */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 sm:p-8">
+          {showSessionDebrief ? (
+            /* Post-Flow Distraction Triage Debrief View */
+            <div className="p-6 sm:p-8 flex flex-col gap-6">
+              <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      Post-Flow Distraction Triage
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono">
+                        {sessionParkedItems.length} Remaining
+                      </span>
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Review thoughts captured during focus before returning to your day.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleFinishDebrief}
+                  className="px-4 py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] text-xs font-semibold text-slate-200 transition-all flex items-center gap-2"
+                >
+                  <span>Skip Remaining</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {sessionParkedItems.length === 0 ? (
+                <div className="py-12 flex flex-col items-center justify-center text-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <Check className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-white">All Distractions Processed!</h4>
+                  <p className="text-xs text-slate-400 max-w-sm">
+                    Your focus buffer is clear. No loose ends left behind.
+                  </p>
+                  <button
+                    onClick={handleFinishDebrief}
+                    className="mt-2 px-6 py-2.5 rounded-xl bg-[#FF5A1F] hover:bg-[#EA580C] text-white font-medium text-xs shadow-lg shadow-[#FF5A1F]/20 transition-all"
+                  >
+                    Complete Deep Work Session
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3 max-h-[50vh] overflow-y-auto pr-1">
+                  {sessionParkedItems.map(item => (
+                    <div
+                      key={item.id}
+                      className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-white/[0.15] transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                        <span className="text-sm font-medium text-slate-200">{item.title}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => handleDiscardParked(item.id)}
+                          className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium flex items-center gap-1.5 transition-all"
+                          title="Discard impulsive thought"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Brain Fog</span>
+                        </button>
+                        <button
+                          onClick={() => handleScheduleParked(item.id)}
+                          className="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-medium flex items-center gap-1.5 transition-all"
+                          title="Schedule for later today"
+                        >
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>Do Today</span>
+                        </button>
+                        <button
+                          onClick={() => handleKeepParked(item.id)}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-medium flex items-center gap-1.5 transition-all"
+                          title="Keep safe in backlog"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Keep in Inbox</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {sessionParkedItems.length > 0 && (
+                <div className="pt-4 border-t border-white/[0.08] flex items-center justify-end">
+                  <button
+                    onClick={handleFinishDebrief}
+                    className="px-6 py-2.5 rounded-xl bg-[#FF5A1F] hover:bg-[#EA580C] text-white font-semibold text-xs shadow-lg shadow-[#FF5A1F]/25 flex items-center gap-2 transition-all"
+                  >
+                    <span>Done Triaging</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Main Grid: Left Timer & Audio | Right Checklist & Distraction Parking */
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 sm:p-8">
             
             {/* Left Column: Focus Dial & Ambient Sound Synth (7 cols) */}
             <div className="md:col-span-7 flex flex-col items-center justify-center gap-6 p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
@@ -561,7 +700,8 @@ export const FlowCockpitModal: React.FC<FlowCockpitModalProps> = ({
             </div>
 
           </div>
-        </motion.div>
+        )}
+      </motion.div>
       </div>
     </AnimatePresence>
   );

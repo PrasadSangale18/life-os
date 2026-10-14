@@ -7,7 +7,9 @@ import {
   Target, 
   TrendingUp, 
   Trash2, 
-  X 
+  X,
+  Shield,
+  Zap
 } from 'lucide-react';
 import { useStore } from '../../store';
 import type { Item, PillarId } from '../../types';
@@ -20,6 +22,7 @@ export const HabitsView: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newAnchor, setNewAnchor] = useState('');
+  const [newElasticMin, setNewElasticMin] = useState('');
   const [newPillar, setNewPillar] = useState<PillarId>('physical');
 
   // Generate last 60 days list for the heatmap
@@ -36,6 +39,17 @@ export const HabitsView: React.FC = () => {
 
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
 
+  // Today's Pulse for Elastic Mode detection
+  const todayPulse = useMemo(() => {
+    return items.find(i => 
+      i.type === 'journal' && 
+      !i.deletedAt && 
+      i.title === `Pulse-${todayStr}`
+    );
+  }, [items, todayStr]);
+
+  const isLowEnergy = (todayPulse?.energyRating || 3) <= 2;
+
   // Filter habit items from Dexie
   const habits = useMemo(() => {
     return items.filter(i => 
@@ -46,14 +60,54 @@ export const HabitsView: React.FC = () => {
     );
   }, [items, filterPillar]);
 
+  // Handle toggling emergency minimum completion
+  const handleToggleElastic = async (habit: Item, date: string) => {
+    const history = { ...(habit.habitHistory || {}) };
+    const elasticMap = { ...(habit.elasticDays || {}) };
+    const currentlyDone = Boolean(history[date]);
+
+    if (currentlyDone && elasticMap[date]) {
+      delete history[date];
+      delete elasticMap[date];
+    } else {
+      history[date] = true;
+      elasticMap[date] = true;
+    }
+
+    let streak = 0;
+    const checkDate = new Date();
+    while (true) {
+      const dStr = checkDate.toISOString().split('T')[0];
+      if (history[dStr]) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        if (dStr === todayStr) {
+          checkDate.setDate(checkDate.getDate() - 1);
+          continue;
+        }
+        break;
+      }
+    }
+
+    await updateItem(habit.id, {
+      habitHistory: history,
+      elasticDays: elasticMap,
+      habitStreak: streak
+    });
+  };
+
   // Handle toggling habit completion for a specific date
   const handleToggleHabit = async (habit: Item, date: string) => {
     const history = { ...(habit.habitHistory || {}) };
+    const elasticMap = { ...(habit.elasticDays || {}) };
     const currentlyDone = Boolean(history[date]);
     if (currentlyDone) {
       delete history[date];
+      delete elasticMap[date];
     } else {
       history[date] = true;
+      delete elasticMap[date]; // Normal full completion
     }
 
     // Calculate current streak backwards from today
@@ -89,12 +143,15 @@ export const HabitsView: React.FC = () => {
       type: 'habit',
       pillar: newPillar,
       habitAnchor: newAnchor.trim() || 'Daily Routine',
+      elasticMinimum: newElasticMin.trim() || undefined,
       habitStreak: 0,
-      habitHistory: {}
+      habitHistory: {},
+      elasticDays: {}
     });
 
     setNewTitle('');
     setNewAnchor('');
+    setNewElasticMin('');
     setShowAddModal(false);
   };
 
@@ -173,6 +230,24 @@ export const HabitsView: React.FC = () => {
           <TrendingUp className="w-6 h-6 text-[#FF5A1F] opacity-80" />
         </div>
       </div>
+
+      {/* Elastic Mode Alert Banner */}
+      {isLowEnergy && (
+        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center gap-2.5">
+            <Shield className="w-5 h-5 text-amber-400 shrink-0" />
+            <div>
+              <span className="font-bold">Elastic Habit Mode Active</span>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                Your energy rating is {todayPulse?.energyRating || 2}/5. 2-minute emergency minimums are unlocked to protect your streaks without burning out!
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+            Shield Engaged
+          </span>
+        </div>
+      )}
 
       {/* Pillar Filter Bar */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -258,15 +333,39 @@ export const HabitsView: React.FC = () => {
                             {pillarObj.name}
                           </span>
                         )}
+                        {habit.elasticDays?.[todayStr] && (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                            <Shield className="w-3 h-3 text-amber-400" /> Elastic Save
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                      <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">
                         <span className="text-slate-500">Anchor:</span>
                         <span className="text-slate-300 italic">"{habit.habitAnchor || 'Daily routine'}"</span>
+                        {habit.elasticMinimum && (
+                          <span className="text-amber-400/90 text-[11px] font-mono">
+                            • Fallback: {habit.elasticMinimum}
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 self-end sm:self-auto">
+                  <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-auto flex-wrap">
+                    {/* Emergency Minimum Action Button */}
+                    <button
+                      onClick={() => handleToggleElastic(habit, todayStr)}
+                      className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-semibold transition-all flex items-center gap-1.5 ${
+                        habit.elasticDays?.[todayStr]
+                          ? 'bg-amber-500 text-slate-950 font-bold shadow-[0_0_10px_rgba(245,158,11,0.5)]'
+                          : 'bg-white/[0.03] text-slate-400 hover:text-amber-300 hover:bg-amber-500/10 border border-white/[0.08]'
+                      }`}
+                      title="Mark 2-minute Emergency Minimum to protect streak"
+                    >
+                      <Zap className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{habit.elasticMinimum || '2-min Baseline'}</span>
+                    </button>
+
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
                       <Flame className="w-4 h-4 fill-current" />
                       <span className="text-xs font-mono font-bold">{habit.habitStreak || 0}d streak</span>
@@ -286,12 +385,13 @@ export const HabitsView: React.FC = () => {
                 <div className="pt-2 border-t border-white/[0.04]">
                   <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-1.5">
                     <span>60-Day Momentum Heatmap</span>
-                    <span>{isDoneToday ? 'Completed Today ✓' : 'Pending Today'}</span>
+                    <span>{isDoneToday ? (habit.elasticDays?.[todayStr] ? 'Saved with Minimum 🛡️' : 'Completed Today ✓') : 'Pending Today'}</span>
                   </div>
 
                   <div className="flex items-center gap-1 overflow-x-auto pb-1">
                     {dateRange.map(dStr => {
                       const done = Boolean(habit.habitHistory?.[dStr]);
+                      const isElastic = Boolean(habit.elasticDays?.[dStr]);
                       const isToday = dStr === todayStr;
 
                       return (
@@ -299,13 +399,15 @@ export const HabitsView: React.FC = () => {
                           key={dStr}
                           onClick={() => handleToggleHabit(habit, dStr)}
                           className={`w-3.5 h-3.5 rounded-sm transition-all cursor-pointer ${
-                            done
+                            done && isElastic
+                              ? 'bg-amber-400 hover:bg-amber-300 border border-amber-300 shadow-[0_0_6px_rgba(245,158,11,0.6)]'
+                              : done
                               ? 'bg-emerald-500 hover:bg-emerald-400 shadow-[0_0_4px_rgba(16,185,129,0.5)]'
                               : isToday
                               ? 'bg-white/[0.12] border border-amber-400 hover:bg-white/[0.2]'
                               : 'bg-white/[0.04] hover:bg-white/[0.1]'
                           }`}
-                          title={`${dStr}: ${done ? 'Completed' : 'Missed'}`}
+                          title={`${dStr}: ${done ? (isElastic ? `Saved via Emergency Minimum (${habit.elasticMinimum || '2-min baseline'})` : 'Completed Full Habit') : 'Missed'}`}
                         />
                       );
                     })}
@@ -352,6 +454,19 @@ export const HabitsView: React.FC = () => {
                   onChange={e => setNewAnchor(e.target.value)}
                   placeholder="e.g. After I pour morning coffee..."
                   className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5A1F] mt-1"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-mono text-amber-400 uppercase flex items-center gap-1">
+                  <Shield className="w-3 h-3" /> Emergency Minimum (2-min Fallback)
+                </label>
+                <input
+                  type="text"
+                  value={newElasticMin}
+                  onChange={e => setNewElasticMin(e.target.value)}
+                  placeholder="e.g. 5 pushups or 1 page reading"
+                  className="w-full bg-white/[0.04] border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 mt-1"
                 />
               </div>
 
