@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
-import type { Item } from '../../types';
+import type { Item, NoteColorId } from '../../types';
 import { 
   Image as ImageIcon, 
   Mic, 
   Share2, 
   Pin, 
   Tag, 
-  Send, 
   Copy, 
   Lock, 
-  Unlock,
+  Unlock, 
   Trash2, 
-  Check,
-  ChevronRight
+  Check, 
+  ChevronRight,
+  Palette
 } from 'lucide-react';
+import { NOTE_COLOR_PALETTES } from './noteTheme';
 
 interface NoteOptionsSheetProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
   onDuplicateNote
 }) => {
   const [showLabelPicker, setShowLabelPicker] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
   if (!isOpen) return null;
@@ -56,7 +58,6 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
   };
 
   const handleAddSampleImage = () => {
-    // Books shelf sample photo from media_1791719347257.png
     onUpdateNote({ 
       thumbnailUrl: note.thumbnailUrl 
         ? undefined 
@@ -96,8 +97,8 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(15, 23, 42, 0.45)',
-          backdropFilter: 'blur(3px)',
+          background: 'rgba(0, 0, 0, 0.55)',
+          backdropFilter: 'blur(4px)',
           pointerEvents: 'auto',
           animation: 'fadeIn 0.2s ease'
         }}
@@ -107,11 +108,13 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
       <div
         style={{
           position: 'relative',
-          background: '#ffffff',
+          background: 'var(--bg-surface)',
           borderTopLeftRadius: 28,
           borderTopRightRadius: 28,
           padding: '16px 20px 24px',
-          boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.18)',
+          boxShadow: 'var(--shadow-modal)',
+          border: '1px solid var(--border-default)',
+          borderBottom: 'none',
           zIndex: 111,
           pointerEvents: 'auto',
           maxWidth: 480,
@@ -125,7 +128,7 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
       >
         {/* Drag handle */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 2 }}>
-          <div style={{ width: 44, height: 4.5, borderRadius: 9999, background: '#e2e8f0' }} />
+          <div style={{ width: 44, height: 4.5, borderRadius: 9999, background: 'var(--border-strong)' }} />
         </div>
 
         {/* Top 3 Quick Action Tiles [Image, Voice, Share] */}
@@ -140,21 +143,19 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               gap: 8,
-              padding: '16px 10px',
+              padding: '14px 10px',
               borderRadius: 16,
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-subtle)',
               cursor: 'pointer',
-              color: '#0f172a',
+              color: 'var(--text-primary)',
               transition: 'all 0.12s ease'
             }}
-            onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-            onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
           >
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.06)' }}>
-              <ImageIcon size={18} color="#0f172a" />
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-sm)' }}>
+              <ImageIcon size={18} color="var(--text-primary)" />
             </div>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>{note.thumbnailUrl ? 'Remove Img' : 'Image'}</span>
+            <span style={{ fontSize: 12.5, fontWeight: 600 }}>{note.thumbnailUrl ? 'Remove Img' : 'Image'}</span>
           </button>
 
           {/* Tile 2: Voice */}
@@ -167,21 +168,19 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               gap: 8,
-              padding: '16px 10px',
+              padding: '14px 10px',
               borderRadius: 16,
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-subtle)',
               cursor: 'pointer',
-              color: '#0f172a',
+              color: 'var(--text-primary)',
               transition: 'all 0.12s ease'
             }}
-            onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-            onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
           >
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.06)' }}>
-              <Mic size={18} color={note.hasAudio ? '#ea580c' : '#0f172a'} />
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-sm)' }}>
+              <Mic size={18} color={note.hasAudio ? 'var(--accent-warm)' : 'var(--text-primary)'} />
             </div>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>{note.hasAudio ? 'Remove Voice' : 'Voice'}</span>
+            <span style={{ fontSize: 12.5, fontWeight: 600 }}>{note.hasAudio ? 'Remove Voice' : 'Voice'}</span>
           </button>
 
           {/* Tile 3: Share */}
@@ -194,26 +193,82 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               gap: 8,
-              padding: '16px 10px',
+              padding: '14px 10px',
               borderRadius: 16,
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-subtle)',
               cursor: 'pointer',
-              color: '#0f172a',
+              color: 'var(--text-primary)',
               transition: 'all 0.12s ease'
             }}
-            onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-            onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
           >
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.06)' }}>
-              {copiedLink ? <Check size={18} color="#16a34a" /> : <Share2 size={18} color="#0f172a" />}
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-sm)' }}>
+              {copiedLink ? <Check size={18} color="#10b981" /> : <Share2 size={18} color="var(--text-primary)" />}
             </div>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>{copiedLink ? 'Copied!' : 'Share'}</span>
+            <span style={{ fontSize: 12.5, fontWeight: 600 }}>{copiedLink ? 'Copied!' : 'Share'}</span>
           </button>
         </div>
 
         {/* Action List */}
-        <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid #f1f5f9', borderRadius: 16, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid var(--border-subtle)', borderRadius: 16, overflow: 'hidden' }}>
+          {/* Keep Color Picker Option */}
+          <div style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+            <button
+              type="button"
+              onClick={() => setShowColorPicker(prev => !prev)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                background: 'var(--bg-surface)',
+                border: 'none',
+                width: '100%',
+                cursor: 'pointer',
+                color: 'var(--text-primary)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Palette size={16} color="var(--accent-primary)" />
+                <span style={{ fontSize: 13.5, fontWeight: 550 }}>Note Color (Google Keep)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontSize: 12.5 }}>
+                <span>{NOTE_COLOR_PALETTES[note.color || 'default']?.label || 'Default'}</span>
+                <ChevronRight size={14} />
+              </div>
+            </button>
+            {showColorPicker && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px 12px', background: 'var(--bg-surface-elevated)', overflowX: 'auto' }}>
+                {Object.values(NOTE_COLOR_PALETTES).map(p => {
+                  const isSelected = (note.color || 'default') === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        onUpdateNote({ color: p.id === 'default' ? undefined : (p.id as NoteColorId) });
+                        setShowColorPicker(false);
+                      }}
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: '50%',
+                        background: p.dotColor,
+                        border: isSelected ? '2.5px solid var(--text-primary)' : '1px solid var(--border-default)',
+                        cursor: 'pointer',
+                        transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                        boxShadow: isSelected ? '0 2px 6px rgba(0,0,0,0.2)' : 'none',
+                        transition: 'transform 0.12s ease',
+                        flexShrink: 0
+                      }}
+                      title={p.label}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Pin */}
           <button
             type="button"
@@ -223,44 +278,22 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 14px',
-              background: '#ffffff',
+              background: 'var(--bg-surface)',
               border: 'none',
-              borderBottom: '1px solid #f1f5f9',
+              borderBottom: '1px solid var(--border-subtle)',
               cursor: 'pointer',
-              color: '#0f172a'
+              color: 'var(--text-primary)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Pin size={16} color={note.pinned ? '#ea580c' : '#64748b'} fill={note.pinned ? '#ea580c' : 'none'} />
-              <span style={{ fontSize: 14, fontWeight: 550 }}>{note.pinned ? 'Unpin Note' : 'Pin Note'}</span>
+              <Pin size={16} color={note.pinned ? 'var(--accent-warm)' : 'var(--text-secondary)'} fill={note.pinned ? 'var(--accent-warm)' : 'none'} />
+              <span style={{ fontSize: 13.5, fontWeight: 550 }}>{note.pinned ? 'Unpin Note' : 'Pin to Top'}</span>
             </div>
+            {note.pinned && <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-warm)' }}>PINNED</span>}
           </button>
 
-          {/* Add Thumbnail */}
-          <button
-            type="button"
-            onClick={handleAddSampleImage}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 14px',
-              background: '#ffffff',
-              border: 'none',
-              borderBottom: '1px solid #f1f5f9',
-              cursor: 'pointer',
-              color: '#0f172a'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <ImageIcon size={16} color="#64748b" />
-              <span style={{ fontSize: 14, fontWeight: 550 }}>Add Thumbnail</span>
-            </div>
-            {note.thumbnailUrl && <Check size={14} color="#16a34a" />}
-          </button>
-
-          {/* Label */}
-          <div style={{ borderBottom: '1px solid #f1f5f9' }}>
+          {/* Category / Label */}
+          <div style={{ borderBottom: '1px solid var(--border-subtle)' }}>
             <button
               type="button"
               onClick={() => setShowLabelPicker(prev => !prev)}
@@ -269,24 +302,24 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '12px 14px',
-                background: '#ffffff',
+                background: 'var(--bg-surface)',
                 border: 'none',
                 width: '100%',
                 cursor: 'pointer',
-                color: '#0f172a'
+                color: 'var(--text-primary)'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Tag size={16} color="#64748b" />
-                <span style={{ fontSize: 14, fontWeight: 550 }}>Label</span>
+                <Tag size={16} color="var(--text-secondary)" />
+                <span style={{ fontSize: 13.5, fontWeight: 550 }}>Category Label</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748b', fontSize: 13 }}>
-                <span>{note.category || 'Work'}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontSize: 12.5 }}>
+                <span>{note.category || 'Personal'}</span>
                 <ChevronRight size={14} />
               </div>
             </button>
             {showLabelPicker && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '6px 14px 12px', background: '#f8fafc' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '8px 14px 12px', background: 'var(--bg-surface-elevated)' }}>
                 {LABELS.map(lbl => (
                   <button
                     key={lbl}
@@ -296,11 +329,11 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
                       setShowLabelPicker(false);
                     }}
                     style={{
-                      padding: '4px 10px',
+                      padding: '4px 12px',
                       borderRadius: 9999,
-                      background: note.category === lbl ? '#0f172a' : '#ffffff',
-                      color: note.category === lbl ? '#ffffff' : '#334155',
-                      border: '1px solid #cbd5e1',
+                      background: note.category === lbl ? 'var(--accent-primary)' : 'var(--bg-surface)',
+                      color: note.category === lbl ? 'var(--bg-base)' : 'var(--text-primary)',
+                      border: '1px solid var(--border-subtle)',
                       fontSize: 12,
                       fontWeight: 600,
                       cursor: 'pointer'
@@ -312,29 +345,6 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
               </div>
             )}
           </div>
-
-          {/* Send */}
-          <button
-            type="button"
-            onClick={handleShare}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 14px',
-              background: '#ffffff',
-              border: 'none',
-              borderBottom: '1px solid #f1f5f9',
-              cursor: 'pointer',
-              color: '#0f172a'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Send size={16} color="#64748b" />
-              <span style={{ fontSize: 14, fontWeight: 550 }}>Send</span>
-            </div>
-            <ChevronRight size={14} color="#64748b" />
-          </button>
 
           {/* Make a Copy */}
           <button
@@ -348,16 +358,16 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 14px',
-              background: '#ffffff',
+              background: 'var(--bg-surface)',
               border: 'none',
-              borderBottom: '1px solid #f1f5f9',
+              borderBottom: '1px solid var(--border-subtle)',
               cursor: 'pointer',
-              color: '#0f172a'
+              color: 'var(--text-primary)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Copy size={16} color="#64748b" />
-              <span style={{ fontSize: 14, fontWeight: 550 }}>Make a Copy</span>
+              <Copy size={16} color="var(--text-secondary)" />
+              <span style={{ fontSize: 13.5, fontWeight: 550 }}>Make a Duplicate</span>
             </div>
           </button>
 
@@ -370,16 +380,16 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 14px',
-              background: '#ffffff',
+              background: 'var(--bg-surface)',
               border: 'none',
-              borderBottom: '1px solid #f1f5f9',
+              borderBottom: '1px solid var(--border-subtle)',
               cursor: 'pointer',
-              color: '#0f172a'
+              color: 'var(--text-primary)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {note.isLocked ? <Unlock size={16} color="#64748b" /> : <Lock size={16} color="#64748b" />}
-              <span style={{ fontSize: 14, fontWeight: 550 }}>{note.isLocked ? 'Unlock Note' : 'Lock Note'}</span>
+              {note.isLocked ? <Unlock size={16} color="var(--text-secondary)" /> : <Lock size={16} color="var(--text-secondary)" />}
+              <span style={{ fontSize: 13.5, fontWeight: 550 }}>{note.isLocked ? 'Unlock Note' : 'Lock Note (Private)'}</span>
             </div>
           </button>
 
@@ -395,7 +405,7 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 14px',
-              background: '#ffffff',
+              background: 'var(--bg-surface)',
               border: 'none',
               cursor: 'pointer',
               color: '#ef4444'
@@ -403,14 +413,14 @@ export const NoteOptionsSheet: React.FC<NoteOptionsSheetProps> = ({
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <Trash2 size={16} color="#ef4444" />
-              <span style={{ fontSize: 14, fontWeight: 600 }}>Delete Note</span>
+              <span style={{ fontSize: 13.5, fontWeight: 600 }}>Delete Note</span>
             </div>
           </button>
         </div>
 
         {/* Footer: Last edited info */}
-        <div style={{ textAlign: 'center', fontSize: 11, color: '#94a3b8', letterSpacing: '-0.01em', marginTop: -4 }}>
-          Last Edited {lastEditedFormatted} By Harrison..
+        <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '-0.01em', marginTop: -4 }}>
+          Last modified on {lastEditedFormatted}
         </div>
       </div>
     </div>

@@ -62,8 +62,8 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(15, 23, 42, 0.45)',
-          backdropFilter: 'blur(3px)',
+          background: 'rgba(0, 0, 0, 0.55)',
+          backdropFilter: 'blur(4px)',
           pointerEvents: 'auto',
           animation: 'fadeIn 0.2s ease'
         }}
@@ -73,11 +73,13 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
       <div
         style={{
           position: 'relative',
-          background: '#ffffff',
+          background: 'var(--bg-surface)',
           borderTopLeftRadius: 28,
           borderTopRightRadius: 28,
           padding: '16px 20px 28px',
-          boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.16)',
+          boxShadow: 'var(--shadow-modal)',
+          border: '1px solid var(--border-default)',
+          borderBottom: 'none',
           zIndex: 101,
           pointerEvents: 'auto',
           maxWidth: 480,
@@ -91,7 +93,7 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
       >
         {/* Top Drag Handle Indicator */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 2 }}>
-          <div style={{ width: 44, height: 4.5, borderRadius: 9999, background: '#e2e8f0' }} />
+          <div style={{ width: 44, height: 4.5, borderRadius: 9999, background: 'var(--border-strong)' }} />
         </div>
 
         {/* Row 1: Highlighter & Color Swatches */}
@@ -100,16 +102,16 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'space-between',
-            padding: '4px 6px',
-            background: '#f8fafc',
+            padding: '6px 8px',
+            background: 'var(--bg-surface-elevated)',
             borderRadius: 14,
-            border: '1px solid #eef2f6'
+            border: '1px solid var(--border-subtle)'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', borderRadius: 8, background: '#ffffff', border: '1px solid #e2e8f0' }}>
-              <PenTool size={14} color="#64748b" />
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>Highlighter</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
+              <PenTool size={14} color="var(--text-secondary)" />
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Highlighter</span>
             </div>
 
             {/* Color Swatch Dots */}
@@ -129,7 +131,7 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
                       height: 22,
                       borderRadius: '50%',
                       background: c.hex,
-                      border: isSelected ? `2.5px solid ${c.border}` : '1px solid rgba(0,0,0,0.1)',
+                      border: isSelected ? `2.5px solid ${c.border}` : '1px solid var(--border-subtle)',
                       cursor: 'pointer',
                       transform: isSelected ? 'scale(1.15)' : 'scale(1)',
                       boxShadow: isSelected ? '0 2px 6px rgba(0,0,0,0.15)' : 'none',
@@ -150,13 +152,13 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
                 width: 32,
                 height: 32,
                 borderRadius: 8,
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                color: '#64748b'
+                color: 'var(--text-secondary)'
               }}
               title="Add Comment"
             >
@@ -169,13 +171,13 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
                 width: 32,
                 height: 32,
                 borderRadius: 8,
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                color: '#64748b'
+                color: 'var(--text-secondary)'
               }}
               title="Insert Callout Card"
             >
@@ -188,13 +190,13 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
                 width: 32,
                 height: 32,
                 borderRadius: 8,
-                background: '#f1f5f9',
-                border: 'none',
+                background: 'var(--bg-surface-elevated)',
+                border: '1px solid var(--border-subtle)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                color: '#64748b'
+                color: 'var(--text-secondary)'
               }}
               title="Close"
             >
@@ -220,9 +222,9 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
               style={{
                 height: 42,
                 borderRadius: 10,
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                color: '#0f172a',
+                background: 'var(--bg-surface-elevated)',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--text-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -231,8 +233,6 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
                 cursor: 'pointer',
                 transition: 'all 0.12s ease'
               }}
-              onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'}
-              onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
             >
               {btn.isText ? (
                 <span style={{ 
@@ -266,38 +266,31 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
               style={{
                 height: 42,
                 borderRadius: 10,
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                color: '#0f172a',
+                background: 'var(--bg-surface-elevated)',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--text-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 13,
+                fontSize: btn.label ? 13 : 15,
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.12s ease'
               }}
-              onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'}
-              onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
             >
-              {btn.label ? (
-                <span>{btn.label}</span>
-              ) : btn.Icon ? (
-                <btn.Icon size={16} />
-              ) : null}
+              {btn.label ? <span>{btn.label}</span> : btn.Icon ? <btn.Icon size={16} /> : null}
             </button>
           ))}
         </div>
 
-        {/* Row 4: Alignment & Extra [Left, Center, Right, Justify, Table, Quote “ ”] */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8 }}>
+        {/* Row 4: Alignment & Table [AlignLeft, AlignCenter, AlignRight, AlignJustify, Table] */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
           {[
             { id: 'alignLeft', Icon: AlignLeft },
             { id: 'alignCenter', Icon: AlignCenter },
             { id: 'alignRight', Icon: AlignRight },
             { id: 'alignJustify', Icon: AlignJustify },
             { id: 'table', Icon: Table },
-            { id: 'quotes', label: '“ ”' },
           ].map(btn => (
             <button
               key={btn.id}
@@ -306,25 +299,17 @@ export const FormattingTraySheet: React.FC<FormattingTraySheetProps> = ({
               style={{
                 height: 42,
                 borderRadius: 10,
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                color: '#0f172a',
+                background: 'var(--bg-surface-elevated)',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--text-secondary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 15,
-                fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.12s ease'
               }}
-              onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'}
-              onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
             >
-              {btn.label ? (
-                <span>{btn.label}</span>
-              ) : btn.Icon ? (
-                <btn.Icon size={16} />
-              ) : null}
+              <btn.Icon size={16} />
             </button>
           ))}
         </div>

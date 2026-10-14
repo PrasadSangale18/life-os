@@ -66,7 +66,7 @@ export const AudioMemoPlayer: React.FC<AudioMemoPlayerProps> = ({
     }
   };
 
-  // 36 bars representing the audio waveform in media_1791719363063.png
+  // 36 bars representing the audio waveform telemetry
   const waveformHeights = [
     8, 14, 20, 12, 18, 24, 16, 28, 22, 14, 26, 32, 
     20, 16, 28, 30, 18, 24, 12, 22, 28, 16, 20, 14, 
@@ -82,11 +82,12 @@ export const AudioMemoPlayer: React.FC<AudioMemoPlayerProps> = ({
         gap: 12,
         padding: '10px 16px',
         borderRadius: 9999,
-        background: '#191d28',
-        color: '#ffffff',
+        background: 'var(--bg-surface-elevated)',
+        border: '1px solid var(--border-default)',
+        color: 'var(--text-primary)',
         width: '100%',
-        maxWidth: 420,
-        boxShadow: '0 4px 14px rgba(0, 0, 0, 0.18)',
+        maxWidth: 440,
+        boxShadow: 'var(--shadow-sm)',
         userSelect: 'none'
       }}
     >
@@ -99,8 +100,8 @@ export const AudioMemoPlayer: React.FC<AudioMemoPlayerProps> = ({
           width: 34,
           height: 34,
           borderRadius: '50%',
-          background: '#ffffff',
-          color: '#0f172a',
+          background: 'var(--accent-primary)',
+          color: 'var(--bg-base)',
           border: 'none',
           display: 'flex',
           alignItems: 'center',
@@ -108,15 +109,15 @@ export const AudioMemoPlayer: React.FC<AudioMemoPlayerProps> = ({
           cursor: 'pointer',
           flexShrink: 0,
           transition: 'transform 0.12s ease',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+          boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
         }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
+        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.08)'}
         onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
       >
         {isPlaying ? (
-          <Pause size={14} fill="#0f172a" />
+          <Pause size={14} fill="currentColor" />
         ) : (
-          <Play size={14} fill="#0f172a" style={{ marginLeft: 2 }} />
+          <Play size={14} fill="currentColor" style={{ marginLeft: 2 }} />
         )}
       </button>
 
@@ -148,7 +149,7 @@ export const AudioMemoPlayer: React.FC<AudioMemoPlayerProps> = ({
                 width: 2.5,
                 height: isPlaying ? Math.max(6, Math.min(28, h + (Math.sin(progress + i) * 6))) : h * 0.7,
                 borderRadius: 2,
-                background: isPassed ? '#ffffff' : 'rgba(255, 255, 255, 0.3)',
+                background: isPassed ? 'var(--accent-primary)' : 'var(--border-strong)',
                 transition: isPlaying ? 'height 0.15s ease' : 'background 0.15s ease'
               }}
             />
@@ -162,7 +163,7 @@ export const AudioMemoPlayer: React.FC<AudioMemoPlayerProps> = ({
           fontFamily: 'var(--font-mono, monospace)',
           fontSize: 12,
           fontWeight: 600,
-          color: 'rgba(255, 255, 255, 0.85)',
+          color: 'var(--text-secondary)',
           letterSpacing: '0.04em',
           flexShrink: 0
         }}

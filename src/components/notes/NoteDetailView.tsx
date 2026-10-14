@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import type { Item } from '../../types';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import type { Item, NoteColorId } from '../../types';
+import { useStore } from '../../store';
 import { 
   ChevronLeft, 
   Check, 
@@ -10,16 +11,23 @@ import {
   Type, 
   SlidersHorizontal,
   Plus, 
-  Sparkles,
-  MessageSquare,
-  Bold,
-  RotateCcw,
-  Crop,
-  Trash2
+  Pin, 
+  Palette, 
+  FileText, 
+  Link2, 
+  Heading1, 
+  Heading2, 
+  List, 
+  Quote, 
+  Code, 
+  Minus, 
+  X 
 } from 'lucide-react';
 import { AudioMemoPlayer } from './AudioMemoPlayer';
 import { FormattingTraySheet } from './FormattingTraySheet';
 import { NoteOptionsSheet } from './NoteOptionsSheet';
+import { NOTE_COLOR_PALETTES } from './noteTheme';
+import { calculateBacklinks, findItemByTitle } from '../../utils/wikiLinks';
 
 interface NoteDetailViewProps {
   note: Item;
@@ -28,6 +36,7 @@ interface NoteDetailViewProps {
   onDeleteNote: () => void;
   onDuplicateNote: () => void;
   onOpenDraw: () => void;
+  onOpenNoteById?: (id: string) => void;
 }
 
 export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
@@ -36,16 +45,57 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
   onUpdateNote,
   onDeleteNote,
   onDuplicateNote,
-  onOpenDraw
+  onOpenDraw,
+  onOpenNoteById
 }) => {
+  const items = useStore(state => state.items);
+
   const [title, setTitle] = useState(note.title);
+  const [bodyText, setBodyText] = useState(note.body || '');
   const [showOptionsSheet, setShowOptionsSheet] = useState(false);
   const [showFormattingSheet, setShowFormattingSheet] = useState(false);
-  const [activeHighlightColor, setActiveHighlightColor] = useState('#ede9fe'); // Soft purple
-  const [showContextPill, setShowContextPill] = useState(false);
-  const [contextPillPos, setContextPillPos] = useState({ top: 0, left: 0 });
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [activeHighlightColor, setActiveHighlightColor] = useState('#ede9fe');
+  const [newChecklistText, setNewChecklistText] = useState('');
 
-  // Initial checklists if not set
+  // Notion Slash Command Menu State
+  const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [slashQuery, setSlashQuery] = useState('');
+  const [slashMenuIndex, setSlashMenuIndex] = useState(0);
+
+  // Notion Wiki Links ([[]) Autocomplete State
+  const [showWikiMenu, setShowWikiMenu] = useState(false);
+  const [wikiQuery, setWikiQuery] = useState('');
+  const [wikiMenuIndex, setWikiMenuIndex] = useState(0);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Sync state if active note changes
+  const [prevNoteId, setPrevNoteId] = useState(note.id);
+  if (note.id !== prevNoteId) {
+    setPrevNoteId(note.id);
+    setTitle(note.title);
+    setBodyText(note.body || '');
+  }
+
+  // Realtime dark mode detection
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark') || document.documentElement.getAttribute('data-theme') === 'dark';
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const dark = document.documentElement.classList.contains('dark') || document.documentElement.getAttribute('data-theme') === 'dark';
+      setIsDark(dark);
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
+  // Checklists state
   const [checklists, setChecklists] = useState<Array<{ id: string; text: string; done: boolean; section?: string }>>(() => {
     if (note.checklists && note.checklists.length > 0) return note.checklists;
     if (note.title.toLowerCase().includes('to-do') || note.title.toLowerCase().includes('preparations')) {
@@ -58,16 +108,113 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
         { id: '6', text: 'Check microphones, sound system, and lighting', done: false, section: '2. Technology and AV Equipment' }
       ];
     }
-    return [
-      { id: '1', text: 'Review key objectives and goals for the day', done: true },
-      { id: '2', text: 'Coordinate with team on release milestones', done: false },
-      { id: '3', text: 'Synthesize user feedback and design impressions', done: false }
-    ];
+    return [];
   });
+
+  // Calculate incoming backlinks (Notion bidirectional links)
+  const incomingBacklinks = useMemo(() => {
+    return calculateBacklinks(items, note.title);
+  }, [items, note.title]);
+
+  // All other notes/tasks for [[ autocomplete
+  const candidateWikiItems = useMemo(() => {
+    return items.filter(i => 
+      !i.deletedAt && 
+      !i.isArchived && 
+      i.id !== note.id && 
+      i.title.toLowerCase().includes(wikiQuery.toLowerCase())
+    ).slice(0, 6);
+  }, [items, note.id, wikiQuery]);
+
+  // Palette styling based on Google Keep theme
+  const palette = NOTE_COLOR_PALETTES[note.color || 'default'] || NOTE_COLOR_PALETTES.default;
+  const noteBg = isDark ? palette.bgDark : palette.bgLight;
+  const noteBorder = isDark ? palette.borderDark : palette.borderLight;
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
     onUpdateNote({ title: newTitle });
+  };
+
+  const handleBodyChange = (newBody: string) => {
+    setBodyText(newBody);
+    onUpdateNote({ body: newBody });
+
+    // Detect Slash Command trigger: "/" at end or after whitespace
+    const cursorPos = textareaRef.current?.selectionStart || newBody.length;
+    const textUpToCursor = newBody.slice(0, cursorPos);
+    const slashMatch = textUpToCursor.match(/(?:^|\n|\s)\/([a-zA-Z0-9]*)$/);
+
+    if (slashMatch) {
+      setShowSlashMenu(true);
+      setSlashQuery(slashMatch[1].toLowerCase());
+      setSlashMenuIndex(0);
+    } else {
+      setShowSlashMenu(false);
+    }
+
+    // Detect Notion Wiki Link trigger: "[[" at end or after whitespace
+    const wikiMatch = textUpToCursor.match(/\[\[([^\]\n]*)$/);
+    if (wikiMatch) {
+      setShowWikiMenu(true);
+      setWikiQuery(wikiMatch[1]);
+      setWikiMenuIndex(0);
+    } else {
+      setShowWikiMenu(false);
+    }
+  };
+
+  // Notion Slash Command Actions
+  const slashCommands = [
+    { id: 'h1', label: 'Heading 1', icon: Heading1, desc: 'Large section heading', insert: '\n# ' },
+    { id: 'h2', label: 'Heading 2', icon: Heading2, desc: 'Medium section heading', insert: '\n## ' },
+    { id: 'todo', label: 'To-do List', icon: CheckSquare, desc: 'Track tasks with interactive checkboxes', insert: '\n- [ ] ' },
+    { id: 'bullet', label: 'Bulleted List', icon: List, desc: 'Create a simple bulleted list', insert: '\n- ' },
+    { id: 'quote', label: 'Visionary Quote', icon: Quote, desc: 'Capture a memorable quotation', insert: '\n> ' },
+    { id: 'callout', label: 'Callout Box', icon: CreditCard, desc: 'Highlighted notice or insight box', insert: '\n> 💡 **Notice**: ' },
+    { id: 'code', label: 'Code Block', icon: Code, desc: 'Monospace syntax snippet', insert: '\n```\n\n```' },
+    { id: 'divider', label: 'Divider', icon: Minus, desc: 'Visually divide sections', insert: '\n---\n' },
+  ].filter(cmd => cmd.label.toLowerCase().includes(slashQuery) || cmd.id.includes(slashQuery));
+
+  const applySlashCommand = (cmd: typeof slashCommands[0]) => {
+    const cursorPos = textareaRef.current?.selectionStart || bodyText.length;
+    const textBeforeCursor = bodyText.slice(0, cursorPos);
+    const textAfterCursor = bodyText.slice(cursorPos);
+    
+    // Replace the trailing "/..." with the command insertion
+    const updatedBefore = textBeforeCursor.replace(/(?:^|\n|\s)\/[a-zA-Z0-9]*$/, cmd.insert);
+    const newText = updatedBefore + textAfterCursor;
+    
+    setBodyText(newText);
+    onUpdateNote({ body: newText });
+    setShowSlashMenu(false);
+
+    // If to-do chosen, also add to structured checklists
+    if (cmd.id === 'todo') {
+      addChecklistItem('New task from command');
+    }
+
+    setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 50);
+  };
+
+  const applyWikiLink = (targetItem: Item) => {
+    const cursorPos = textareaRef.current?.selectionStart || bodyText.length;
+    const textBeforeCursor = bodyText.slice(0, cursorPos);
+    const textAfterCursor = bodyText.slice(cursorPos);
+
+    // Replace the trailing "[[..." with "[[Target Title]] "
+    const updatedBefore = textBeforeCursor.replace(/\[\[[^\]\n]*$/, `[[${targetItem.title}]] `);
+    const newText = updatedBefore + textAfterCursor;
+
+    setBodyText(newText);
+    onUpdateNote({ body: newText });
+    setShowWikiMenu(false);
+
+    setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 50);
   };
 
   const toggleChecklist = (id: string) => {
@@ -76,83 +223,118 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
     onUpdateNote({ checklists: updated });
   };
 
-  const addChecklistItem = (section?: string) => {
+  const addChecklistItem = (customText?: string, section?: string) => {
+    const textToAdd = customText || newChecklistText.trim() || 'New checklist task';
     const newItem = {
-      id: String(Date.now()),
-      text: 'New checklist task',
+      id: `${note.id}-task-${checklists.length + 1}`,
+      text: textToAdd,
       done: false,
       section: section || (checklists[checklists.length - 1]?.section)
     };
     const updated = [...checklists, newItem];
+    setChecklists(updated);
+    setNewChecklistText('');
+    onUpdateNote({ checklists: updated });
+  };
+
+  const removeChecklistItem = (id: string) => {
+    const updated = checklists.filter(c => c.id !== id);
     setChecklists(updated);
     onUpdateNote({ checklists: updated });
   };
 
   const formattedDate = new Date(note.createdAt || 0).toLocaleDateString('en-US', {
     weekday: 'short',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    year: 'numeric'
   });
 
-  // Check if note is Steve Jobs Inspiration Quote note
   const isQuoteNote = note.quoteAuthor || note.title.toLowerCase().includes('steve jobs') || note.title.toLowerCase().includes('inspiration');
 
-  // Text selection listener for Floating Context Pill (media_1791719352272.png)
-  const handleMouseUp = () => {
-    const selection = window.getSelection();
-    if (selection && selection.toString().trim().length > 0) {
-      const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-      setContextPillPos({
-        top: Math.max(10, rect.top - 52),
-        left: rect.left + rect.width / 2
-      });
-      setShowContextPill(true);
-    } else {
-      setShowContextPill(false);
-    }
+  // Render wiki link pills inside text
+  const renderInteractiveText = (text: string) => {
+    const parts = text.split(/(\[\[.*?\]\])/g);
+    return parts.map((part, idx) => {
+      if (part.startsWith('[[') && part.endsWith(']]')) {
+        const linkTitle = part.slice(2, -2);
+        const resolvedItem = findItemByTitle(items, linkTitle);
+
+        return (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => {
+              if (resolvedItem && onOpenNoteById) {
+                onOpenNoteById(resolvedItem.id);
+              }
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '1px 8px',
+              borderRadius: 6,
+              background: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-default)',
+              color: 'var(--accent-primary)',
+              fontSize: '0.92em',
+              fontWeight: 600,
+              cursor: resolvedItem ? 'pointer' : 'default',
+              margin: '0 2px',
+              verticalAlign: 'baseline',
+              transition: 'background 0.1s ease'
+            }}
+            title={resolvedItem ? `Jump to note: ${linkTitle}` : `Page: ${linkTitle}`}
+          >
+            <FileText size={12} color="var(--accent-primary)" />
+            <span>{linkTitle}</span>
+          </button>
+        );
+      }
+      return <span key={idx}>{part}</span>;
+    });
   };
 
   return (
     <div 
-      onMouseUp={handleMouseUp}
       style={{
         position: 'relative',
         width: '100%',
         minHeight: '100%',
-        background: 'var(--bg-surface)',
-        borderRadius: 24,
+        background: noteBg,
+        border: `1.5px solid ${noteBorder}`,
+        borderRadius: 20,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: 'var(--shadow-md)',
-        color: 'var(--text-primary)'
+        color: 'var(--text-primary)',
+        transition: 'background 0.2s ease, border-color 0.2s ease'
       }}
     >
-      {/* Top Header matching media_1791719347257.png & media_1791719363063.png */}
+      {/* Top Header with Back, Keep Color Swatch, Category & Done Button */}
       <div 
         style={{
-          padding: '14px 20px',
+          padding: '12px 18px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: '1px solid var(--border-subtle)',
-          background: 'var(--bg-surface)',
+          background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.7)',
           backdropFilter: 'blur(10px)',
           position: 'sticky',
           top: 0,
           zIndex: 20
         }}
       >
+        {/* Back Button */}
         <button
           type="button"
           onClick={onBack}
           style={{
-            width: 36,
-            height: 36,
+            width: 34,
+            height: 34,
             borderRadius: '50%',
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-default)',
@@ -161,36 +343,124 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
             justifyContent: 'center',
             cursor: 'pointer',
             color: 'var(--text-primary)',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            boxShadow: 'var(--shadow-sm)'
           }}
-          title="Back to My Notes"
+          title="Back to Notes"
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={18} />
         </button>
 
-        {/* Center: Note Category & Timestamp */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Center: Category, Keep Color Swatch & Date */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Keep Color Picker Flyout */}
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setShowColorPicker(prev => !prev)}
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: '50%',
+                background: palette.dotColor,
+                border: '2px solid var(--bg-surface)',
+                boxShadow: '0 0 0 1px var(--border-default)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title={`Note Color: ${palette.label}`}
+            />
+            {showColorPicker && (
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: 32,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-default)',
+                  borderRadius: 12,
+                  padding: '6px 8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  boxShadow: 'var(--shadow-modal)',
+                  zIndex: 40
+                }}
+              >
+                {Object.values(NOTE_COLOR_PALETTES).map(p => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      onUpdateNote({ color: p.id === 'default' ? undefined : (p.id as NoteColorId) });
+                      setShowColorPicker(false);
+                    }}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      background: p.dotColor,
+                      border: (note.color || 'default') === p.id ? '2px solid var(--text-primary)' : '1px solid var(--border-subtle)',
+                      cursor: 'pointer'
+                    }}
+                    title={p.label}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
           {note.category && (
             <span 
-              className="ui-pill"
-              style={{ fontSize: 11, padding: '2px 8px', fontWeight: 600, background: 'var(--bg-surface-elevated)' }}
+              style={{ 
+                fontSize: 11, 
+                padding: '3px 9px', 
+                fontWeight: 650, 
+                background: 'var(--bg-surface-elevated)',
+                borderRadius: 9999,
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-subtle)'
+              }}
             >
               {note.category}
             </span>
           )}
-          <span style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>
+
+          <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
             {formattedDate}
           </span>
         </div>
 
-        {/* Right side: Done Checkmark Button + More Options */}
+        {/* Right side: Pin, Done & More */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => onUpdateNote({ pinned: !note.pinned })}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: '50%',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-default)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: note.pinned ? '#f59e0b' : 'var(--text-tertiary)'
+            }}
+            title={note.pinned ? 'Unpin Note' : 'Pin Note'}
+          >
+            <Pin size={16} fill={note.pinned ? '#f59e0b' : 'none'} />
+          </button>
+
           <button
             type="button"
             onClick={onBack}
             style={{
-              width: 36,
-              height: 36,
+              width: 34,
+              height: 34,
               borderRadius: '50%',
               background: 'var(--accent-primary)',
               border: 'none',
@@ -199,19 +469,19 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               justifyContent: 'center',
               cursor: 'pointer',
               color: 'var(--bg-base)',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+              boxShadow: 'var(--shadow-sm)'
             }}
-            title="Save & Done"
+            title="Save & Close"
           >
-            <Check size={18} strokeWidth={2.5} />
+            <Check size={17} strokeWidth={2.5} />
           </button>
 
           <button
             type="button"
             onClick={() => setShowOptionsSheet(true)}
             style={{
-              width: 36,
-              height: 36,
+              width: 34,
+              height: 34,
               borderRadius: '50%',
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-default)',
@@ -221,9 +491,9 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               cursor: 'pointer',
               color: 'var(--text-secondary)'
             }}
-            title="Note Options"
+            title="More Options"
           >
-            <MoreHorizontal size={18} />
+            <MoreHorizontal size={17} />
           </button>
         </div>
       </div>
@@ -231,9 +501,9 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
       {/* Main Content Area */}
       <div style={{ padding: '22px 24px 100px', display: 'flex', flexDirection: 'column', gap: 20, flex: 1, overflowY: 'auto' }}>
         
-        {/* Cover Photo / Thumbnail if present */}
+        {/* Cover Photo / Thumbnail if present (Xiaomi Notes style) */}
         {note.thumbnailUrl && (
-          <div style={{ width: '100%', maxHeight: 220, borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}>
+          <div style={{ width: '100%', maxHeight: 220, borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
             <img 
               src={note.thumbnailUrl} 
               alt={note.title} 
@@ -242,216 +512,328 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
           </div>
         )}
 
-        {/* Note Title & Metadata Header */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <input
-            value={title}
-            onChange={e => handleTitleChange(e.target.value)}
-            style={{
-              fontSize: 24,
-              fontWeight: 750,
-              letterSpacing: '-0.025em',
-              color: 'var(--text-primary)',
-              border: 'none',
-              outline: 'none',
-              width: '100%',
-              lineHeight: 1.25,
-              padding: 0,
-              background: 'transparent'
-            }}
-            placeholder="Note Title..."
-          />
+        {/* Note Title Input */}
+        <input
+          value={title}
+          onChange={e => handleTitleChange(e.target.value)}
+          style={{
+            fontSize: 24,
+            fontWeight: 750,
+            letterSpacing: '-0.025em',
+            color: 'var(--text-primary)',
+            border: 'none',
+            outline: 'none',
+            width: '100%',
+            lineHeight: 1.25,
+            padding: 0,
+            background: 'transparent'
+          }}
+          placeholder="Note Title..."
+        />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 500 }}>
-            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{note.category || 'Work'}</span>
-            <span>|</span>
-            <span>{formattedDate}</span>
-          </div>
-        </div>
-
-        {/* Audio Memo Player (if note has audio or to-do launch note) */}
+        {/* Audio Memo Player (Xiaomi Notes audio memo integration) */}
         {(note.hasAudio || note.title.toLowerCase().includes('preparations') || note.title.toLowerCase().includes('launch')) && (
           <AudioMemoPlayer initialDuration={note.audioDuration || '05:47'} />
         )}
 
-        {/* Introductory Rich Text with Inline Highlighter Pills */}
-        <div style={{ fontSize: 14.5, lineHeight: 1.65, color: '#334155' }}>
-          {note.body ? (
-            <p style={{ margin: 0 }}>{note.body}</p>
-          ) : (
-            <p style={{ margin: 0 }}>
-              In this exploration, I delve into the concept and design of a user-friendly, functional, and intuitive notes and reminder app. The app is designed to help users organize their{' '}
-              <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '1px 6px', borderRadius: 4, fontWeight: 550 }}>daily activities</span>, jot down important ideas, and manage reminders efficiently.
-            </p>
+        {/* Notion Block Editing Area */}
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {/* Hint toolbar for Notion commands */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-tertiary)' }}>
+            <span>Type <kbd style={{ padding: '1px 5px', borderRadius: 4, background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontWeight: 650 }}>/</kbd> for Notion blocks or <kbd style={{ padding: '1px 5px', borderRadius: 4, background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontWeight: 650 }}>[[</kbd> to link pages</span>
+            <button
+              type="button"
+              onClick={() => setShowSlashMenu(prev => !prev)}
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600 }}
+            >
+              <Plus size={12} />
+              <span>Insert Block</span>
+            </button>
+          </div>
+
+          {/* Interactive Textarea for Note Body */}
+          <textarea
+            ref={textareaRef}
+            value={bodyText}
+            onChange={e => handleBodyChange(e.target.value)}
+            placeholder="Type anything... Use / for Notion slash commands or [[ to link another note or task."
+            style={{
+              width: '100%',
+              minHeight: 140,
+              fontSize: 14.5,
+              lineHeight: 1.65,
+              color: 'var(--text-primary)',
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              resize: 'vertical',
+              fontFamily: 'inherit'
+            }}
+          />
+
+          {/* Rendered Preview with Clickable Wiki Backlink Chips */}
+          {bodyText.includes('[[') && (
+            <div 
+              style={{ 
+                padding: '12px 14px', 
+                borderRadius: 12, 
+                background: 'var(--bg-surface-elevated)', 
+                border: '1px solid var(--border-subtle)',
+                fontSize: 13.5,
+                lineHeight: 1.6
+              }}
+            >
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                WIKI BACKLINKS PREVIEW:
+              </div>
+              <div>{renderInteractiveText(bodyText)}</div>
+            </div>
           )}
 
-          <p style={{ marginTop: 12 }}>
-            The main focus is to create a{' '}
-            <span style={{ background: '#ede9fe', color: '#7c3aed', padding: '1px 6px', borderRadius: 4, fontWeight: 600 }}>simple yet engaging</span>{' '}
-            interface, making it easy for users to stay productive and organized.
-          </p>
+          {/* NOTION SLASH COMMANDS MENU DROPDOWN */}
+          {showSlashMenu && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 40,
+                left: 10,
+                width: 280,
+                maxHeight: 280,
+                overflowY: 'auto',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                borderRadius: 14,
+                boxShadow: 'var(--shadow-modal)',
+                zIndex: 60,
+                padding: '6px'
+              }}
+            >
+              <div style={{ padding: '6px 8px', fontSize: 10.5, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+                Notion Blocks
+              </div>
+              {slashCommands.map((cmd, idx) => (
+                <button
+                  key={cmd.id}
+                  type="button"
+                  onClick={() => applySlashCommand(cmd)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '8px 10px',
+                    borderRadius: 8,
+                    background: idx === slashMenuIndex ? 'var(--bg-surface-elevated)' : 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                  onMouseEnter={() => setSlashMenuIndex(idx)}
+                >
+                  <div style={{ width: 28, height: 28, borderRadius: 6, background: 'var(--bg-surface-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)', flexShrink: 0 }}>
+                    <cmd.icon size={15} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{cmd.label}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{cmd.desc}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* NOTION WIKI LINK ([]) AUTOCOMPLETE DROPDOWN */}
+          {showWikiMenu && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 70,
+                left: 10,
+                width: 300,
+                maxHeight: 240,
+                overflowY: 'auto',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                borderRadius: 14,
+                boxShadow: 'var(--shadow-modal)',
+                zIndex: 60,
+                padding: '6px'
+              }}
+            >
+              <div style={{ padding: '6px 8px', fontSize: 10.5, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+                Link Page or Note
+              </div>
+              {candidateWikiItems.length === 0 ? (
+                <div style={{ padding: '8px 10px', fontSize: 12, color: 'var(--text-tertiary)' }}>
+                  No matching notes found.
+                </div>
+              ) : (
+                candidateWikiItems.map((cand, idx) => (
+                  <button
+                    key={cand.id}
+                    type="button"
+                    onClick={() => applyWikiLink(cand)}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      background: idx === wikiMenuIndex ? 'var(--bg-surface-elevated)' : 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                    onMouseEnter={() => setWikiMenuIndex(idx)}
+                  >
+                    <FileText size={15} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                      <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        {cand.title}
+                      </span>
+                      <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)' }}>
+                        {cand.category || 'General'}
+                      </span>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Steve Jobs Quote Block & Image Widget (media_1791719356647.png) */}
+        {/* Steve Jobs Quote Card if applicable */}
         {isQuoteNote && (
           <div 
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: 20,
-              padding: '20px',
+              background: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 18,
+              padding: '18px 20px',
               display: 'flex',
               flexDirection: 'column',
-              gap: 16,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+              gap: 14
             }}
           >
-            {/* Quote text */}
-            <div style={{ fontSize: 15, fontStyle: 'italic', lineHeight: 1.6, color: '#1e293b', position: 'relative' }}>
-              <span style={{ fontSize: 28, color: '#94a3b8', lineHeight: 0, verticalAlign: 'middle', marginRight: 4 }}>“</span>
-              I'm convinced that about half of what separates the successful entrepreneurs from the non-successful ones is pure{' '}
-              <span style={{ border: '2px solid #f59e0b', borderRadius: 9999, padding: '1px 8px', fontStyle: 'normal', fontWeight: 600, color: '#b45309' }}>
-                perseverance
-              </span>
+            <div style={{ fontSize: 14.5, fontStyle: 'italic', lineHeight: 1.6, color: 'var(--text-primary)' }}>
+              <span style={{ fontSize: 24, color: 'var(--text-tertiary)', verticalAlign: 'middle', marginRight: 4 }}>“</span>
+              I'm convinced that about half of what separates the successful entrepreneurs from the non-successful ones is pure perseverance.
             </div>
-
-            {/* Author Portrait with Doodle Sticker Annotation */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
-              <div style={{ position: 'relative', display: 'inline-block' }}>
-                <img 
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" 
-                  alt="Steve Jobs" 
-                  style={{ width: 100, height: 100, borderRadius: 16, objectFit: 'cover', filter: 'grayscale(100%)', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}
-                />
-                
-                {/* Lightbulb Doodle with Bounding Box handles */}
-                <div 
-                  style={{
-                    position: 'absolute',
-                    top: -16,
-                    right: -16,
-                    padding: '4px 6px',
-                    borderRadius: 8,
-                    background: '#ffffff',
-                    border: '1.5px dashed #2563eb',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <Sparkles size={16} color="#eab308" />
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <img 
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" 
+                alt="Steve Jobs" 
+                style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }} 
+              />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Steve Jobs</span>
+                <span style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>Founder, Apple Inc.</span>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 9999, background: '#ede9fe', color: '#7c3aed', width: 'fit-content' }}>
-                  Steve Jobs
-                </span>
-                <span style={{ fontSize: 12, color: '#64748b' }}>Founder & Visionary, Apple</span>
-              </div>
-            </div>
-
-            {/* Image Toolbar matching media_1791719356647.png */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', paddingTop: 10, borderTop: '1px solid #e2e8f0', color: '#64748b' }}>
-              <button type="button" className="btn-ghost" style={{ padding: 6 }} title="Adjust Color"><PenTool size={16} /></button>
-              <button type="button" className="btn-ghost" style={{ padding: 6 }} title="Crop"><Crop size={16} /></button>
-              <button type="button" className="btn-ghost" style={{ padding: 6 }} title="Rotate"><RotateCcw size={16} /></button>
-              <button type="button" className="btn-ghost" style={{ padding: 6, color: '#ef4444' }} title="Delete Photo"><Trash2 size={16} /></button>
             </div>
           </div>
         )}
 
-        {/* Callout Card (media_1791719352272.png) */}
-        <div 
-          style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderLeft: '4px solid #8b5cf6',
-            borderRadius: 14,
-            padding: '14px 18px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 4
-          }}
-        >
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>Simple yet Engaging</div>
-          <div style={{ fontSize: 12.5, lineHeight: 1.5, color: '#64748b' }}>
-            The design philosophy of creating an interface that is both straightforward and easy to use, while also visually appealing and interactive, ensuring a positive user experience without overwhelming the user.
+        {/* Structured Checklists Section (Xiaomi Notes style) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)' }}>Checklist Tasks</span>
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+              {checklists.filter(c => c.done).length}/{checklists.length} done
+            </span>
           </div>
-        </div>
 
-        {/* Interactive Checklist Sections (media_1791719363063.png) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {['1. Venue and Decor', '2. Technology and AV Equipment'].map(secName => {
-            const secItems = checklists.filter(c => c.section === secName || (!c.section && secName === '1. Venue and Decor'));
-            if (secItems.length === 0) return null;
+          {/* New Checklist Item Input */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              value={newChecklistText}
+              onChange={e => setNewChecklistText(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addChecklistItem();
+                }
+              }}
+              placeholder="Add a checklist item (press Enter)..."
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: 8,
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                color: 'var(--text-primary)',
+                fontSize: 13,
+                outline: 'none'
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => addChecklistItem()}
+              className="btn-primary"
+              style={{ padding: '8px 12px', fontSize: 12, gap: 4 }}
+            >
+              <Plus size={13} />
+              <span>Add</span>
+            </button>
+          </div>
 
-            return (
-              <div key={secName} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{secName}</span>
-                  <button
-                    type="button"
-                    onClick={() => addChecklistItem(secName)}
-                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ea580c', display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, fontWeight: 600 }}
+          {/* Checklist Items */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {checklists.map(item => (
+              <div 
+                key={item.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '7px 10px',
+                  borderRadius: 8,
+                  background: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-subtle)',
+                  transition: 'background 0.1s ease'
+                }}
+              >
+                <div 
+                  onClick={() => toggleChecklist(item.id)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flex: 1 }}
+                >
+                  <div 
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: 4,
+                      background: item.done ? 'var(--accent-primary)' : 'transparent',
+                      border: `1.5px solid ${item.done ? 'var(--accent-primary)' : 'var(--border-strong)'}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
                   >
-                    <Plus size={13} />
-                    <span>Add Item</span>
-                  </button>
+                    {item.done && <Check size={11} color="var(--bg-base)" strokeWidth={3} />}
+                  </div>
+                  <span 
+                    style={{
+                      fontSize: 13,
+                      color: item.done ? 'var(--text-tertiary)' : 'var(--text-primary)',
+                      textDecoration: item.done ? 'line-through' : 'none'
+                    }}
+                  >
+                    {item.text}
+                  </span>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {secItems.map(item => (
-                    <div 
-                      key={item.id}
-                      onClick={() => toggleChecklist(item.id)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                        padding: '6px 8px',
-                        borderRadius: 8,
-                        cursor: 'pointer',
-                        transition: 'background 0.12s ease'
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                    >
-                      {/* Circular Custom Checkbox matching media_1791719363063.png */}
-                      <div 
-                        style={{
-                          width: 20,
-                          height: 20,
-                          borderRadius: '50%',
-                          background: item.done ? '#0f172a' : '#ffffff',
-                          border: item.done ? '2px solid #0f172a' : '2px solid #cbd5e1',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
-                          transition: 'all 0.12s ease'
-                        }}
-                      >
-                        {item.done && <Check size={12} color="#ffffff" strokeWidth={3} />}
-                      </div>
-
-                      <span 
-                        style={{
-                          fontSize: 13.5,
-                          color: item.done ? '#94a3b8' : '#334155',
-                          textDecoration: item.done ? 'line-through' : 'none',
-                          lineHeight: 1.4
-                        }}
-                      >
-                        {item.text}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => removeChecklistItem(item.id)}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 3 }}
+                  title="Remove Item"
+                >
+                  <X size={13} />
+                </button>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
 
         {/* Hand-Drawn Sketch preview if note has drawingData */}
@@ -460,10 +842,10 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
             onClick={onOpenDraw}
             style={{ 
               borderRadius: 16, 
-              border: '1.5px dashed #cbd5e1', 
-              padding: 12, 
+              border: '1.5px dashed var(--border-default)', 
+              padding: 14, 
               cursor: 'pointer',
-              background: '#f8fafc',
+              background: 'var(--bg-surface-elevated)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -471,39 +853,61 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
             }}
           >
             <img src={note.drawingData} alt="Sketch" style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain' }} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>✏️ Tap to edit drawing</span>
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--text-secondary)' }}>✏️ Click to edit hand-drawn sketch</span>
+          </div>
+        )}
+
+        {/* NOTION INCOMING BACKLINKS SECTION */}
+        {incomingBacklinks.length > 0 && (
+          <div 
+            style={{
+              marginTop: 10,
+              padding: '14px 18px',
+              borderRadius: 14,
+              background: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-subtle)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+              <Link2 size={13} color="var(--accent-primary)" />
+              <span>{incomingBacklinks.length} Linked Mention{incomingBacklinks.length === 1 ? '' : 's'} (Notion Backlinks)</span>
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {incomingBacklinks.map(backlinkItem => (
+                <button
+                  key={backlinkItem.id}
+                  type="button"
+                  onClick={() => onOpenNoteById && onOpenNoteById(backlinkItem.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '5px 12px',
+                    borderRadius: 8,
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: 'var(--shadow-sm)'
+                  }}
+                  title={`Open: ${backlinkItem.title}`}
+                >
+                  <FileText size={12} color="var(--accent-primary)" />
+                  <span>{backlinkItem.title}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Floating Context Highlight Selection Pill (media_1791719352272.png) */}
-      {showContextPill && (
-        <div
-          style={{
-            position: 'fixed',
-            top: contextPillPos.top,
-            left: contextPillPos.left,
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            padding: '6px 14px',
-            borderRadius: 9999,
-            background: '#191d28',
-            color: '#ffffff',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
-            zIndex: 90,
-            animation: 'fadeIn 0.12s ease'
-          }}
-        >
-          <PenTool size={14} color="#ffffff" />
-          <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#8b5cf6' }} />
-          <MessageSquare size={14} color="#ffffff" />
-          <Bold size={14} color="#ffffff" />
-        </div>
-      )}
-
-      {/* Floating Bottom Tool Dock matching media_1791719347257.png */}
+      {/* Floating Bottom Tool Dock (Xiaomi & Notion controls) */}
       <div 
         style={{
           position: 'fixed',
@@ -512,8 +916,8 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
           transform: 'translateX(-50%)',
           display: 'flex',
           alignItems: 'center',
-          gap: 16,
-          padding: '10px 22px',
+          gap: 14,
+          padding: '8px 20px',
           borderRadius: 9999,
           background: 'var(--bg-surface)',
           boxShadow: 'var(--shadow-modal)',
@@ -528,7 +932,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', padding: 4 }}
           title="Draw Your Note"
         >
-          <PenTool size={20} />
+          <PenTool size={18} />
         </button>
 
         {/* 2. Checklist */}
@@ -538,37 +942,47 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', padding: 4 }}
           title="Add Checklist"
         >
-          <CheckSquare size={20} />
+          <CheckSquare size={18} />
         </button>
 
-        {/* 3. Callout / Card */}
+        {/* 3. Notion Blocks Menu */}
         <button
           type="button"
-          onClick={() => setShowFormattingSheet(true)}
+          onClick={() => setShowSlashMenu(prev => !prev)}
           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', padding: 4 }}
-          title="Insert Callout Card"
+          title="Insert Notion Block"
         >
-          <CreditCard size={20} />
+          <Plus size={18} />
         </button>
 
-        {/* 4. Typography / Formatting */}
+        {/* 4. Formatting */}
         <button
           type="button"
           onClick={() => setShowFormattingSheet(true)}
           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', padding: 4 }}
           title="Rich Text Formatting"
         >
-          <Type size={20} />
+          <Type size={18} />
         </button>
 
-        {/* 5. More Options */}
+        {/* 5. Keep Color */}
+        <button
+          type="button"
+          onClick={() => setShowColorPicker(prev => !prev)}
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', padding: 4 }}
+          title="Note Color"
+        >
+          <Palette size={18} />
+        </button>
+
+        {/* 6. Settings */}
         <button
           type="button"
           onClick={() => setShowOptionsSheet(true)}
           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', padding: 4 }}
           title="Note Settings & Options"
         >
-          <SlidersHorizontal size={20} />
+          <SlidersHorizontal size={18} />
         </button>
       </div>
 
@@ -581,6 +995,22 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
         onApplyFormat={(fmt, val) => {
           if (fmt === 'highlight') {
             setActiveHighlightColor(val || '#ede9fe');
+          } else if (fmt === 'bold') {
+            handleBodyChange(bodyText + ' **Bold text**');
+          } else if (fmt === 'italic') {
+            handleBodyChange(bodyText + ' *Italic text*');
+          } else if (fmt === 'h1') {
+            handleBodyChange(bodyText + '\n# Heading 1');
+          } else if (fmt === 'h2') {
+            handleBodyChange(bodyText + '\n## Heading 2');
+          } else if (fmt === 'bulletList') {
+            handleBodyChange(bodyText + '\n- Bullet point');
+          } else if (fmt === 'numberedList') {
+            handleBodyChange(bodyText + '\n1. First step');
+          } else if (fmt === 'quote') {
+            handleBodyChange(bodyText + '\n> Visionary quote');
+          } else if (fmt === 'callout') {
+            handleBodyChange(bodyText + '\n> 💡 **Notice**: Important takeaway');
           }
         }}
       />
