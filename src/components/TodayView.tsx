@@ -51,7 +51,7 @@ const STATUS_CONFIG: Record<TaskStatus, { label: string; color: string }> = {
 };
 
 const PRIORITY_CONFIG: Record<PriorityLevel, { label: string; color: string }> = {
-  critical: { label: 'Critical', color: '#f43f5e' },
+  critical: { label: 'Critical', color: '#ef4444' },
   high: { label: 'High', color: '#f59e0b' },
   normal: { label: 'Normal', color: '#3b82f6' },
   low: { label: 'Low', color: '#64748b' }
@@ -244,10 +244,10 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
     
     // Transparent why-prioritized reason
     const getReason = () => {
-      if (task.priority === 'critical') return { text: 'Critical Priority', color: '#f43f5e' };
+      if (task.priority === 'critical') return { text: 'Critical Priority', color: '#ef4444' };
       if (task.deadline && task.deadline < startOfToday) {
         const days = Math.max(1, Math.round((startOfToday - task.deadline) / 86400000));
-        return { text: `Overdue (${days}d)`, color: '#f43f5e' };
+        return { text: `Overdue (${days}d)`, color: '#ef4444' };
       }
       if (task.deadline && task.deadline >= startOfToday && task.deadline <= endOfToday) {
         return { text: 'Due Today', color: '#10b981' };
@@ -341,7 +341,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
             )}
 
             {task.deadline && (
-              <span className="text-meta" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 3, color: task.deadline < startOfToday ? "#f43f5e" : "var(--text-tertiary)" }}>
+              <span className="text-meta" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 3, color: task.deadline < startOfToday ? "#ef4444" : "var(--text-tertiary)" }}>
                 <Calendar size={11} />
                 <span>{new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
               </span>
@@ -504,7 +504,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          {/* Prompt-Wise Action Button (Prahari Warm Orange Gradient) */}
+          {/* Prompt-Wise Action Button (Prahari Translucent Orange Tint) */}
           <button
             type="button"
             onClick={() => setShowTodayPromptModal(true)}
@@ -514,20 +514,26 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
               gap: 8,
               padding: "9px 16px",
               borderRadius: 10,
-              background: "linear-gradient(135deg, #ea580c 0%, #c2410c 100%)",
-              color: "#ffffff",
-              border: "none",
+              background: "rgba(255, 90, 31, 0.12)",
+              color: "#FF5A1F",
+              border: "1px solid rgba(255, 90, 31, 0.3)",
               fontSize: 13,
               fontWeight: 650,
               cursor: "pointer",
-              boxShadow: "0 3px 12px rgba(234, 88, 12, 0.35)",
+              boxShadow: "0 2px 8px rgba(255, 90, 31, 0.15)",
               transition: "all 0.15s ease"
             }}
-            onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
-            onMouseLeave={e => e.currentTarget.style.transform = "none"}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "rgba(255, 90, 31, 0.2)";
+              e.currentTarget.style.transform = "translateY(-1px)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "rgba(255, 90, 31, 0.12)";
+              e.currentTarget.style.transform = "none";
+            }}
             title="Format today's workload into a structured prompt for external AI"
           >
-            <Sparkles size={14} color="#ffffff" />
+            <Sparkles size={14} color="#FF5A1F" />
             <span>⚡ Prompt-Wise AI Breakdown</span>
           </button>
           
@@ -567,10 +573,10 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
       {/* 3 Executive Metric Stat Cards (Matching Prahari media_1791718696966.png) */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
         {/* Card 1: Critical / Do Now */}
-        <div className="glass-panel" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10, borderLeft: "3px solid #f43f5e" }}>
+        <div className="glass-panel" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10, borderLeft: "3px solid #FF5A1F" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>CRITICAL / DO NOW</span>
-            <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 7px", borderRadius: 9999, background: "rgba(244, 63, 94, 0.1)", color: "#f43f5e", border: "1px solid rgba(244, 63, 94, 0.2)" }}>
+            <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 7px", borderRadius: 9999, background: "rgba(255, 90, 31, 0.12)", color: "#FF5A1F", border: "1px solid rgba(255, 90, 31, 0.25)" }}>
               {overdueTasks.length > 0 ? `${overdueTasks.length} Overdue` : 'Nominal'}
             </span>
           </div>
@@ -581,7 +587,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
             <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>tasks requiring immediate action</span>
           </div>
           <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", display: "flex", alignItems: "center", gap: 5 }}>
-            <AlertTriangle size={12} color="#f43f5e" />
+            <AlertTriangle size={12} color="#FF5A1F" />
             <span>Urgent & Important (Eisenhower Q1)</span>
           </div>
         </div>
@@ -721,12 +727,12 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
           {/* Overdue Section */}
           {overdueTasks.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 7, color: "#f43f5e", fontWeight: 600, fontSize: 13, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, color: "#ef4444", fontWeight: 600, fontSize: 13, textTransform: "uppercase", letterSpacing: "0.04em" }}>
                 <AlertTriangle size={14} />
                 <span>Overdue ({overdueTasks.length})</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {overdueTasks.map(t => renderTaskCard(t, { label: 'Overdue', color: '#f43f5e' }))}
+                {overdueTasks.map(t => renderTaskCard(t, { label: 'Overdue', color: '#ef4444' }))}
               </div>
             </div>
           )}
@@ -783,7 +789,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
           <div className="glass-panel" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Clock size={15} color={capacityPercent > 100 ? "#f43f5e" : "#3b82f6"} />
+                <Clock size={15} color={capacityPercent > 100 ? "#FF5A1F" : "#3b82f6"} />
                 <span className="card-title" style={{ fontSize: 14 }}>Focus Capacity</span>
               </div>
               <span className="text-meta" style={{ fontSize: 11 }}>
@@ -797,7 +803,7 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
                 style={{ 
                   height: "100%", 
                   width: `${Math.min(100, capacityPercent)}%`, 
-                  background: capacityPercent > 100 ? "linear-gradient(90deg, #f59e0b, #f43f5e)" : "linear-gradient(90deg, #3b82f6, #10b981)", 
+                  background: capacityPercent > 100 ? "linear-gradient(90deg, #f59e0b, #FF5A1F)" : "linear-gradient(90deg, #3b82f6, #10b981)", 
                   borderRadius: 9999, 
                   transition: "width 0.3s ease" 
                 }} 

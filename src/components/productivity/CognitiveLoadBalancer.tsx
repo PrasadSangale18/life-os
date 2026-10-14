@@ -159,10 +159,10 @@ export const CognitiveLoadBalancer: React.FC<CognitiveLoadBalancerProps> = ({
         <div className="flex items-center gap-3">
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-colors ${
             isOverloaded 
-              ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+              ? 'bg-[#FF5A1F]/15 text-[#FF5A1F] border-[#FF5A1F]/30'
               : loadPercent >= 80 
-              ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
-              : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+              ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+              : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
           }`}>
             {isOverloaded ? <AlertTriangle className="w-4 h-4" /> : <BatteryCharging className="w-4 h-4" />}
           </div>
@@ -173,10 +173,10 @@ export const CognitiveLoadBalancer: React.FC<CognitiveLoadBalancerProps> = ({
               </h3>
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold font-mono ${
                 isOverloaded 
-                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                  ? 'bg-[#FF5A1F]/15 text-[#FF5A1F] border border-[#FF5A1F]/30'
                   : loadPercent >= 80 
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                  : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
               }`}>
                 {loadPercent}% Capacity ({Math.round(totalPlannedMinutes / 60 * 10) / 10}h / {Math.round(capacityMinutes / 60 * 10) / 10}h)
               </span>
@@ -213,7 +213,7 @@ export const CognitiveLoadBalancer: React.FC<CognitiveLoadBalancerProps> = ({
           {isOverloaded && (
             <button
               onClick={handleAutoBalance}
-              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 text-white font-bold text-xs shadow-lg shadow-rose-500/20 hover:opacity-95 transition-all flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-xl bg-[#FF5A1F] hover:bg-[#EA580C] text-white font-semibold text-xs shadow-[0_2px_10px_rgba(255,90,31,0.3)] transition-all flex items-center gap-1.5"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Auto-Balance Day</span>
@@ -257,10 +257,10 @@ export const CognitiveLoadBalancer: React.FC<CognitiveLoadBalancerProps> = ({
           <div 
             className={`h-full rounded-full transition-all duration-500 ${
               isOverloaded 
-                ? 'bg-gradient-to-r from-amber-500 to-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]'
+                ? 'bg-gradient-to-r from-amber-500 to-[#FF5A1F] shadow-[0_0_10px_rgba(255,90,31,0.4)]'
                 : loadPercent >= 80 
-                ? 'bg-gradient-to-r from-[#FF5A1F] to-amber-500 shadow-[0_0_10px_rgba(255,90,31,0.5)]'
-                : 'bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+                ? 'bg-gradient-to-r from-[#FF5A1F] to-amber-500 shadow-[0_0_8px_rgba(255,90,31,0.3)]'
+                : 'bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_8px_rgba(16,185,129,0.3)]'
             }`}
             style={{ width: `${Math.min(100, loadPercent)}%` }}
           />

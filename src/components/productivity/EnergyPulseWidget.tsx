@@ -69,11 +69,9 @@ export const EnergyPulseWidget: React.FC = () => {
       {/* Left: Indicator & Guidance */}
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-          currentEnergy >= 4 
-            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-            : currentEnergy <= 2 && currentEnergy > 0
-            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-            : 'bg-white/[0.05] text-[#FF5A1F] border border-white/[0.08]'
+          currentEnergy > 0
+            ? 'bg-[#FF5A1F]/15 text-[#FF5A1F] border border-[#FF5A1F]/30'
+            : 'bg-white/[0.05] text-slate-400 border border-white/[0.08]'
         }`}>
           <BatteryCharging className="w-4 h-4" />
         </div>
@@ -110,11 +108,7 @@ export const EnergyPulseWidget: React.FC = () => {
               onClick={() => handleSelectEnergy(lvl)}
               className={`w-7 h-7 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center ${
                 currentEnergy === lvl
-                  ? lvl >= 4
-                    ? 'bg-emerald-500 text-slate-950 shadow-[0_0_10px_rgba(16,185,129,0.4)]'
-                    : lvl <= 2
-                    ? 'bg-amber-500 text-slate-950 shadow-[0_0_10px_rgba(245,158,11,0.4)]'
-                    : 'bg-[#FF5A1F] text-white shadow-[0_0_10px_rgba(255,90,31,0.4)]'
+                  ? 'bg-[#FF5A1F] text-white shadow-[0_0_12px_rgba(255,90,31,0.35)]'
                   : 'text-slate-400 hover:text-white hover:bg-white/[0.08]'
               }`}
               title={`Energy Level ${lvl}/5`}

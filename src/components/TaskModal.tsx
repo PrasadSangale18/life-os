@@ -41,7 +41,7 @@ const STATUS_OPTIONS: { id: TaskStatus; label: string; color: string }[] = [
 ];
 
 const PRIORITY_OPTIONS: { id: PriorityLevel; label: string; color: string }[] = [
-  { id: 'critical', label: 'Critical', color: '#f43f5e' },
+  { id: 'critical', label: 'Critical', color: '#ef4444' },
   { id: 'high', label: 'High', color: '#f59e0b' },
   { id: 'normal', label: 'Normal', color: '#3b82f6' },
   { id: 'low', label: 'Low', color: '#64748b' },

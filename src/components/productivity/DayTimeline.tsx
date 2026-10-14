@@ -150,7 +150,10 @@ export const DayTimeline: React.FC<DayTimelineProps> = ({
         <div className="min-w-[700px] flex flex-col gap-2">
           
           {/* Time markers bar */}
-          <div className="grid grid-cols-15 text-[10px] font-mono text-slate-500 border-b border-white/[0.06] pb-1">
+          <div 
+            className="text-[10px] font-mono text-slate-500 border-b border-white/[0.06] pb-1"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}
+          >
             {hours.map(h => (
               <span key={h.hour} className="text-left pl-1">
                 {h.label}
@@ -162,7 +165,10 @@ export const DayTimeline: React.FC<DayTimelineProps> = ({
           <div className="relative h-20 bg-white/[0.015] border border-white/[0.05] rounded-xl overflow-hidden flex items-center p-2">
             
             {/* Hour grid lines */}
-            <div className="absolute inset-0 grid grid-cols-15 pointer-events-none opacity-20">
+            <div 
+              className="absolute inset-0 pointer-events-none opacity-20"
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}
+            >
               {hours.map(h => (
                 <div key={h.hour} className="border-r border-white" />
               ))}
