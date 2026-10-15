@@ -18,6 +18,8 @@ export interface Item {
   isPrivate?: boolean;
   color?: NoteColorId;
   pinned?: boolean;
+  isFavorite?: boolean;
+  notebookId?: string;
   
   // Phase 5 specific
   cleanedTitle?: string;

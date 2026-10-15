@@ -9,17 +9,17 @@ import {
   Tag, 
   Lock, 
   ArrowUpRight, 
-  ArrowDownRight, 
   Search, 
   Plus, 
   FileText, 
   LayoutGrid, 
   Layers
 } from 'lucide-react';
-import { calculateBacklinks, calculateForwardLinks, findItemByTitle } from '../utils/wikiLinks';
+import { findItemByTitle } from '../utils/wikiLinks';
 import { selectNotes } from '../utils/selectors';
 import { PILLARS, NOTE_COLORS } from '../theme/tokens';
 import { NotesAppView } from './notes/NotesAppView';
+import { NotesWorkspace } from './notes/NotesWorkspace';
 
 interface NotesViewProps {
   onEditTask: (item: Item) => void;
@@ -28,7 +28,7 @@ interface NotesViewProps {
 
 const validTypes = ['note', 'idea', 'knowledge', 'reference', 'principle', 'journal'];
 
-type NoteViewMode = 'app' | 'workspace' | 'board' | 'quick';
+type NoteViewMode = 'workspace' | 'app' | 'board' | 'quick';
 
 export const NotesView = ({ onEditTask, onNewNote }: NotesViewProps) => {
   const items = useStore(state => state.items);
@@ -36,11 +36,10 @@ export const NotesView = ({ onEditTask, onNewNote }: NotesViewProps) => {
   const updateItem = useStore(state => state.updateItem);
   const showPrivate = useStore(state => state.showPrivate);
 
-  const [viewMode, setViewMode] = useState<NoteViewMode>('app');
+  const [viewMode, setViewMode] = useState<NoteViewMode>('workspace');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTag, setActiveTag] = useState<string>('all');
   const [activePillar, setActivePillar] = useState<string>('all');
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
   const notes = useMemo(() => {
     return selectNotes(items, validTypes, showPrivate);
@@ -80,14 +79,6 @@ export const NotesView = ({ onEditTask, onNewNote }: NotesViewProps) => {
       return b.updatedAt - a.updatedAt;
     });
   }, [notes, activeTag, activePillar, searchQuery]);
-
-  // Selected note for Workspace view
-  const currentWorkspaceNote = useMemo(() => {
-    if (!selectedNoteId && filteredNotes.length > 0) {
-      return filteredNotes[0];
-    }
-    return filteredNotes.find(n => n.id === selectedNoteId) || filteredNotes[0] || null;
-  }, [selectedNoteId, filteredNotes]);
 
   const handleTogglePin = (note: Item) => {
     updateItem(note.id, { pinned: !note.pinned });
@@ -154,83 +145,87 @@ export const NotesView = ({ onEditTask, onNewNote }: NotesViewProps) => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Top Header: Search & View Mode Switcher */}
+      {/* Top Header: View Mode Switcher */}
       <div 
         className="glass-panel" 
         style={{ 
-          padding: "16px 20px", 
+          padding: "10px 18px", 
           display: "flex", 
-          flexDirection: "column", 
-          gap: 14,
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 12,
           background: "var(--bg-surface)"
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-          {/* Search bar */}
-          <div style={{ position: "relative", flex: 1, minWidth: 240, maxWidth: 440 }}>
-            <Search size={15} color="var(--text-tertiary)" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
-            <input 
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search all notes, ideas, knowledge, tags..."
-              className="ui-input"
-              style={{ width: "100%", paddingLeft: 36, paddingRight: 12, height: 38, fontSize: 13 }}
-            />
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="segmented-nav">
+            <button 
+              onClick={() => setViewMode('workspace')}
+              className={`segmented-nav-btn ${viewMode === 'workspace' ? 'active' : ''}`}
+              title="Modern 3-Panel Workspace (Apple Notes + Notion + Obsidian)"
+            >
+              <FileText size={13} />
+              <span>Workspace</span>
+            </button>
+            <button 
+              onClick={() => setViewMode('app')}
+              className={`segmented-nav-btn ${viewMode === 'app' ? 'active' : ''}`}
+              title="Notes Card Grid"
+            >
+              <LayoutGrid size={13} color={viewMode === 'app' ? 'var(--text-primary)' : 'inherit'} />
+              <span>Cards</span>
+            </button>
+            <button 
+              onClick={() => setViewMode('board')}
+              className={`segmented-nav-btn ${viewMode === 'board' ? 'active' : ''}`}
+              title="Kanban Board"
+            >
+              <Layers size={13} />
+              <span>Board</span>
+            </button>
+            <button 
+              onClick={() => setViewMode('quick')}
+              className={`segmented-nav-btn ${viewMode === 'quick' ? 'active' : ''}`}
+              title="Compact List"
+            >
+              <Layers size={13} />
+              <span>List</span>
+            </button>
           </div>
+        </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {/* View Mode Switcher: Cards Grid / Workspace / Board / List */}
-            <div className="segmented-nav">
-              <button 
-                onClick={() => setViewMode('app')}
-                className={`segmented-nav-btn ${viewMode === 'app' ? 'active' : ''}`}
-                title="Notes Card Grid"
-              >
-                <LayoutGrid size={13} color={viewMode === 'app' ? 'var(--text-primary)' : 'inherit'} />
-                <span>Cards</span>
-              </button>
-              <button 
-                onClick={() => setViewMode('workspace')}
-                className={`segmented-nav-btn ${viewMode === 'workspace' ? 'active' : ''}`}
-                title="Knowledge Workspace"
-              >
-                <FileText size={13} />
-                <span>Workspace</span>
-              </button>
-              <button 
-                onClick={() => setViewMode('board')}
-                className={`segmented-nav-btn ${viewMode === 'board' ? 'active' : ''}`}
-                title="Kanban Board"
-              >
-                <Layers size={13} />
-                <span>Board</span>
-              </button>
-              <button 
-                onClick={() => setViewMode('quick')}
-                className={`segmented-nav-btn ${viewMode === 'quick' ? 'active' : ''}`}
-                title="Compact List"
-              >
-                <Layers size={13} />
-                <span>List</span>
-              </button>
+        {/* Search & Actions for secondary views (Cards/Board/List) */}
+        {viewMode !== 'workspace' && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, justifyContent: "flex-end", maxWidth: 440 }}>
+            <div style={{ position: "relative", width: "100%" }}>
+              <Search size={14} color="var(--text-tertiary)" style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)" }} />
+              <input 
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search notes, tags..."
+                className="ui-input"
+                style={{ width: "100%", paddingLeft: 32, paddingRight: 10, height: 32, fontSize: 12.5 }}
+              />
             </div>
 
             {onNewNote && (
               <button 
                 onClick={onNewNote}
                 className="btn-primary"
-                style={{ gap: 6, padding: "8px 14px", fontSize: 13 }}
+                style={{ gap: 6, padding: "6px 12px", fontSize: 12.5, whiteSpace: "nowrap" }}
               >
-                <Plus size={14} strokeWidth={2.5} />
+                <Plus size={13} strokeWidth={2.5} />
                 <span>New Note</span>
               </button>
             )}
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Filter Pills Bar: Pillars & Tags (shown in Workspace / Board / Quick modes) */}
-        {viewMode !== 'app' && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
+      {/* Filter Pills Bar: Pillars & Tags (only shown in Board/Quick modes) */}
+      {(viewMode === 'board' || viewMode === 'quick') && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
             {/* Pillar selector chips */}
             <button 
               onClick={() => setActivePillar('all')}
@@ -320,7 +315,6 @@ export const NotesView = ({ onEditTask, onNewNote }: NotesViewProps) => {
             })}
           </div>
         )}
-      </div>
 
       {/* MODE 1: Notes Card Grid */}
       {viewMode === 'app' && (
@@ -419,150 +413,9 @@ export const NotesView = ({ onEditTask, onNewNote }: NotesViewProps) => {
         </div>
       )}
 
-      {/* MODE 2: Knowledge Workspace (Notion style structured hierarchy & rich reader) */}
+      {/* MODE 1: Modern 3-Panel Notes Workspace */}
       {viewMode === 'workspace' && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-          {/* Left Column: Outline Tree */}
-          <div className="glass-panel" style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 10, maxHeight: "72vh", overflowY: "auto" }}>
-            <span className="text-label" style={{ fontSize: 10 }}>Knowledge Hierarchy</span>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              {filteredNotes.map(note => {
-                const isSelected = currentWorkspaceNote?.id === note.id;
-                const pObj = PILLARS.find(p => p.id === note.pillar);
-
-                return (
-                  <button 
-                    key={note.id}
-                    onClick={() => setSelectedNoteId(note.id)}
-                    style={{ 
-                      display: "flex", 
-                      alignItems: "center", 
-                      justifyContent: "space-between", 
-                      padding: "8px 10px", 
-                      borderRadius: 7, 
-                      background: isSelected ? "rgba(255,255,255,0.08)" : "transparent", 
-                      border: "none", 
-                      cursor: "pointer", 
-                      textAlign: "left",
-                      color: isSelected ? "var(--text-primary)" : "var(--text-secondary)",
-                      transition: "all 0.12s ease"
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
-                      <FileText size={13} color={pObj ? pObj.color : "var(--text-tertiary)"} />
-                      <span style={{ fontSize: 13, fontWeight: isSelected ? 600 : 450, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {note.title}
-                      </span>
-                    </div>
-                    {pObj && (
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: pObj.color, flexShrink: 0 }} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Right Column: Full Markdown Reader / Editor Preview */}
-          <div className="glass-panel" style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16, minHeight: 400 }}>
-            {currentWorkspaceNote ? (
-              <>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, borderBottom: "1px solid var(--border-subtle)", paddingBottom: 14 }}>
-                  <div>
-                    <h2 style={{ fontSize: 20, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.015em" }}>
-                      {currentWorkspaceNote.title}
-                    </h2>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
-                      {PILLARS.find(p => p.id === currentWorkspaceNote.pillar) && (
-                        <span className="ui-pill" style={{ fontSize: 10 }}>
-                          {PILLARS.find(p => p.id === currentWorkspaceNote.pillar)?.name}
-                        </span>
-                      )}
-                      <span className="text-meta" style={{ fontSize: 11 }}>
-                        Updated {new Date(currentWorkspaceNote.updatedAt).toLocaleDateString()}
-                      </span>
-                      {currentWorkspaceNote.tags?.map(t => (
-                        <span key={t} className="text-meta" style={{ fontSize: 11, color: "var(--accent-hover)" }}>
-                          #{t}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={() => onEditTask(currentWorkspaceNote)} 
-                    className="btn-secondary" 
-                    style={{ fontSize: 12, gap: 5, padding: "6px 12px" }}
-                  >
-                    <Edit3 size={13} />
-                    <span>Edit Page</span>
-                  </button>
-                </div>
-
-                {/* Markdown Rendered Body */}
-                <div style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-secondary)", minHeight: 160 }}>
-                  {currentWorkspaceNote.body ? (
-                    renderWikiLinksMarkdown(currentWorkspaceNote.body)
-                  ) : (
-                    <span style={{ color: "var(--text-tertiary)", fontStyle: "italic" }}>
-                      No content in this document. Click &ldquo;Edit Page&rdquo; to write Markdown or link notes with [[Note Title]].
-                    </span>
-                  )}
-                </div>
-
-                {/* Bi-directional Backlinks & Outbound Links */}
-                <div style={{ marginTop: "auto", paddingTop: 14, borderTop: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column", gap: 10 }}>
-                  {/* Backlinks */}
-                  {(() => {
-                    const backlinks = calculateBacklinks(activeVisibleItems, currentWorkspaceNote.title);
-                    const forwardLinks = calculateForwardLinks(activeVisibleItems, currentWorkspaceNote.body || '');
-
-                    return (
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
-                        <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-subtle)" }}>
-                          <div style={{ fontSize: 11, color: "var(--text-tertiary)", fontWeight: 600, display: "flex", alignItems: "center", gap: 4, marginBottom: 6 }}>
-                            <ArrowDownRight size={12} color="#10b981" />
-                            <span>Referenced By ({backlinks.length})</span>
-                          </div>
-                          {backlinks.length > 0 ? (
-                            backlinks.map(b => (
-                              <button key={b.id} onClick={() => onEditTask(b)} className="btn-ghost" style={{ fontSize: 11.5, padding: "2px 4px", color: "var(--accent-hover)" }}>
-                                • {b.title}
-                              </button>
-                            ))
-                          ) : (
-                            <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>No inbound backlinks</span>
-                          )}
-                        </div>
-
-                        <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-subtle)" }}>
-                          <div style={{ fontSize: 11, color: "var(--text-tertiary)", fontWeight: 600, display: "flex", alignItems: "center", gap: 4, marginBottom: 6 }}>
-                            <ArrowUpRight size={12} color="#3b82f6" />
-                            <span>Outbound Links ({forwardLinks.length})</span>
-                          </div>
-                          {forwardLinks.length > 0 ? (
-                            forwardLinks.map(f => (
-                              <button key={f.title} onClick={() => f.item && onEditTask(f.item)} className="btn-ghost" style={{ fontSize: 11.5, padding: "2px 4px", color: f.item ? "var(--accent-hover)" : "var(--text-tertiary)" }}>
-                                • [[{f.title}]]
-                              </button>
-                            ))
-                          ) : (
-                            <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>No outbound links</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </>
-            ) : (
-              <div style={{ padding: 40, textAlign: "center", color: "var(--text-tertiary)" }}>
-                Select a document from the hierarchy to read and navigate.
-              </div>
-            )}
-          </div>
-        </div>
+        <NotesWorkspace onOpenGlobalCapture={onNewNote} />
       )}
 
       {/* MODE 3: Visual Note Board (Google Keep style pinned multi-column cards & color accents) */}
