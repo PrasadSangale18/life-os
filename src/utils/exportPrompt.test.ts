@@ -66,7 +66,7 @@ describe('Export and Prompt-Wise AI Logic', () => {
       customInstructions: 'Keep steps under 20 minutes each'
     });
 
-    expect(prompt).toContain('AI TASK BREAKDOWN & EXECUTION ARCHITECTURE PROMPT');
+    expect(prompt).toContain('AI TASK MANAGEMENT & DECOMPOSITION ARCHITECTURE PROMPT');
     expect(prompt).toContain('Complete HSE Safety Audit Report');
     expect(prompt).toContain('Keep steps under 20 minutes each');
     expect(prompt).toContain('Desired Outcome & Definition of Done');
@@ -80,21 +80,64 @@ describe('Export and Prompt-Wise AI Logic', () => {
       customInstructions: 'Work day starts at 8:30 AM'
     });
 
-    expect(prompt).toContain('EXECUTIVE TIME-BLOCKED DAILY SCHEDULE PROMPT');
+    expect(prompt).toContain('EXECUTIVE TIME-BLOCKED DAILY SCHEDULE & CIRCADIAN ALIGNMENT PROMPT');
     expect(prompt).toContain('Review System Architecture Draft');
     expect(prompt).toContain('Work day starts at 8:30 AM');
-    expect(prompt).toContain('Deep work blocks');
+    expect(prompt).toContain('Deep Work Ultra-Blocks');
   });
 
-  it('generates an 80/20 leverage audit prompt', () => {
+  it('generates a decision matrix and regret minimization prompt', () => {
     const prompt = generateExternalAIPrompt(sampleItems, {
       scope: 'single',
       template: 'first_principles',
       task: sampleItems[0]
     });
 
-    expect(prompt).toContain('FIRST-PRINCIPLES VALUE & LEVERAGE AUDIT');
+    expect(prompt).toContain('HIGH-STAKES DECISION MATRIX & PRE-MORTEM AUDIT PROMPT');
     expect(prompt).toContain('Complete HSE Safety Audit Report');
-    expect(prompt).toContain('Eliminate');
+    expect(prompt).toContain('Regret Minimization Framework');
+  });
+
+  it('generates productivity prompts for the 5 core frameworks (Task, Goal, Time, Brainstorm, Decision)', () => {
+    // 1. Task Management
+    const taskPrompt = generateExternalAIPrompt(sampleItems, {
+      scope: 'open',
+      template: 'task_management'
+    });
+    expect(taskPrompt).toContain('AI TASK MANAGEMENT & DECOMPOSITION ARCHITECTURE PROMPT');
+    expect(taskPrompt).toContain('Complete HSE Safety Audit Report');
+
+    // 2. Goal Setting
+    const goalPrompt = generateExternalAIPrompt(sampleItems, {
+      scope: 'all',
+      template: 'goal_setting'
+    });
+    expect(goalPrompt).toContain('EXECUTIVE GOAL SETTING & OKR ROADMAP PROMPT');
+    expect(goalPrompt).toContain('Review System Architecture Draft');
+
+    // 3. Time Management
+    const timePrompt = generateExternalAIPrompt(sampleItems, {
+      scope: 'today',
+      template: 'time_management'
+    });
+    expect(timePrompt).toContain('EXECUTIVE TIME-BLOCKED DAILY SCHEDULE & CIRCADIAN ALIGNMENT PROMPT');
+    expect(timePrompt).toContain('Complete HSE Safety Audit Report');
+
+    // 4. Brainstorming
+    const brainstormPrompt = generateExternalAIPrompt(sampleItems, {
+      scope: 'all',
+      template: 'brainstorming'
+    });
+    expect(brainstormPrompt).toContain('FIRST-PRINCIPLES BRAINSTORMING & LATERAL IDEATION PROMPT');
+    expect(brainstormPrompt).toContain('First Principles of Autonomous Systems');
+
+    // 5. Decision Making
+    const decisionPrompt = generateExternalAIPrompt(sampleItems, {
+      scope: 'all',
+      template: 'decision_making'
+    });
+    expect(decisionPrompt).toContain('HIGH-STAKES DECISION MATRIX & PRE-MORTEM AUDIT PROMPT');
+    expect(decisionPrompt).toContain('Complete HSE Safety Audit Report');
   });
 });
+

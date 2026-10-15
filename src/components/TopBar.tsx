@@ -8,7 +8,8 @@ import {
   List, 
   FolderKanban, 
   Inbox,
-  Menu
+  Menu,
+  Sparkles
 } from 'lucide-react';
 
 interface TopBarProps {
@@ -19,6 +20,7 @@ interface TopBarProps {
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   onQuickCapture?: () => void;
+  onOpenPromptWise?: () => void;
   pageTitle?: string;
   onSearchClick?: () => void;
   onToggleSidebar?: () => void;
@@ -35,6 +37,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   isDarkMode,
   onToggleDarkMode,
   onQuickCapture,
+  onOpenPromptWise,
   pageTitle = "Shift Radar",
   onSearchClick,
   onToggleSidebar,
@@ -124,6 +127,19 @@ export const TopBar: React.FC<TopBarProps> = ({
           <span>Search</span>
           <kbd className="text-[10px] font-mono bg-white dark:bg-slate-800 px-1 rounded border border-slate-200 dark:border-slate-700">⌘K</kbd>
         </button>
+
+        {/* AI Productivity Studio */}
+        {onOpenPromptWise && (
+          <button
+            type="button"
+            onClick={onOpenPromptWise}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 dark:border-orange-500/40 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0 shadow-xs"
+            title="Productivity AI Studio (Task Management, Goal Setting, Time Management, Brainstorming, Decision Making)"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400" />
+            <span className="hidden sm:inline">AI Studio</span>
+          </button>
+        )}
 
         {/* Theme Toggle - Lights up on cursor hover matching Prahari */}
         <button

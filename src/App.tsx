@@ -239,6 +239,7 @@ export default function App() {
           inboxCount={inboxCount}
           isDarkMode={theme === 'dark'}
           onToggleDarkMode={toggleTheme}
+          onOpenPromptWise={() => setShowPromptModal(true)}
           onQuickCapture={() => {
             setEditingTask(undefined);
             setCaptureTarget('inbox');
