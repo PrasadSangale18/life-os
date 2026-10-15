@@ -542,18 +542,30 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
       {/* 3 Executive Metric Stat Cards (Matching Prahari Reference) */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
         {/* Card 1: Critical / Do Now */}
-        <div className="glass-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 12, borderLeft: "3px solid #EF4444" }}>
+        <div 
+          className="glass-panel" 
+          style={{ 
+            padding: "20px 22px", 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: 12, 
+            background: "linear-gradient(180deg, rgba(239, 68, 68, 0.09) 0%, var(--bg-surface) 100%)",
+            border: "1px solid rgba(239, 68, 68, 0.35)",
+            borderLeft: "4px solid #EF4444",
+            boxShadow: "0 6px 24px rgba(239, 68, 68, 0.12)"
+          }}
+        >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>CRITICAL / DO NOW</span>
-            <div style={{ width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(239, 68, 68, 0.12)", color: "#EF4444", border: "1px solid rgba(239, 68, 68, 0.25)" }}>
-              <AlertTriangle size={14} />
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "#EF4444", textTransform: "uppercase" }}>CRITICAL / DO NOW</span>
+            <div style={{ width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(239, 68, 68, 0.18)", color: "#EF4444", border: "1px solid rgba(239, 68, 68, 0.4)" }}>
+              <AlertTriangle size={15} />
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-            <span style={{ fontSize: 34, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+            <span style={{ fontSize: 36, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
               {overdueTasks.length + topPriorities.filter(t => t.priority === 'critical').length}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 650, padding: "3px 8px", borderRadius: 9999, background: overdueTasks.length > 0 ? "rgba(239, 68, 68, 0.15)" : "rgba(16, 185, 129, 0.12)", color: overdueTasks.length > 0 ? "#EF4444" : "#10B981", border: `1px solid ${overdueTasks.length > 0 ? "rgba(239, 68, 68, 0.3)" : "rgba(16, 185, 129, 0.25)"}` }}>
+            <span style={{ fontSize: 11, fontWeight: 650, padding: "3px 9px", borderRadius: 9999, background: overdueTasks.length > 0 ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.15)", color: overdueTasks.length > 0 ? "#EF4444" : "#10B981", border: `1px solid ${overdueTasks.length > 0 ? "rgba(239, 68, 68, 0.4)" : "rgba(16, 185, 129, 0.3)"}` }}>
               {overdueTasks.length > 0 ? `${overdueTasks.length} Overdue` : 'Nominal'}
             </span>
           </div>
@@ -563,18 +575,30 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
         </div>
 
         {/* Card 2: Active Focus / Planned */}
-        <div className="glass-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 12, borderLeft: "3px solid #10b981" }}>
+        <div 
+          className="glass-panel" 
+          style={{ 
+            padding: "20px 22px", 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: 12, 
+            background: "linear-gradient(180deg, rgba(16, 185, 129, 0.09) 0%, var(--bg-surface) 100%)",
+            border: "1px solid rgba(16, 185, 129, 0.35)",
+            borderLeft: "4px solid #10b981",
+            boxShadow: "0 6px 24px rgba(16, 185, 129, 0.12)"
+          }}
+        >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>ACTIVE FOCUS</span>
-            <div style={{ width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(16, 185, 129, 0.12)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.25)" }}>
-              <Zap size={14} />
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "#10b981", textTransform: "uppercase" }}>ACTIVE FOCUS</span>
+            <div style={{ width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(16, 185, 129, 0.18)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.4)" }}>
+              <Zap size={15} />
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-            <span style={{ fontSize: 34, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+            <span style={{ fontSize: 36, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
               {inProgressTasks.length + dueTodayTasks.length}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 650, padding: "3px 8px", borderRadius: 9999, background: "rgba(16, 185, 129, 0.12)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.25)" }}>
+            <span style={{ fontSize: 11, fontWeight: 650, padding: "3px 9px", borderRadius: 9999, background: "rgba(16, 185, 129, 0.18)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.35)" }}>
               {capacityPercent}% Capacity
             </span>
           </div>
@@ -585,18 +609,30 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
         </div>
 
         {/* Card 3: Total System Records across Pillars */}
-        <div className="glass-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 12, borderLeft: "3px solid #3b82f6" }}>
+        <div 
+          className="glass-panel" 
+          style={{ 
+            padding: "20px 22px", 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: 12, 
+            background: "linear-gradient(180deg, rgba(59, 130, 246, 0.09) 0%, var(--bg-surface) 100%)",
+            border: "1px solid rgba(59, 130, 246, 0.35)",
+            borderLeft: "4px solid #3b82f6",
+            boxShadow: "0 6px 24px rgba(59, 130, 246, 0.12)"
+          }}
+        >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>SYSTEM KNOWLEDGE & TASKS</span>
-            <div style={{ width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(59, 130, 246, 0.12)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.25)" }}>
-              <CheckCircle2 size={14} />
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "#3b82f6", textTransform: "uppercase" }}>SYSTEM KNOWLEDGE & TASKS</span>
+            <div style={{ width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(59, 130, 246, 0.18)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.4)" }}>
+              <CheckCircle2 size={15} />
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-            <span style={{ fontSize: 34, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+            <span style={{ fontSize: 36, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
               {items.filter(i => !i.deletedAt).length}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 650, padding: "3px 8px", borderRadius: 9999, background: "rgba(59, 130, 246, 0.12)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.25)" }}>
+            <span style={{ fontSize: 11, fontWeight: 650, padding: "3px 9px", borderRadius: 9999, background: "rgba(59, 130, 246, 0.18)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.35)" }}>
               5 Pillars Active
             </span>
           </div>

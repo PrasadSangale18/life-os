@@ -31,10 +31,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   totalCount = 0
 }) => {
   const navItems = [
+    { id: 'notes', name: 'My Notes', icon: BookOpen, subtitle: 'Apple Notes + Notion + Obsidian', count: notesCount > 0 ? notesCount : undefined },
     { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, subtitle: 'Command center & daily focus' },
     { id: 'tasks', name: 'To-do list', icon: CheckSquare, subtitle: 'Tasks, matrix & execution' },
     { id: 'habits', name: 'Habits & Routines', icon: Flame, subtitle: 'Atomic streaks & heatmaps' },
-    { id: 'notes', name: 'My Notes', icon: BookOpen, subtitle: 'Rich thoughts & ideas', count: notesCount > 0 ? notesCount : undefined },
     { id: 'mindmap', name: 'Canvas & Graph', icon: Compass, subtitle: 'Visual second brain' },
     { id: 'organizer', name: 'Smart AI Organizer', icon: Sparkles, subtitle: 'Bulk input & auto-sorting', badge: 'BULK AI' },
   ];

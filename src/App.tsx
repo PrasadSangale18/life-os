@@ -47,7 +47,7 @@ export default function App() {
 
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeSection, setActiveSection] = useState<string>("dashboard");
+  const [activeSection, setActiveSection] = useState<string>("notes");
   const [taskViewMode, setTaskViewMode] = useState<'matrix' | 'list' | 'projects' | 'inbox'>('matrix');
   const [activePillar, setActivePillar] = useState<PillarId>("physical");
   const [showUtilitiesModal, setShowUtilitiesModal] = useState(false);
