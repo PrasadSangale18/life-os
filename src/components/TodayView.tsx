@@ -504,48 +504,105 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          {/* Prompt-Wise Action Button (Refined AI Violet Tint) */}
-          <button
+          <button 
             type="button"
             onClick={() => setShowTodayPromptModal(true)}
-            style={{
+            className="btn-secondary"
+            style={{ 
               display: "inline-flex",
               alignItems: "center",
-              gap: 8,
-              padding: "9px 16px",
-              borderRadius: 10,
-              background: "rgba(139, 92, 246, 0.12)",
-              color: "#A78BFA",
-              border: "1px solid rgba(139, 92, 246, 0.3)",
-              fontSize: 13,
-              fontWeight: 650,
+              gap: 7,
+              padding: "9px 14px", 
+              borderRadius: 10, 
+              fontSize: 13, 
+              color: "#8b5cf6", 
+              borderColor: "rgba(139, 92, 246, 0.3)", 
+              background: "rgba(139, 92, 246, 0.08)",
               cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(139, 92, 246, 0.15)",
-              transition: "all 0.15s ease"
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(139, 92, 246, 0.22)";
-              e.currentTarget.style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "rgba(139, 92, 246, 0.12)";
-              e.currentTarget.style.transform = "none";
+              fontWeight: 600
             }}
             title="Format today's workload into a structured prompt for external AI"
           >
-            <Sparkles size={14} color="#A78BFA" />
-            <span>⚡ Prompt-Wise AI Breakdown</span>
+            <Sparkles size={14} color="#8b5cf6" />
+            <span>AI Breakdown</span>
           </button>
-          
+
           <button 
             type="button"
             onClick={onAddTask}
             className="btn-primary"
-            style={{ padding: "9px 16px", borderRadius: 10, fontSize: 13, gap: 6 }}
+            style={{ padding: "9px 18px", borderRadius: 10, fontSize: 13, gap: 7, fontWeight: 600 }}
           >
-            <Plus size={14} strokeWidth={2.5} />
+            <Plus size={15} strokeWidth={2.5} />
             <span>Add Task</span>
           </button>
+        </div>
+      </div>
+
+      {/* 3 Executive Metric Stat Cards (Matching Prahari Reference) */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+        {/* Card 1: Critical / Do Now */}
+        <div className="glass-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 12, borderLeft: "3px solid #EF4444" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>CRITICAL / DO NOW</span>
+            <div style={{ width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(239, 68, 68, 0.12)", color: "#EF4444", border: "1px solid rgba(239, 68, 68, 0.25)" }}>
+              <AlertTriangle size={14} />
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+            <span style={{ fontSize: 34, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+              {overdueTasks.length + topPriorities.filter(t => t.priority === 'critical').length}
+            </span>
+            <span style={{ fontSize: 11, fontWeight: 650, padding: "3px 8px", borderRadius: 9999, background: overdueTasks.length > 0 ? "rgba(239, 68, 68, 0.15)" : "rgba(16, 185, 129, 0.12)", color: overdueTasks.length > 0 ? "#EF4444" : "#10B981", border: `1px solid ${overdueTasks.length > 0 ? "rgba(239, 68, 68, 0.3)" : "rgba(16, 185, 129, 0.25)"}` }}>
+              {overdueTasks.length > 0 ? `${overdueTasks.length} Overdue` : 'Nominal'}
+            </span>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
+            <span>Urgent & Important • Eisenhower Q1</span>
+          </div>
+        </div>
+
+        {/* Card 2: Active Focus / Planned */}
+        <div className="glass-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 12, borderLeft: "3px solid #10b981" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>ACTIVE FOCUS</span>
+            <div style={{ width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(16, 185, 129, 0.12)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.25)" }}>
+              <Zap size={14} />
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+            <span style={{ fontSize: 34, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+              {inProgressTasks.length + dueTodayTasks.length}
+            </span>
+            <span style={{ fontSize: 11, fontWeight: 650, padding: "3px 8px", borderRadius: 9999, background: "rgba(16, 185, 129, 0.12)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.25)" }}>
+              {capacityPercent}% Capacity
+            </span>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
+            <Clock size={12} color="#10b981" />
+            <span>{totalEstMinutes}m planned execution time</span>
+          </div>
+        </div>
+
+        {/* Card 3: Total System Records across Pillars */}
+        <div className="glass-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 12, borderLeft: "3px solid #3b82f6" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>SYSTEM KNOWLEDGE & TASKS</span>
+            <div style={{ width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(59, 130, 246, 0.12)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.25)" }}>
+              <CheckCircle2 size={14} />
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+            <span style={{ fontSize: 34, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+              {items.filter(i => !i.deletedAt).length}
+            </span>
+            <span style={{ fontSize: 11, fontWeight: 650, padding: "3px 8px", borderRadius: 9999, background: "rgba(59, 130, 246, 0.12)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.25)" }}>
+              5 Pillars Active
+            </span>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
+            <span>Synchronized across Life OS</span>
+          </div>
         </div>
       </div>
 
@@ -569,69 +626,6 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
         }}
         onEditTask={onEditTask}
       />
-
-      {/* 3 Executive Metric Stat Cards (Matching Prahari media_1791718696966.png) */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
-        {/* Card 1: Critical / Do Now */}
-        <div className="glass-panel" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10, borderLeft: "3px solid #EF4444" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>CRITICAL / DO NOW</span>
-            <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 7px", borderRadius: 9999, background: "rgba(239, 68, 68, 0.12)", color: "#EF4444", border: "1px solid rgba(239, 68, 68, 0.25)" }}>
-              {overdueTasks.length > 0 ? `${overdueTasks.length} Overdue` : 'Nominal'}
-            </span>
-          </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <span style={{ fontSize: 32, fontWeight: 750, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
-              {overdueTasks.length + topPriorities.filter(t => t.priority === 'critical').length}
-            </span>
-            <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>tasks requiring immediate action</span>
-          </div>
-          <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", display: "flex", alignItems: "center", gap: 5 }}>
-            <AlertTriangle size={12} color="#EF4444" />
-            <span>Urgent & Important (Eisenhower Q1)</span>
-          </div>
-        </div>
-
-        {/* Card 2: Active Focus / Planned */}
-        <div className="glass-panel" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10, borderLeft: "3px solid #10b981" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>ACTIVE FOCUS</span>
-            <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 7px", borderRadius: 9999, background: "rgba(16, 185, 129, 0.1)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
-              {capacityPercent}% Capacity
-            </span>
-          </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <span style={{ fontSize: 32, fontWeight: 750, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
-              {inProgressTasks.length + dueTodayTasks.length}
-            </span>
-            <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>tasks in progress & due today</span>
-          </div>
-          <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", display: "flex", alignItems: "center", gap: 5 }}>
-            <Clock size={12} color="#10b981" />
-            <span>{totalEstMinutes}m planned focus time</span>
-          </div>
-        </div>
-
-        {/* Card 3: Total System Records across Pillars */}
-        <div className="glass-panel" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10, borderLeft: "3px solid #3b82f6" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-tertiary)", textTransform: "uppercase" }}>SYSTEM KNOWLEDGE & TASKS</span>
-            <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 7px", borderRadius: 9999, background: "rgba(59, 130, 246, 0.1)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
-              5 Pillars Active
-            </span>
-          </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <span style={{ fontSize: 32, fontWeight: 750, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
-              {items.filter(i => !i.deletedAt).length}
-            </span>
-            <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>total organized records</span>
-          </div>
-          <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", display: "flex", alignItems: "center", gap: 5 }}>
-            <CheckCircle2 size={12} color="#3b82f6" />
-            <span>Synchronized across 5 Life Pillars</span>
-          </div>
-        </div>
-      </div>
 
       {/* Date & Agenda Status bar */}
       <div 
@@ -670,38 +664,21 @@ export const TodayView = ({ onEditTask, onAddTask, onGoToInbox, onGoToMatrix }: 
             onClick={handleExportToday}
             className="btn-ghost"
             style={{ 
+              display: "inline-flex",
+              alignItems: "center",
               gap: 6, 
-              padding: "7px 12px", 
+              padding: "7px 14px", 
               fontSize: 12.5, 
               borderRadius: 8, 
               border: "1px solid var(--border-default)", 
               background: "var(--bg-surface-elevated)",
-              color: "var(--text-secondary)"
+              color: "var(--text-secondary)",
+              cursor: "pointer"
             }}
             title="Export Today's Agenda (Markdown / Backup)"
           >
             <Download size={13} color="#3b82f6" />
-            <span>Export</span>
-          </button>
-
-          {/* Button 2: Prompt-Wise AI */}
-          <button 
-            type="button"
-            onClick={() => setShowTodayPromptModal(true)}
-            className="btn-ghost"
-            style={{ 
-              gap: 6, 
-              padding: "7px 12px", 
-              fontSize: 12.5, 
-              borderRadius: 8, 
-              border: "1px solid rgba(234, 88, 12, 0.25)", 
-              background: "rgba(234, 88, 12, 0.08)",
-              color: "#ea580c"
-            }}
-            title="Prompt-Wise: Format Today's Workload for External AI"
-          >
-            <Sparkles size={13} color="#ea580c" />
-            <span>AI Prompt</span>
+            <span>Export Agenda</span>
           </button>
         </div>
       </div>

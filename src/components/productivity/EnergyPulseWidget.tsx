@@ -65,88 +65,128 @@ export const EnergyPulseWidget: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-[#131924] border border-white/[0.08] hover:border-white/[0.14] rounded-xl p-4 transition-all flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div 
+      className="glass-panel"
+      style={{ 
+        padding: "14px 18px", 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "space-between", 
+        flexWrap: "wrap", 
+        gap: 14 
+      }}
+    >
       {/* Left: Indicator & Guidance */}
-      <div className="flex items-center gap-3 w-full sm:w-auto">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-          currentEnergy >= 4
-            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-            : currentEnergy === 3
-            ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
-            : currentEnergy > 0
-            ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-            : 'bg-white/[0.05] text-slate-400 border border-white/[0.08]'
-        }`}>
-          <BatteryCharging className="w-4 h-4" />
+      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 260 }}>
+        <div style={{ 
+          width: 36, 
+          height: 36, 
+          borderRadius: 10, 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          flexShrink: 0,
+          background: currentEnergy >= 4 ? "rgba(16, 185, 129, 0.12)" : currentEnergy === 3 ? "rgba(59, 130, 246, 0.12)" : currentEnergy > 0 ? "rgba(245, 158, 11, 0.12)" : "var(--bg-surface-elevated)",
+          color: currentEnergy >= 4 ? "#10b981" : currentEnergy === 3 ? "#3b82f6" : currentEnergy > 0 ? "#f59e0b" : "var(--text-tertiary)",
+          border: `1px solid ${currentEnergy >= 4 ? "rgba(16, 185, 129, 0.25)" : currentEnergy === 3 ? "rgba(59, 130, 246, 0.25)" : currentEnergy > 0 ? "rgba(245, 158, 11, 0.25)" : "var(--border-subtle)"}`,
+          transition: "all 0.2s ease"
+        }}>
+          <BatteryCharging size={18} />
         </div>
 
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-white tracking-wide">
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 650, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
               Daily Energy & Sentiment Pulse
             </span>
             {justSaved && (
-              <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-                <Check className="w-3 h-3" /> Logged
+              <span style={{ fontSize: 10, color: "#10b981", fontFamily: "var(--font-mono)", display: "flex", alignItems: "center", gap: 3, fontWeight: 600 }}>
+                <Check size={11} strokeWidth={2.5} /> Logged
               </span>
             )}
           </div>
-          <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
+          <p style={{ margin: "2px 0 0", fontSize: 11.5, color: "var(--text-secondary)", lineHeight: 1.35 }}>
             {currentEnergy === 0
-              ? 'Rate your morning energy to calibrate today\'s workload capacity'
+              ? "Rate your morning energy to calibrate today's workload capacity"
               : currentEnergy <= 2
-              ? 'Low energy detected: protect non-urgent tasks & focus strictly on Q1'
+              ? "Low energy detected: protect non-urgent tasks & focus strictly on Q1"
               : currentEnergy >= 4
-              ? 'High cognitive readiness: optimal day for deep architectural work'
-              : 'Steady balanced energy: stick to your scheduled 4h capacity'}
+              ? "High cognitive readiness: optimal day for deep architectural work"
+              : "Steady balanced energy: stick to your scheduled 4h capacity"}
           </p>
         </div>
       </div>
 
       {/* Right: Interactive 1-Click Energy Selector (1 to 5) & Mood Pills */}
-      <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-        <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-xl border border-white/[0.06]">
-          {[1, 2, 3, 4, 5].map(lvl => (
-            <button
-              key={lvl}
-              onClick={() => handleSelectEnergy(lvl)}
-              className={`w-7 h-7 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center ${
-                currentEnergy === lvl
-                  ? lvl <= 2
-                    ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.25)]'
-                    : lvl === 3
-                    ? 'bg-blue-500/25 text-blue-300 border border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.25)]'
-                    : 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
-                  : 'text-slate-400 hover:text-white hover:bg-white/[0.08]'
-              }`}
-              title={`Energy Level ${lvl}/5`}
-            >
-              {lvl}
-            </button>
-          ))}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 3, background: "var(--bg-surface-elevated)", padding: 3, borderRadius: 10, border: "1px solid var(--border-subtle)" }}>
+          {[1, 2, 3, 4, 5].map(lvl => {
+            const isSelected = currentEnergy === lvl;
+            const activeColor = lvl <= 2 ? "#f59e0b" : lvl === 3 ? "#3b82f6" : "#10b981";
+            const activeBg = lvl <= 2 ? "rgba(245, 158, 11, 0.18)" : lvl === 3 ? "rgba(59, 130, 246, 0.18)" : "rgba(16, 185, 129, 0.18)";
+            const activeBorder = lvl <= 2 ? "rgba(245, 158, 11, 0.4)" : lvl === 3 ? "rgba(59, 130, 246, 0.4)" : "rgba(16, 185, 129, 0.4)";
+            return (
+              <button
+                key={lvl}
+                type="button"
+                onClick={() => handleSelectEnergy(lvl)}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 7,
+                  fontSize: 12,
+                  fontFamily: "var(--font-mono)",
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  border: isSelected ? `1px solid ${activeBorder}` : "1px solid transparent",
+                  background: isSelected ? activeBg : "transparent",
+                  color: isSelected ? activeColor : "var(--text-tertiary)"
+                }}
+                title={`Energy Level ${lvl}/5`}
+              >
+                {lvl}
+              </button>
+            );
+          })}
         </div>
 
         {/* Mood Emoji Pills */}
-        <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-xl border border-white/[0.06]">
+        <div style={{ display: "flex", alignItems: "center", gap: 3, background: "var(--bg-surface-elevated)", padding: 3, borderRadius: 10, border: "1px solid var(--border-subtle)" }}>
           {[
             { id: 'great', icon: '⚡', label: 'Flow' },
             { id: 'good', icon: '✨', label: 'Good' },
             { id: 'neutral', icon: '⚖️', label: 'Neutral' },
             { id: 'tired', icon: '☕', label: 'Tired' },
-          ].map(m => (
-            <button
-              key={m.id}
-              onClick={() => handleSelectMood(m.id)}
-              className={`px-2 py-1 rounded-lg text-xs transition-all flex items-center gap-1 ${
-                currentMood === m.id
-                  ? 'bg-white/[0.15] text-white font-bold'
-                  : 'text-slate-400 hover:text-white hover:bg-white/[0.05]'
-              }`}
-              title={m.label}
-            >
-              <span>{m.icon}</span>
-            </button>
-          ))}
+          ].map(m => {
+            const isSelected = currentMood === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => handleSelectMood(m.id)}
+                style={{
+                  padding: "4px 8px",
+                  borderRadius: 7,
+                  fontSize: 12,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  border: isSelected ? "1px solid var(--border-default)" : "1px solid transparent",
+                  background: isSelected ? "var(--bg-surface)" : "transparent",
+                  color: isSelected ? "var(--text-primary)" : "var(--text-tertiary)"
+                }}
+                title={m.label}
+              >
+                <span>{m.icon}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

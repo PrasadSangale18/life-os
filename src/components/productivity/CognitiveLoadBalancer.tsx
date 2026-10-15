@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { 
   BatteryCharging, 
   AlertTriangle, 
-  CheckCircle2, 
   RotateCcw, 
   Swords, 
   BookOpen, 
@@ -153,53 +152,80 @@ export const CognitiveLoadBalancer: React.FC<CognitiveLoadBalancerProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#131924] border border-white/[0.08] rounded-xl p-4 sm:p-5 flex flex-col gap-4 shadow-sm transition-all">
+    <div 
+      className="glass-panel"
+      style={{ 
+        padding: "16px 20px", 
+        display: "flex", 
+        flexDirection: "column", 
+        gap: 14 
+      }}
+    >
       {/* Header Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
-        <div className="flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-colors ${
-            isOverloaded 
-              ? 'bg-red-500/15 text-red-400 border-red-500/30'
-              : loadPercent >= 80 
-              ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-              : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-          }`}>
-            {isOverloaded ? <AlertTriangle className="w-4 h-4" /> : <BatteryCharging className="w-4 h-4" />}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, borderBottom: "1px solid var(--border-subtle)", paddingBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ 
+            width: 36, 
+            height: 36, 
+            borderRadius: 10, 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            flexShrink: 0,
+            background: isOverloaded ? "rgba(239, 68, 68, 0.12)" : loadPercent >= 80 ? "rgba(245, 158, 11, 0.12)" : "rgba(16, 185, 129, 0.12)",
+            color: isOverloaded ? "#ef4444" : loadPercent >= 80 ? "#f59e0b" : "#10b981",
+            border: `1px solid ${isOverloaded ? "rgba(239, 68, 68, 0.28)" : loadPercent >= 80 ? "rgba(245, 158, 11, 0.28)" : "rgba(16, 185, 129, 0.28)"}`
+          }}>
+            {isOverloaded ? <AlertTriangle size={18} /> : <BatteryCharging size={18} />}
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: "0.03em", textTransform: "uppercase", color: "var(--text-primary)" }}>
                 Cognitive Capacity Balancer
               </h3>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold font-mono ${
-                isOverloaded 
-                  ? 'bg-red-500/15 text-red-300 border border-red-500/30'
-                  : loadPercent >= 80 
-                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-                  : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-              }`}>
+              <span style={{ 
+                fontSize: 10.5, 
+                fontWeight: 700, 
+                fontFamily: "var(--font-mono)", 
+                padding: "2px 8px", 
+                borderRadius: 9999,
+                background: isOverloaded ? "rgba(239, 68, 68, 0.12)" : loadPercent >= 80 ? "rgba(245, 158, 11, 0.12)" : "rgba(16, 185, 129, 0.12)",
+                color: isOverloaded ? "#ef4444" : loadPercent >= 80 ? "#f59e0b" : "#10b981",
+                border: `1px solid ${isOverloaded ? "rgba(239, 68, 68, 0.25)" : loadPercent >= 80 ? "rgba(245, 158, 11, 0.25)" : "rgba(16, 185, 129, 0.25)"}`
+              }}>
                 {loadPercent}% Capacity ({Math.round(totalPlannedMinutes / 60 * 10) / 10}h / {Math.round(capacityMinutes / 60 * 10) / 10}h)
               </span>
 
               {velocityTelemetry.hasData && velocityTelemetry.ratio !== 1.0 && (
                 <button
+                  type="button"
                   onClick={() => setApplyVelocityCalibration(!applyVelocityCalibration)}
-                  className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold flex items-center gap-1 transition-all ${
-                    applyVelocityCalibration
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
-                      : 'bg-white/[0.04] text-slate-400 border border-white/[0.08] hover:text-slate-200'
-                  }`}
-                  title="Click to toggle whether capacity accounts for your historical flow focus multiplier"
+                  style={{
+                    fontSize: 10.5,
+                    fontWeight: 600,
+                    fontFamily: "var(--font-mono)",
+                    padding: "2px 8px",
+                    borderRadius: 9999,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    cursor: "pointer",
+                    background: applyVelocityCalibration ? "rgba(245, 158, 11, 0.15)" : "var(--bg-surface-elevated)",
+                    color: applyVelocityCalibration ? "#f59e0b" : "var(--text-tertiary)",
+                    border: `1px solid ${applyVelocityCalibration ? "rgba(245, 158, 11, 0.35)" : "var(--border-subtle)"}`,
+                    transition: "all 0.15s ease"
+                  }}
+                  title="Toggle velocity-calibrated workload estimate"
                 >
-                  <Zap className="w-2.5 h-2.5 text-amber-400" />
+                  <Zap size={11} color="#f59e0b" />
                   <span>{applyVelocityCalibration ? `Calibrated (${velocityTelemetry.ratio}×)` : 'Raw Estimate'}</span>
                 </button>
               )}
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p style={{ margin: "3px 0 0", fontSize: 11.5, color: "var(--text-secondary)", lineHeight: 1.35 }}>
               {isOverloaded 
                 ? (velocityTelemetry.hasData && velocityTelemetry.ratio > 1.0 && applyVelocityCalibration
-                    ? `Planning Fallacy Alert: Flow telemetry shows tasks take ~${velocityTelemetry.ratio}× longer. Calibrated load is ${totalPlannedMinutes}m vs ${capacityMinutes}m budget.`
+                    ? `Planning Fallacy Alert: Historical focus multiplier shows tasks take ~${velocityTelemetry.ratio}× longer. Calibrated load is ${totalPlannedMinutes}m vs ${capacityMinutes}m budget.`
                     : `Energy pulse ${energyRating}/5: Workload exceeds cognitive budget by ${totalPlannedMinutes - capacityMinutes} mins. Risk of burnout.`)
                 : loadPercent >= 80 
                 ? `Energy pulse ${energyRating}/5: Near optimal daily throughput. Avoid adding more tasks.`
@@ -209,42 +235,101 @@ export const CognitiveLoadBalancer: React.FC<CognitiveLoadBalancerProps> = ({
         </div>
 
         {/* Quick Action Triggers */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           {isOverloaded && (
             <button
+              type="button"
               onClick={handleAutoBalance}
-              className="px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 font-semibold text-xs shadow-[0_2px_10px_rgba(239,68,68,0.2)] transition-all flex items-center gap-1.5"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 12px",
+                borderRadius: 8,
+                background: "rgba(239, 68, 68, 0.12)",
+                color: "#ef4444",
+                border: "1px solid rgba(239, 68, 68, 0.35)",
+                fontSize: 12,
+                fontWeight: 650,
+                cursor: "pointer",
+                transition: "all 0.15s ease"
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = "rgba(239, 68, 68, 0.22)"}
+              onMouseLeave={e => e.currentTarget.style.background = "rgba(239, 68, 68, 0.12)"}
+              title="Shed lower-priority tasks to tomorrow"
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
+              <ShieldCheck size={14} color="#ef4444" />
               <span>Auto-Balance Day</span>
             </button>
           )}
 
           <button
+            type="button"
             onClick={onOpenDecisionDuel}
-            className="px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] text-slate-200 text-xs font-semibold transition-all flex items-center gap-1.5"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              borderRadius: 8,
+              background: "var(--bg-surface-elevated)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--border-default)",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.15s ease"
+            }}
             title="When stuck or overwhelmed, let pairwise choice find your #1 task"
           >
-            <Swords className="w-3.5 h-3.5 text-[#FF5A1F]" />
+            <Swords size={13} color="#FF5A1F" />
             <span>Decide For Me</span>
           </button>
 
           <button
+            type="button"
             onClick={onOpenEveningChronicle}
-            className="px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] text-slate-200 text-xs font-semibold transition-all flex items-center gap-1.5"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              borderRadius: 8,
+              background: "var(--bg-surface-elevated)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--border-default)",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.15s ease"
+            }}
             title="Synthesize today's accomplishments and reflections"
           >
-            <BookOpen className="w-3.5 h-3.5 text-blue-400" />
+            <BookOpen size={13} color="#3b82f6" />
             <span>Daily Chronicle</span>
           </button>
 
           {staleCount > 0 && (
             <button
+              type="button"
               onClick={onOpenDecayRadar}
-              className="px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-amber-500/30 text-amber-300 text-xs font-semibold transition-all flex items-center gap-1.5"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 12px",
+                borderRadius: 8,
+                background: "rgba(245, 158, 11, 0.1)",
+                color: "#f59e0b",
+                border: "1px solid rgba(245, 158, 11, 0.3)",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.15s ease"
+              }}
               title="Guilt-free triage for tasks neglected > 14 days"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+              <RotateCcw size={13} color="#f59e0b" />
               <span>Backlog Decay ({staleCount})</span>
             </button>
           )}
@@ -252,37 +337,48 @@ export const CognitiveLoadBalancer: React.FC<CognitiveLoadBalancerProps> = ({
       </div>
 
       {/* Progress Capacity Bar */}
-      <div className="flex flex-col gap-1.5">
-        <div className="w-full h-2.5 bg-white/[0.04] rounded-full overflow-hidden p-0.5 border border-white/[0.06] relative">
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ 
+          width: "100%", 
+          height: 8, 
+          background: "var(--bg-surface-elevated)", 
+          borderRadius: 9999, 
+          overflow: "hidden", 
+          border: "1px solid var(--border-subtle)", 
+          position: "relative" 
+        }}>
           <div 
-            className={`h-full rounded-full transition-all duration-500 ${
-              isOverloaded 
-                ? 'bg-gradient-to-r from-amber-500 to-red-500 shadow-[0_0_10px_rgba(239,68,68,0.35)]'
+            style={{ 
+              height: "100%", 
+              borderRadius: 9999,
+              transition: "all 0.4s ease",
+              width: `${Math.min(100, loadPercent)}%`,
+              background: isOverloaded 
+                ? "linear-gradient(90deg, #f59e0b, #ef4444)" 
                 : loadPercent >= 80 
-                ? 'bg-gradient-to-r from-[#FF5A1F] to-amber-500 shadow-[0_0_8px_rgba(255,90,31,0.3)]'
-                : 'bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_8px_rgba(16,185,129,0.3)]'
-            }`}
-            style={{ width: `${Math.min(100, loadPercent)}%` }}
+                ? "linear-gradient(90deg, #FF5A1F, #f59e0b)" 
+                : "linear-gradient(90deg, #10b981, #06b6d4)",
+              boxShadow: isOverloaded ? "0 0 10px rgba(239, 68, 68, 0.35)" : "none"
+            }}
           />
           {/* 100% capacity threshold marker */}
-          <div className="absolute top-0 bottom-0 right-0 w-0.5 bg-white/40" title="Max Daily Capacity" />
+          <div style={{ position: "absolute", top: 0, bottom: 0, right: 0, width: 2, background: "rgba(255,255,255,0.4)" }} title="Max Daily Capacity" />
         </div>
 
         {/* Legend / Metrics */}
-        <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11, color: "var(--text-tertiary)", fontFamily: "var(--font-mono)" }}>
           <span>0h (Start)</span>
-          <span className="flex items-center gap-1 text-slate-400">
-            <Clock className="w-3 h-3" />
-            {pendingTasks.length} pending tasks • ~{totalPlannedMinutes} mins
+          <span style={{ display: "flex", alignItems: "center", gap: 5, color: "var(--text-secondary)" }}>
+            <Clock size={12} />
+            <span>{pendingTasks.length} pending tasks • ~{totalPlannedMinutes} mins</span>
           </span>
-          <span className="text-slate-300 font-bold">{Math.round(capacityMinutes / 60 * 10) / 10}h Max Limit</span>
+          <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{Math.round(capacityMinutes / 60 * 10) / 10}h Max Limit</span>
         </div>
       </div>
 
       {balancedNotification && (
-        <div className="px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2 animate-fade-in">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
-          <span>{balancedNotification}</span>
+        <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(16, 185, 129, 0.12)", border: "1px solid rgba(16, 185, 129, 0.3)", color: "#10b981", fontSize: 12, fontWeight: 600 }}>
+          {balancedNotification}
         </div>
       )}
     </div>

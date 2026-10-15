@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  Clock, 
   Sparkles, 
-  Play, 
-  RotateCcw
+  Clock, 
+  RotateCcw,
+  Play
 } from 'lucide-react';
 import type { Item } from '../../types';
 import { useStore } from '../../store';
@@ -36,7 +36,7 @@ export const DayTimeline: React.FC<DayTimelineProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  // Time boundaries: 07:00 to 22:00 (15 hours)
+  // Time boundaries: 07:00 to 22:00 (16 markers)
   const START_HOUR = 7;
   const END_HOUR = 22;
 
@@ -49,44 +49,41 @@ export const DayTimeline: React.FC<DayTimelineProps> = ({
     return arr;
   }, []);
 
-  // Laser indicator position
-  const nowPercent = useMemo(() => {
-    const startMins = START_HOUR * 60;
-    const endMins = END_HOUR * 60;
-    if (currentMinutesFromMidnight < startMins) return 0;
-    if (currentMinutesFromMidnight > endMins) return 100;
-    return ((currentMinutesFromMidnight - startMins) / (endMins - startMins)) * 100;
-  }, [currentMinutesFromMidnight]);
-
-  // Tasks that have a scheduledStart (format "HH:mm")
+  // Filter tasks that have scheduled slots or are active today
   const scheduledTasks = useMemo(() => {
-    return tasks.filter(t => t.scheduledStart && t.status !== 'dropped');
+    return tasks
+      .filter(t => t.scheduledStart)
+      .sort((a, b) => (a.scheduledStart || '').localeCompare(b.scheduledStart || ''));
   }, [tasks]);
 
-  // Unscheduled tasks due today or in top priorities
   const unscheduledTasks = useMemo(() => {
     return tasks.filter(t => !t.scheduledStart && t.status !== 'done' && t.status !== 'dropped');
   }, [tasks]);
 
-  // Auto-Schedule Day Engine (Circadian cognitive matching)
-  const handleAutoSchedule = async () => {
-    const circadianSlots = [
-      '09:00', // Morning peak 1
-      '10:15', // Morning peak 2
-      '11:30', // Pre-lunch
-      '14:00', // Afternoon admin / low friction
-      '15:15', // Afternoon flow
-      '16:30', // Late sprint
-      '18:00'  // Wrap-up
-    ];
+  // Laser line position relative to 07:00 -> 22:00
+  const startMin = START_HOUR * 60;
+  const totalMinSpan = (END_HOUR - START_HOUR) * 60;
+  const nowPercent = Math.max(0, Math.min(100, ((currentMinutesFromMidnight - startMin) / totalMinSpan) * 100));
 
-    // Sort unscheduled: Q1 first, highest priority, shortest duration first
+  // 1-Click Circadian Auto-Scheduler: Slots unscheduled tasks by priority & energy peak
+  const handleAutoSchedule = async () => {
     const sorted = [...unscheduledTasks].sort((a, b) => {
+      if (a.isPriority && !b.isPriority) return -1;
+      if (!a.isPriority && b.isPriority) return 1;
       if (a.quadrant === 'do' && b.quadrant !== 'do') return -1;
       if (a.quadrant !== 'do' && b.quadrant === 'do') return 1;
-      if (a.isPriority && !b.isPriority) return -1;
-      return (a.estMinutes || 25) - (b.estMinutes || 25);
+      return (a.estMinutes || 30) - (b.estMinutes || 30);
     });
+
+    const circadianSlots = [
+      '09:00', // Morning peak focus slot 1
+      '10:30', // Morning peak focus slot 2
+      '11:45', // Quick win before lunch
+      '14:00', // Early afternoon administrative/execution
+      '15:30', // Afternoon second wind
+      '17:00', // Late afternoon wrap-up
+      '19:00'  // Evening low-friction / reflection
+    ];
 
     for (let i = 0; i < sorted.length && i < circadianSlots.length; i++) {
       const t = sorted[i];
@@ -102,93 +99,172 @@ export const DayTimeline: React.FC<DayTimelineProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#131924] border border-white/[0.08] rounded-xl p-4 sm:p-5 flex flex-col gap-4">
+    <div 
+      className="glass-panel"
+      style={{ 
+        padding: "16px 20px", 
+        display: "flex", 
+        flexDirection: "column", 
+        gap: 14 
+      }}
+    >
       {/* Header with Title and Auto-Schedule Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center justify-center">
-            <Clock className="w-4 h-4" />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, borderBottom: "1px solid var(--border-subtle)", paddingBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ 
+            width: 32, 
+            height: 32, 
+            borderRadius: 8, 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center",
+            background: "rgba(56, 189, 248, 0.12)",
+            color: "#38bdf8",
+            border: "1px solid rgba(56, 189, 248, 0.25)"
+          }}>
+            <Clock size={16} />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
+            <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: "0.03em", textTransform: "uppercase", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 8 }}>
               Circadian Day Timeline
-              <span className="text-[10px] text-slate-400 font-normal lowercase">
+              <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-tertiary)", textTransform: "none" }}>
                 ({scheduledTasks.length} scheduled)
               </span>
             </h3>
-            <p className="text-[11px] text-slate-400">
+            <p style={{ margin: "2px 0 0", fontSize: 11.5, color: "var(--text-secondary)" }}>
               Interactive 24h schedule calibrated to human energy rhythms
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {scheduledTasks.length > 0 && (
             <button
+              type="button"
               onClick={handleClearSchedule}
-              className="px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-white text-[11px] font-mono transition-all flex items-center gap-1"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "6px 10px",
+                borderRadius: 8,
+                background: "var(--bg-surface-elevated)",
+                color: "var(--text-tertiary)",
+                border: "1px solid var(--border-subtle)",
+                fontSize: 11,
+                fontFamily: "var(--font-mono)",
+                cursor: "pointer"
+              }}
               title="Clear scheduled slots"
             >
-              <RotateCcw className="w-3 h-3" />
-              Reset
+              <RotateCcw size={11} />
+              <span>Reset</span>
             </button>
           )}
 
           <button
+            type="button"
             onClick={handleAutoSchedule}
             disabled={unscheduledTasks.length === 0}
-            className="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 disabled:opacity-40 font-semibold text-xs flex items-center gap-1.5 shadow-[0_2px_8px_rgba(56,189,248,0.15)] transition-all"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "7px 14px",
+              borderRadius: 8,
+              background: "rgba(56, 189, 248, 0.12)",
+              color: "#38bdf8",
+              border: "1px solid rgba(56, 189, 248, 0.3)",
+              fontSize: 12,
+              fontWeight: 650,
+              cursor: unscheduledTasks.length === 0 ? "not-allowed" : "pointer",
+              opacity: unscheduledTasks.length === 0 ? 0.45 : 1,
+              transition: "all 0.15s ease"
+            }}
+            title="Auto-slot tasks according to natural circadian peaks"
           >
-            <Sparkles className="w-3.5 h-3.5 fill-current" />
-            Auto-Schedule Day
+            <Sparkles size={13} fill="currentColor" />
+            <span>Auto-Schedule Day</span>
           </button>
         </div>
       </div>
 
       {/* Horizontal / Grid Timeline Track */}
-      <div className="relative w-full overflow-x-auto pb-2">
-        <div className="min-w-[700px] flex flex-col gap-2">
+      <div style={{ position: "relative", width: "100%", overflowX: "auto", paddingBottom: 4 }}>
+        <div style={{ minWidth: 680, display: "flex", flexDirection: "column", gap: 8 }}>
           
           {/* Time markers bar */}
           <div 
-            className="text-[10px] font-mono text-slate-500 border-b border-white/[0.06] pb-1"
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}
+            style={{ 
+              display: "grid", 
+              gridTemplateColumns: "repeat(16, minmax(0, 1fr))",
+              fontSize: 10,
+              fontFamily: "var(--font-mono)",
+              color: "var(--text-tertiary)",
+              borderBottom: "1px solid var(--border-subtle)",
+              paddingBottom: 4
+            }}
           >
             {hours.map(h => (
-              <span key={h.hour} className="text-left pl-1">
+              <span key={h.hour} style={{ textAlign: "left", paddingLeft: 4 }}>
                 {h.label}
               </span>
             ))}
           </div>
 
           {/* Real-time laser line */}
-          <div className="relative h-20 bg-white/[0.015] border border-white/[0.05] rounded-xl overflow-hidden flex items-center p-2">
+          <div style={{ 
+            position: "relative", 
+            height: 72, 
+            background: "var(--bg-surface-elevated)", 
+            border: "1px solid var(--border-subtle)", 
+            borderRadius: 10, 
+            overflow: "hidden", 
+            display: "flex", 
+            alignItems: "center", 
+            padding: 8 
+          }}>
             
             {/* Hour grid lines */}
             <div 
-              className="absolute inset-0 pointer-events-none opacity-20"
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}
+              style={{ 
+                position: "absolute", 
+                inset: 0, 
+                display: "grid", 
+                gridTemplateColumns: "repeat(16, minmax(0, 1fr))", 
+                pointerEvents: "none", 
+                opacity: 0.15 
+              }}
             >
               {hours.map(h => (
-                <div key={h.hour} className="border-r border-white" />
+                <div key={h.hour} style={{ borderRight: "1px solid var(--text-primary)" }} />
               ))}
             </div>
 
             {/* Now line indicator */}
             {nowPercent > 0 && nowPercent < 100 && (
               <div 
-                className="absolute top-0 bottom-0 z-20 pointer-events-none flex flex-col items-center"
-                style={{ left: `${nowPercent}%` }}
+                style={{ 
+                  position: "absolute", 
+                  top: 0, 
+                  bottom: 0, 
+                  left: `${nowPercent}%`, 
+                  zIndex: 20, 
+                  pointerEvents: "none", 
+                  display: "flex", 
+                  flexDirection: "column", 
+                  alignItems: "center" 
+                }}
               >
-                <div className="w-2 h-2 rounded-full bg-[#FF5A1F] shadow-[0_0_8px_#FF5A1F]" />
-                <div className="w-[1.5px] h-full bg-[#FF5A1F]/70 shadow-[0_0_8px_#FF5A1F]" />
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF5A1F", boxShadow: "0 0 8px #FF5A1F" }} />
+                <div style={{ width: 1.5, height: "100%", background: "#FF5A1F", opacity: 0.75, boxShadow: "0 0 6px #FF5A1F" }} />
               </div>
             )}
 
             {/* Scheduled task chips on track */}
-            <div className="relative w-full flex items-center gap-2 overflow-x-auto z-10">
+            <div style={{ position: "relative", width: "100%", display: "flex", alignItems: "center", gap: 8, overflowX: "auto", zIndex: 10 }}>
               {scheduledTasks.length === 0 ? (
-                <div className="w-full text-center text-xs text-slate-500 italic py-2">
+                <div style={{ width: "100%", textAlign: "center", fontSize: 12, color: "var(--text-tertiary)", fontStyle: "italic", padding: "8px 0" }}>
                   No tasks placed on the timeline yet. Click "Auto-Schedule Day" to align your daily tasks.
                 </div>
               ) : (
@@ -197,31 +273,54 @@ export const DayTimeline: React.FC<DayTimelineProps> = ({
                   return (
                     <div
                       key={t.id}
-                      className="group shrink-0 p-2.5 rounded-xl border border-white/[0.12] bg-[#161B22]/90 hover:border-[#FF5A1F] transition-all flex items-center gap-2.5 cursor-pointer shadow-md"
+                      style={{ 
+                        flexShrink: 0, 
+                        padding: "8px 12px", 
+                        borderRadius: 10, 
+                        border: "1px solid var(--border-default)", 
+                        background: "var(--bg-surface)", 
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: 10, 
+                        cursor: "pointer", 
+                        boxShadow: "var(--shadow-sm)",
+                        transition: "all 0.15s ease"
+                      }}
                       onClick={() => onEditTask(t)}
                     >
                       <div 
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: pillarColor }}
+                        style={{ width: 8, height: 8, borderRadius: "50%", flexShrink: 0, backgroundColor: pillarColor }}
                       />
-                      <div className="flex flex-col max-w-[140px]">
-                        <span className="text-[10px] font-mono text-[#FF5A1F] font-bold">
+                      <div style={{ display: "flex", flexDirection: "column", maxWidth: 140 }}>
+                        <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "#FF5A1F", fontWeight: 700 }}>
                           {t.scheduledStart} ({t.estMinutes || 25}m)
                         </span>
-                        <span className="text-xs text-slate-200 truncate font-medium">
+                        <span style={{ fontSize: 12, color: "var(--text-primary)", fontWeight: 550, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {t.title}
                         </span>
                       </div>
 
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           onStartFocus(t);
                         }}
-                        className="w-6 h-6 rounded-lg bg-[#FF5A1F]/20 text-[#FF5A1F] hover:bg-[#FF5A1F] hover:text-white flex items-center justify-center transition-all opacity-80 group-hover:opacity-100"
+                        style={{ 
+                          width: 24, 
+                          height: 24, 
+                          borderRadius: 6, 
+                          background: "rgba(255, 90, 31, 0.15)", 
+                          color: "#FF5A1F", 
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: "center", 
+                          cursor: "pointer",
+                          border: "none"
+                        }}
                         title="Start Focus"
                       >
-                        <Play className="w-3 h-3 fill-current ml-0.5" />
+                        <Play size={11} fill="currentColor" style={{ marginLeft: 1 }} />
                       </button>
                     </div>
                   );
