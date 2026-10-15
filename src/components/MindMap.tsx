@@ -93,7 +93,7 @@ export const MindMap: React.FC<MindMapProps> = ({ onEditTask, onNewItem }) => {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14, height: "100%", minHeight: 650 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14, height: "100%", minHeight: 650, padding: 16 }}>
       {/* Top Header & Toolbar Bar */}
       <div 
         className="glass-panel" 

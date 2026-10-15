@@ -275,7 +275,15 @@ export default function App() {
         </TopBar>
 
         {/* Content Body */}
-        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 14 : 24, paddingBottom: isMobile ? 100 : 80 }}>
+        <div style={{ 
+          flex: 1, 
+          overflowY: activeSection === 'mindmap' ? 'hidden' : 'auto', 
+          padding: isMobile ? 14 : (activeSection === 'mindmap' ? 0 : 24), 
+          paddingBottom: isMobile ? (activeSection === 'mindmap' ? 50 : 100) : (activeSection === 'mindmap' ? 0 : 80),
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0
+        }}>
           {/* 1. NOTES FOR TASK WORKSPACE */}
           {activeSection === "tasks" && (
             <AnimatePresence mode="wait">

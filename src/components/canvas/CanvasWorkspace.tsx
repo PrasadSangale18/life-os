@@ -1,11 +1,8 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import { 
   Search, 
   Plus, 
-  RotateCcw, 
-  RotateCw, 
   X, 
-  ChevronDown, 
   Check, 
   Share2, 
   Columns, 
@@ -23,16 +20,19 @@ import {
   ZoomIn, 
   ZoomOut, 
   Layers, 
-  ExternalLink,
-  Edit3,
-  Compass,
-  FolderKanban
+  Edit3, 
+  Compass, 
+  FolderKanban, 
+  CheckSquare, 
+  Trash2, 
+  Database 
 } from 'lucide-react';
+import { useStore } from '../../store';
 import type { Item } from '../../types';
 
 export interface CanvasNode {
   id: string;
-  type: 'note' | 'record' | 'link' | 'task';
+  type: 'note' | 'record' | 'link' | 'task' | 'project' | 'goal';
   title: string;
   subtitle: string;
   body?: string;
@@ -42,6 +42,10 @@ export interface CanvasNode {
   width?: number;
   color?: string;
   tags?: string[];
+  pillar?: string;
+  priority?: string;
+  status?: string;
+  itemId?: string;
 }
 
 export interface CanvasEdge {
@@ -68,229 +72,6 @@ export interface CanvasBoard {
   };
 }
 
-const INITIAL_CANVASES: CanvasBoard[] = [
-  {
-    id: 'paris-route',
-    title: 'Paris Route',
-    nodesCount: 3,
-    updatedAt: 'Just now',
-    diagramType: 'wireframe',
-    nodes: [
-      {
-        id: 'node-1',
-        type: 'note',
-        title: 'Seine walking route',
-        subtitle: 'Île Saint-Louis → Louvre → Tuileries',
-        body: 'Morning walk starting from Île Saint-Louis, passing through Pont Neuf, the Louvre courtyard, and concluding at the Tuileries Garden.',
-        x: 260,
-        y: 140,
-        width: 270,
-        tags: ['paris', 'walking', 'morning']
-      },
-      {
-        id: 'node-2',
-        type: 'record',
-        title: 'Take it slow along the Seine',
-        subtitle: 'Keep Saturday morning open for walking and unplanned stops.',
-        body: 'Audio memo: "Do not rush the schedule. Sit at a bench near Pont des Arts, watch the river barges, and stop for hot espresso."',
-        x: 580,
-        y: 300,
-        width: 280,
-        tags: ['audio', 'memo', 'mindfulness']
-      },
-      {
-        id: 'node-3',
-        type: 'link',
-        title: "Musée d'Orsay reservation",
-        subtitle: 'example.com/paris-orsay',
-        url: 'https://musee-orsay.fr/tickets',
-        body: 'Reserved for Sunday 10:30 AM. Impressionist galleries on 5th floor first before crowd builds up.',
-        x: 320,
-        y: 520,
-        width: 270,
-        tags: ['tickets', 'art', 'reservation']
-      }
-    ],
-    edges: [
-      { id: 'edge-1-2', from: 'node-1', to: 'node-2' },
-      { id: 'edge-2-3', from: 'node-2', to: 'node-3' }
-    ],
-    docTitle: 'Weekend in Paris',
-    docContent: {
-      summary: 'Focus the two days on the Seine, Le Marais, and Montmartre, leaving more time for walks, meals, and spontaneous stops. Full addresses are saved in the route notes.',
-      quote: 'Choose one main route each day. If a place feels right, stay a little longer.',
-      bullets: [
-        'Saturday: the Seine, the Louvre courtyard, Le Marais, and a Paris bistro',
-        'Sunday: Montmartre, Musée d\'Orsay, and gifts before departure'
-      ],
-      tableRows: [
-        { day: 'Sat', route: 'Île Saint-Louis → Le Marais', walking: 'About 8 km' },
-        { day: 'Sun', route: 'Montmartre → Musée d\'Orsay', walking: 'About 7 km' }
-      ]
-    }
-  },
-  {
-    id: 'seine-walk',
-    title: 'Seine Walk',
-    nodesCount: 4,
-    updatedAt: 'Today',
-    diagramType: 'curve',
-    nodes: [
-      {
-        id: 'sw-1',
-        type: 'note',
-        title: 'Pont de Sully to Pont Neuf',
-        subtitle: 'Historic bridges & architecture line',
-        x: 200,
-        y: 180,
-        width: 260
-      },
-      {
-        id: 'sw-2',
-        type: 'record',
-        title: 'Bouquinistes riverside stalls',
-        subtitle: 'Vintage prints, books, and antique maps.',
-        x: 520,
-        y: 220,
-        width: 270
-      },
-      {
-        id: 'sw-3',
-        type: 'note',
-        title: 'Sunset viewpoint at Pont des Arts',
-        subtitle: 'Arrive by 7:15 PM for golden hour lighting.',
-        x: 440,
-        y: 440,
-        width: 280
-      }
-    ],
-    edges: [
-      { id: 'sw-e1', from: 'sw-1', to: 'sw-2' },
-      { id: 'sw-e2', from: 'sw-2', to: 'sw-3' }
-    ],
-    docTitle: 'Seine Riverside Guide',
-    docContent: {
-      summary: 'An uninterrupted walking tour along the Left and Right banks of the River Seine.',
-      quote: 'Paris is best understood on foot, matching the slow speed of the water.',
-      bullets: [
-        'Inspect antique illustrations at the riverside stalls',
-        'Cross Pont Neuf at twilight for reflective water views'
-      ],
-      tableRows: [
-        { day: 'Morning', route: 'Pont de Sully → Île de la Cité', walking: '3.5 km' },
-        { day: 'Evening', route: 'Pont des Arts → Tuileries', walking: '2.8 km' }
-      ]
-    }
-  },
-  {
-    id: 'restaurants-coffee',
-    title: 'Restaurants and Coffee',
-    nodesCount: 5,
-    updatedAt: 'Yesterday',
-    diagramType: 'branching',
-    nodes: [
-      {
-        id: 'rc-1',
-        type: 'note',
-        title: 'Boot Café (Le Marais)',
-        subtitle: 'Tiny former shoe repair shop serving Belleville roast.',
-        x: 240,
-        y: 160,
-        width: 280
-      },
-      {
-        id: 'rc-2',
-        type: 'link',
-        title: 'Bistrot Paul Bert',
-        subtitle: 'Classic steak frites & grand Marnier soufflé.',
-        url: 'https://bistrotpaulbert.fr',
-        x: 560,
-        y: 240,
-        width: 280
-      },
-      {
-        id: 'rc-3',
-        type: 'record',
-        title: 'Télescope Espresso bar',
-        subtitle: 'Clean pour-overs near Palais-Royal.',
-        x: 360,
-        y: 450,
-        width: 270
-      }
-    ],
-    edges: [
-      { id: 'rc-e1', from: 'rc-1', to: 'rc-2' },
-      { id: 'rc-e2', from: 'rc-1', to: 'rc-3' }
-    ],
-    docTitle: 'Gastronomy & Specialty Coffee',
-    docContent: {
-      summary: 'Hand-picked cafes, patisseries, and neighborhood bistros with authentic local character.',
-      quote: 'Never eat in a hurry; dining is half of the Parisian cultural compass.',
-      bullets: [
-        'Book Paul Bert at least 1 week in advance',
-        'Order filter origin roast at Boot Café'
-      ],
-      tableRows: [
-        { day: 'Coffee', route: 'Télescope & Boot Café', walking: '1.2 km' },
-        { day: 'Dinner', route: 'Bistrot Paul Bert (11th arr.)', walking: 'Metro 8' }
-      ]
-    }
-  },
-  {
-    id: 'rainy-day',
-    title: 'Rainy-day Alternative',
-    nodesCount: 4,
-    updatedAt: 'Yesterday',
-    diagramType: 'tree',
-    nodes: [
-      {
-        id: 'rd-1',
-        type: 'note',
-        title: 'Covered Passages (Passages Couverts)',
-        subtitle: 'Passage des Panoramas & Galerie Vivienne',
-        x: 280,
-        y: 160,
-        width: 290
-      },
-      {
-        id: 'rd-2',
-        type: 'note',
-        title: 'Musée de l\'Orangerie Water Lilies',
-        subtitle: 'Claude Monet oval galleries under natural skylight',
-        x: 580,
-        y: 260,
-        width: 290
-      },
-      {
-        id: 'rd-3',
-        type: 'link',
-        title: 'Shakespeare and Company Bookstore',
-        subtitle: 'Browse upstairs reading library while it rains outside',
-        x: 340,
-        y: 470,
-        width: 290
-      }
-    ],
-    edges: [
-      { id: 'rd-e1', from: 'rd-1', to: 'rd-2' },
-      { id: 'rd-e2', from: 'rd-1', to: 'rd-3' }
-    ],
-    docTitle: 'Rainy Day Exploration',
-    docContent: {
-      summary: 'Architectural covered arcades, glass-roofed libraries, and quiet museum galleries for rainy afternoons.',
-      quote: 'Rain in Paris is an invitation to explore the secret interior labyrinths.',
-      bullets: [
-        'Wander Galerie Vivienne with its tiled mosaic floors',
-        'Spend two hours with Monet\'s Nymphéas murals'
-      ],
-      tableRows: [
-        { day: 'Morning', route: 'Passage des Panoramas', walking: 'Covered' },
-        { day: 'Afternoon', route: 'Orangerie & Shakespeare and Co.', walking: 'Metro 1' }
-      ]
-    }
-  }
-];
-
 export interface CanvasWorkspaceProps {
   onEditTask?: (task: Item) => void;
   onNewItem?: () => void;
@@ -298,16 +79,260 @@ export interface CanvasWorkspaceProps {
   onViewChange?: (view: 'canvas' | 'tree' | 'graph') => void;
 }
 
+/**
+ * Builds dynamic Life OS canvases grounded in the user's real database items
+ */
+const generateLifeOSCanvases = (items: Item[]): CanvasBoard[] => {
+  const tasks = items.filter(i => i.type === 'task' && !i.deletedAt && !i.isArchived);
+  const notes = items.filter(i => (i.type === 'note' || i.type === 'knowledge' || i.type === 'idea') && !i.deletedAt && !i.isArchived);
+
+  // 1. Board: Strategy & HSE Operations
+  const task1 = tasks.find(t => t.priority === 'critical' || t.title.toLowerCase().includes('safety') || t.title.toLowerCase().includes('audit')) || tasks[0] || {
+    id: 'strat-node-1',
+    type: 'task',
+    title: 'Complete HSE Safety Audit Report',
+    body: 'Verify all safety equipment, compliance protocols, and site certifications across operations.',
+    pillar: 'physical',
+    priority: 'critical'
+  };
+
+  const task2 = tasks.find(t => t.id !== task1.id && (t.title.toLowerCase().includes('architecture') || t.priority === 'high')) || tasks[1] || {
+    id: 'strat-node-2',
+    type: 'task',
+    title: 'Review System Architecture Draft',
+    body: 'Evaluate data ingestion pipeline, resilience layers, and offline Dexie PWA store.',
+    pillar: 'mental',
+    priority: 'high'
+  };
+
+  const note1 = notes[0] || {
+    id: 'strat-node-3',
+    type: 'knowledge',
+    title: 'First Principles of Autonomous Systems',
+    body: 'Deconstruct every complex goal into physics and root assumptions. Avoid analogy-based thinking.',
+    pillar: 'mental'
+  };
+
+  const boardStrategy: CanvasBoard = {
+    id: 'strategy-ops',
+    title: 'Strategy & Operations',
+    nodesCount: 3,
+    updatedAt: 'Just now',
+    diagramType: 'wireframe',
+    nodes: [
+      {
+        id: 'node-strat-1',
+        type: 'task',
+        title: task1.title,
+        subtitle: task1.body || 'High-leverage critical deliverable',
+        body: task1.body,
+        x: 60,
+        y: 70,
+        width: 280,
+        tags: (task1.tags && task1.tags.length > 0) ? task1.tags : ['safety', 'operations', 'critical'],
+        pillar: task1.pillar || 'physical',
+        priority: task1.priority || 'critical',
+        itemId: task1.id
+      },
+      {
+        id: 'node-strat-2',
+        type: 'task',
+        title: task2.title,
+        subtitle: task2.body || 'Core technical architecture review',
+        body: task2.body,
+        x: 400,
+        y: 110,
+        width: 280,
+        tags: (task2.tags && task2.tags.length > 0) ? task2.tags : ['engineering', 'pwa', 'architecture'],
+        pillar: task2.pillar || 'mental',
+        priority: task2.priority || 'high',
+        itemId: task2.id
+      },
+      {
+        id: 'node-strat-3',
+        type: 'note',
+        title: note1.title,
+        subtitle: note1.body || 'Mental model for systems engineering',
+        body: note1.body,
+        x: 210,
+        y: 350,
+        width: 290,
+        tags: (note1.tags && note1.tags.length > 0) ? note1.tags : ['first-principles', 'strategy'],
+        pillar: note1.pillar || 'mental',
+        itemId: note1.id
+      }
+    ],
+    edges: [
+      { id: 'edge-s1', from: 'node-strat-1', to: 'node-strat-2', label: 'Dependency review' },
+      { id: 'edge-s2', from: 'node-strat-2', to: 'node-strat-3', label: 'Root mental axioms' }
+    ],
+    docTitle: 'Executive Strategy & Operations Plan',
+    docContent: {
+      summary: 'High-leverage operational alignment linking HSE site audit compliance with system architecture principles and root mental models.',
+      quote: 'Simplicity is prerequisite for reliability. Eliminate unnecessary moving parts.',
+      bullets: [
+        'Phase 1: Complete and sign off on site safety inspection checklist',
+        'Phase 2: Review state machine synchronization and offline Dexie database',
+        'Phase 3: Synthesize root architectural axioms into company SOP'
+      ],
+      tableRows: [
+        { day: 'Block 1', route: 'HSE Safety Audit Checklist', walking: '45 min' },
+        { day: 'Block 2', route: 'System Architecture Review', walking: '60 min' },
+        { day: 'Block 3', route: 'First Principles Alignment', walking: '30 min' }
+      ]
+    }
+  };
+
+  // 2. Board: Second Brain & Knowledge Web
+  const brainNotes = notes.length > 0 ? notes.slice(0, 4) : [
+    { id: 'kb-1', type: 'knowledge', title: 'First Principles Thinking', body: 'Break systems down to fundamental truths.', pillar: 'mental', tags: ['axiom', 'logic'] },
+    { id: 'kb-2', type: 'note', title: 'Circadian Energy Architecture', body: 'Match cognitive load to biological chronotype.', pillar: 'physical', tags: ['habits', 'bio'] },
+    { id: 'kb-3', type: 'idea', title: 'Local-First Synchronizer', body: 'Client database with background sync outbox.', pillar: 'mental', tags: ['code', 'pwa'] }
+  ];
+
+  const boardSecondBrain: CanvasBoard = {
+    id: 'second-brain',
+    title: 'Second Brain Knowledge Web',
+    nodesCount: brainNotes.length,
+    updatedAt: 'Today',
+    diagramType: 'branching',
+    nodes: brainNotes.map((n, idx) => ({
+      id: `brain-node-${idx}`,
+      type: (n.type === 'knowledge' || n.type === 'note' || n.type === 'idea') ? (n.type as any) : 'note',
+      title: n.title,
+      subtitle: n.body || 'Knowledge card and associative concepts',
+      body: n.body,
+      x: idx === 0 ? 80 : idx === 1 ? 420 : 250,
+      y: idx === 0 ? 80 : idx === 1 ? 140 : 360,
+      width: 275,
+      tags: n.tags || ['knowledge', 'notes'],
+      pillar: n.pillar || 'mental',
+      itemId: n.id
+    })),
+    edges: brainNotes.length >= 2 ? [
+      { id: 'edge-b1', from: 'brain-node-0', to: 'brain-node-1', label: 'Associative link' },
+      ...(brainNotes.length >= 3 ? [{ id: 'edge-b2', from: 'brain-node-0', to: 'brain-node-2', label: 'Applied synthesis' }] : [])
+    ] : [],
+    docTitle: 'Associative Knowledge Synthesis',
+    docContent: {
+      summary: 'Interconnected mental models and research notes forming your persistent digital second brain.',
+      quote: 'Knowledge is not a collection of isolated facts, but a lattice of interrelated mental models.',
+      bullets: [
+        'Connect first-principles thinking with biological work limits',
+        'Cross-reference offline data architecture with privacy principles'
+      ],
+      tableRows: [
+        { day: 'Concept 1', route: 'Root First Principles', walking: 'Foundation' },
+        { day: 'Concept 2', route: 'Ultradian Deep Work', walking: 'Execution' }
+      ]
+    }
+  };
+
+  // 3. Board: Sprint & Tactical Execution
+  const sprintTasks = tasks.slice(0, 3);
+  const boardSprint: CanvasBoard = {
+    id: 'sprint-delivery',
+    title: 'Sprint & Tactical Roadmap',
+    nodesCount: Math.max(sprintTasks.length, 2),
+    updatedAt: 'Yesterday',
+    diagramType: 'curve',
+    nodes: (sprintTasks.length > 0 ? sprintTasks : [task1, task2]).map((t, idx) => ({
+      id: `sprint-node-${idx}`,
+      type: 'task',
+      title: t.title,
+      subtitle: t.body || `Pillar: ${t.pillar || 'Core'} | Priority: ${t.priority || 'Normal'}`,
+      body: t.body,
+      x: idx === 0 ? 70 : idx === 1 ? 410 : 240,
+      y: idx === 0 ? 90 : idx === 1 ? 160 : 370,
+      width: 280,
+      tags: t.tags || ['sprint', 'task'],
+      pillar: t.pillar,
+      priority: t.priority,
+      itemId: t.id
+    })),
+    edges: [
+      { id: 'edge-sp1', from: 'sprint-node-0', to: 'sprint-node-1', label: 'Execution sequence' }
+    ],
+    docTitle: '14-Day Sprint Execution Brief',
+    docContent: {
+      summary: 'Active execution pipeline focused on unblocking immediate deliverables and finishing high-impact tasks.',
+      quote: 'Action produces information. Momentum solves 80% of perceived obstacles.',
+      bullets: [
+        'Close out critical audit reports before weekly sprint sign-off',
+        'Refine state machine logic and verify full test coverage'
+      ],
+      tableRows: [
+        { day: 'Sprint Day 1', route: 'Safety Audit Protocol', walking: 'High Priority' },
+        { day: 'Sprint Day 2', route: 'Architecture Verification', walking: 'Review' }
+      ]
+    }
+  };
+
+  // 4. Board: Freeform Visual Scratchpad
+  const boardScratchpad: CanvasBoard = {
+    id: 'visual-scratchpad',
+    title: 'Visual Scratchpad',
+    nodesCount: 2,
+    updatedAt: 'Active',
+    diagramType: 'tree',
+    nodes: [
+      {
+        id: 'scratch-1',
+        type: 'note',
+        title: 'Central Ideation Node',
+        subtitle: 'Double click or use (T) to place connected thoughts around this hub.',
+        body: 'Drag cards to rearrange. Click [+] in the toolbar to pull any real note or task into this workspace.',
+        x: 100,
+        y: 120,
+        width: 280,
+        tags: ['brainstorm', 'canvas']
+      },
+      {
+        id: 'scratch-2',
+        type: 'record',
+        title: 'Voice & Action Notes',
+        subtitle: 'Connect thoughts with glowing bezier edges and export prompt.',
+        x: 430,
+        y: 200,
+        width: 270,
+        tags: ['audio', 'memo']
+      }
+    ],
+    edges: [
+      { id: 'scratch-e1', from: 'scratch-1', to: 'scratch-2', label: 'Sparks idea' }
+    ],
+    docTitle: 'Open Canvas Ideation & Brainstorming',
+    docContent: {
+      summary: 'A clean 2D spatial canvas for deconstructing complex systems and mapping non-linear thoughts.',
+      quote: 'The mind is for having ideas, not holding them.',
+      bullets: [
+        'Drop note cards anywhere on the grid',
+        'Connect ideas using the Link tool',
+        'Import any Life OS task with 1 click'
+      ],
+      tableRows: [
+        { day: 'Step 1', route: 'Capture raw thoughts', walking: 'Divergent' },
+        { day: 'Step 2', route: 'Link and cluster cards', walking: 'Convergent' }
+      ]
+    }
+  };
+
+  return [boardStrategy, boardSecondBrain, boardSprint, boardScratchpad];
+};
+
 export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({ 
   onEditTask, 
   onNewItem: _onNewItem,
   currentView: _currentView = 'canvas',
   onViewChange
 }) => {
-  const [canvases, setCanvases] = useState<CanvasBoard[]>(INITIAL_CANVASES);
-  const [activeCanvasId, setActiveCanvasId] = useState<string>('paris-route');
-  const [activeTab, setActiveTab] = useState<string>('Paris Route');
-  const [showModeDropdown, setShowModeDropdown] = useState<boolean>(false);
+  const items = useStore(state => state.items);
+
+  // Generate real initial canvases from the user's real store
+  const initialCanvases = useMemo(() => generateLifeOSCanvases(items), [items]);
+
+  const [canvases, setCanvases] = useState<CanvasBoard[]>(initialCanvases);
+  const [activeCanvasId, setActiveCanvasId] = useState<string>('strategy-ops');
   
   // Layout and Split View Controls
   const [showDrawer, setShowDrawer] = useState<boolean>(true);
@@ -317,7 +342,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   
   // Canvas Viewport Pan & Zoom
   const [zoom, setZoom] = useState<number>(1);
-  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 30, y: 30 });
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [showGrid, setShowGrid] = useState<boolean>(true);
@@ -330,6 +355,11 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   // Drawer Search
   const [searchDrawer, setSearchDrawer] = useState<string>('');
   
+  // Add item from Life OS library modal
+  const [showLibraryModal, setShowLibraryModal] = useState<boolean>(false);
+  const [librarySearch, setLibrarySearch] = useState<string>('');
+  const [libraryFilter, setLibraryFilter] = useState<'all' | 'task' | 'note' | 'project'>('all');
+
   // AI Copilot state
   const [copilotOpen, setCopilotOpen] = useState<boolean>(true);
   const [aiActionsExpanded, setAiActionsExpanded] = useState<boolean>(true);
@@ -337,11 +367,11 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string; time?: string }>>([
     {
       role: 'user',
-      text: 'Use this material to organize and save a weekend Paris itinerary.'
+      text: 'Analyze active canvas cards and synthesize execution roadmap.'
     },
     {
       role: 'assistant',
-      text: 'I read 3 related travel records and reorganized the two-day itinerary. All items are connected and saved.'
+      text: 'Analyzed cards on this canvas. Identified operational dependencies between safety audit requirements and architectural axioms. All items are synchronized.'
     }
   ]);
 
@@ -354,6 +384,45 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
     const q = searchDrawer.toLowerCase();
     return canvases.filter(c => c.title.toLowerCase().includes(q));
   }, [canvases, searchDrawer]);
+
+  // Fit canvas calculation to ensure zero clipping
+  const handleFitCanvas = useCallback(() => {
+    if (!activeCanvas?.nodes || activeCanvas.nodes.length === 0) {
+      setPan({ x: 40, y: 40 });
+      setZoom(1);
+      return;
+    }
+    const minX = Math.min(...activeCanvas.nodes.map(n => n.x));
+    const maxX = Math.max(...activeCanvas.nodes.map(n => n.x + (n.width || 280)));
+    const minY = Math.min(...activeCanvas.nodes.map(n => n.y));
+    const maxY = Math.max(...activeCanvas.nodes.map(n => n.y + 160));
+
+    const containerRect = canvasRef.current?.getBoundingClientRect();
+    const availableWidth = containerRect ? containerRect.width : 780;
+    const availableHeight = containerRect ? containerRect.height : 560;
+
+    const contentWidth = Math.max(maxX - minX + 80, 400);
+    const contentHeight = Math.max(maxY - minY + 80, 300);
+
+    const fitZoom = Math.min(
+      Math.max(Math.min(availableWidth / contentWidth, availableHeight / contentHeight, 1.0), 0.55),
+      1.15
+    );
+
+    const fitPanX = Math.round((availableWidth - (maxX - minX) * fitZoom) / 2 - minX * fitZoom);
+    const fitPanY = Math.round((availableHeight - (maxY - minY) * fitZoom) / 2 - minY * fitZoom);
+
+    setZoom(Number(fitZoom.toFixed(2)));
+    setPan({ x: Math.max(fitPanX, 20), y: Math.max(fitPanY, 20) });
+  }, [activeCanvas]);
+
+  // Auto-fit on initial render or active canvas switch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleFitCanvas();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [activeCanvasId, handleFitCanvas]);
 
   // Handle Pan
   const handleMouseDownCanvas = (e: React.MouseEvent) => {
@@ -435,7 +504,8 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         subtitle: 'Click to edit thought or action item',
         x: Math.round(mouseCanvasX - 120),
         y: Math.round(mouseCanvasY - 40),
-        width: 260
+        width: 270,
+        tags: ['canvas', 'note']
       };
 
       setCanvases(prev => prev.map(c => {
@@ -450,6 +520,91 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
     }
   };
 
+  // Delete node from active canvas
+  const handleDeleteNode = (nodeId: string) => {
+    setCanvases(prev => prev.map(c => {
+      if (c.id !== activeCanvasId) return c;
+      return {
+        ...c,
+        nodesCount: Math.max(c.nodes.length - 1, 0),
+        nodes: c.nodes.filter(n => n.id !== nodeId),
+        edges: c.edges.filter(e => e.from !== nodeId && e.to !== nodeId)
+      };
+    }));
+  };
+
+  // Add Item from Life OS library to active canvas
+  const handleAddItemToCanvas = (item: Item) => {
+    const containerRect = canvasRef.current?.getBoundingClientRect();
+    const centerX = containerRect ? (containerRect.width / 2 - pan.x) / zoom : 200;
+    const centerY = containerRect ? (containerRect.height / 2 - pan.y) / zoom : 150;
+
+    const newNode: CanvasNode = {
+      id: `canvas-item-${item.id}-${Date.now()}`,
+      type: (item.type === 'task' || item.type === 'note' || item.type === 'knowledge' || item.type === 'project' || item.type === 'goal') 
+        ? (item.type as any) 
+        : 'note',
+      title: item.title,
+      subtitle: item.body || (item.pillar ? `Pillar: ${item.pillar}` : 'Life OS Item'),
+      body: item.body,
+      x: Math.round(centerX - 130 + (Math.random() * 40 - 20)),
+      y: Math.round(centerY - 50 + (Math.random() * 40 - 20)),
+      width: 280,
+      tags: item.tags || [item.type || 'item'],
+      pillar: item.pillar,
+      priority: item.priority,
+      status: item.status,
+      itemId: item.id
+    };
+
+    setCanvases(prev => prev.map(c => {
+      if (c.id !== activeCanvasId) return c;
+      return {
+        ...c,
+        nodesCount: c.nodes.length + 1,
+        nodes: [...c.nodes, newNode]
+      };
+    }));
+
+    setShowLibraryModal(false);
+  };
+
+  // Create new canvas board
+  const handleCreateNewCanvas = () => {
+    const newBoardId = `board-${Date.now()}`;
+    const newBoardTitle = `Canvas ${canvases.length + 1}`;
+    const newBoard: CanvasBoard = {
+      id: newBoardId,
+      title: newBoardTitle,
+      nodesCount: 1,
+      updatedAt: 'Just now',
+      diagramType: 'wireframe',
+      nodes: [
+        {
+          id: `node-${Date.now()}`,
+          type: 'note',
+          title: 'Central Hub',
+          subtitle: 'Double click to start brainstorming or drop items from store.',
+          x: 100,
+          y: 100,
+          width: 270,
+          tags: ['hub', 'starter']
+        }
+      ],
+      edges: [],
+      docTitle: `${newBoardTitle} Notes`,
+      docContent: {
+        summary: 'New canvas board ready for spatial mapping and second-brain decomposition.',
+        quote: 'Start with what you know, branch out to what you want to achieve.',
+        bullets: ['Add note cards', 'Link tasks', 'Synthesize with Copilot'],
+        tableRows: [{ day: 'Phase 1', route: 'Initial Mapping', walking: 'Active' }]
+      }
+    };
+
+    setCanvases(prev => [...prev, newBoard]);
+    setActiveCanvasId(newBoardId);
+  };
+
   // Send Copilot message
   const handleSendCopilot = () => {
     if (!chatPrompt.trim()) return;
@@ -462,16 +617,10 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         ...prev,
         {
           role: 'assistant',
-          text: `Processed: "${userMsg}". Linked relevant knowledge cards to your current itinerary canvas.`
+          text: `Analyzed "${userMsg}" against ${activeCanvas.nodes.length} canvas cards. Key insight: Prioritize items on the critical execution path to maintain 80/20 momentum.`
         }
       ]);
-    }, 800);
-  };
-
-  // Fit Canvas
-  const handleFitCanvas = () => {
-    setPan({ x: 60, y: 40 });
-    setZoom(1);
+    }, 700);
   };
 
   // Bezier path generator for smooth connector lines
@@ -480,22 +629,22 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
     const toNode = activeCanvas.nodes.find(n => n.id === edge.to);
     if (!fromNode || !toNode) return null;
 
-    const fromWidth = fromNode.width || 270;
-    const toWidth = toNode.width || 270;
+    const fromWidth = fromNode.width || 280;
+    const toWidth = toNode.width || 280;
     const fromHeight = 90;
 
-    // Anchor points: right edge of fromNode to left edge of toNode (or center)
     const x1 = fromNode.x + fromWidth / 2;
     const y1 = fromNode.y + fromHeight;
     const x2 = toNode.x + toWidth / 2;
-    const y2 = toNode.y;
+    const y2 = toNode.y + fromHeight;
 
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const cx1 = x1 + dx * 0.1;
-    const cy1 = y1 + dy * 0.5;
-    const cx2 = x2 - dx * 0.1;
-    const cy2 = y2 - dy * 0.5;
+    const dx = Math.abs(x2 - x1) * 0.5;
+    const dy = Math.abs(y2 - y1) * 0.5;
+
+    const cx1 = x1 + Math.max(dx, 40);
+    const cy1 = y1 + Math.min(dy, 60);
+    const cx2 = x2 - Math.max(dx, 40);
+    const cy2 = y2 - Math.min(dy, 60);
 
     const pathData = `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
 
@@ -504,130 +653,139 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         <path
           d={pathData}
           fill="none"
-          stroke="rgba(255, 255, 255, 0.28)"
-          strokeWidth="1.75"
+          stroke="rgba(56, 189, 248, 0.45)"
+          strokeWidth="2"
           strokeLinecap="round"
+          strokeDasharray="4 4"
         />
-        {/* Source and target connection circular handles */}
-        <circle cx={x1} cy={y1} r="3.5" fill="#38BDF8" className="shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
-        <circle cx={x2} cy={y2} r="3.5" fill="#38BDF8" className="shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+        <circle cx={x1} cy={y1} r="4" fill="#38BDF8" className="shadow-[0_0_10px_rgba(56,189,248,0.8)]" />
+        <circle cx={x2} cy={y2} r="4" fill="#38BDF8" className="shadow-[0_0_10px_rgba(56,189,248,0.8)]" />
       </g>
     );
   };
 
+  // Available library items for modal
+  const availableLibraryItems = useMemo(() => {
+    let result = items.filter(i => !i.deletedAt && !i.isArchived);
+    if (libraryFilter !== 'all') {
+      if (libraryFilter === 'task') result = result.filter(i => i.type === 'task');
+      else if (libraryFilter === 'note') result = result.filter(i => i.type === 'note' || i.type === 'knowledge' || i.type === 'idea');
+      else if (libraryFilter === 'project') result = result.filter(i => i.type === 'project' || i.type === 'goal');
+    }
+    if (librarySearch.trim()) {
+      const q = librarySearch.toLowerCase();
+      result = result.filter(i => i.title.toLowerCase().includes(q) || (i.body && i.body.toLowerCase().includes(q)));
+    }
+    return result;
+  }, [items, libraryFilter, librarySearch]);
+
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] w-full bg-[#0A0D14] text-slate-100 select-none overflow-hidden relative font-sans">
+    <div className="flex flex-col h-full w-full bg-[#0A0D14] text-slate-100 select-none overflow-hidden relative font-sans">
       
-      {/* 1. TOP macOS WINDOW BAR & TABS */}
-      <div className="h-11 border-b border-white/[0.08] bg-[#0E131F]/90 backdrop-blur-md px-3 flex items-center justify-between shrink-0 z-30">
+      {/* 1. TOP macOS COMMAND BAR & FIRST-CLASS VIEW SWITCHER */}
+      <div className="h-12 border-b border-white/[0.08] bg-[#0E131F]/90 backdrop-blur-md px-3 flex items-center justify-between shrink-0 z-30">
         
-        {/* Left: macOS Traffic Lights & Canvas Mode Selector */}
+        {/* Left: macOS Traffic Lights & Segmented Mode Switcher */}
         <div className="flex items-center gap-3">
-          {/* Traffic light dots */}
           <div className="flex items-center gap-1.5 mr-1">
             <span className="w-3 h-3 rounded-full bg-[#FF5F56] border border-black/20" />
             <span className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-black/20" />
             <span className="w-3 h-3 rounded-full bg-[#27C93F] border border-black/20" />
           </div>
 
-          {/* Canvas Mode Pill with Dropdown */}
-          <div className="relative">
+          {/* FIRST-CLASS PROMINENT VIEW SWITCHER: Canvas vs Force Graph vs Hierarchy Tree */}
+          <div className="flex items-center bg-black/50 border border-white/[0.1] rounded-xl p-0.5 shadow-inner">
             <button 
               type="button"
-              onClick={() => setShowModeDropdown(prev => !prev)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
-              title="Switch Visualizer View"
+              onClick={() => onViewChange?.('canvas')}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40 shadow-xs cursor-pointer"
+              title="Infinite 2D Spatial Canvas"
             >
-              <Compass size={13} className="text-[#38BDF8]" />
+              <Compass size={13} />
               <span>Canvas</span>
-              <ChevronDown size={11} className="text-slate-400" />
             </button>
-
-            {showModeDropdown && (
-              <div className="absolute top-full left-0 mt-1.5 w-44 rounded-xl bg-[#131924] border border-white/[0.12] shadow-2xl p-1 z-50">
-                <button
-                  type="button"
-                  onClick={() => { setShowModeDropdown(false); onViewChange?.('canvas'); }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.08] text-[#38BDF8]"
-                >
-                  <Compass size={13} />
-                  <span>Infinite Canvas</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowModeDropdown(false); onViewChange?.('graph'); }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-slate-300 hover:bg-white/[0.05]"
-                >
-                  <Share2 size={13} />
-                  <span>Force Graph</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowModeDropdown(false); onViewChange?.('tree'); }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-slate-300 hover:bg-white/[0.05]"
-                >
-                  <Layers size={13} />
-                  <span>Hierarchy Tree</span>
-                </button>
-              </div>
-            )}
+            <button 
+              type="button"
+              onClick={() => onViewChange?.('graph')}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+              title="Interactive D3 Force Graph"
+            >
+              <Share2 size={13} />
+              <span>Force Graph</span>
+            </button>
+            <button 
+              type="button"
+              onClick={() => onViewChange?.('tree')}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+              title="Pillar Hierarchy Tree"
+            >
+              <Layers size={13} />
+              <span>Hierarchy Tree</span>
+            </button>
           </div>
 
-          {/* History undo/redo */}
+          {/* History undo/redo & drawer toggle */}
           <div className="hidden sm:flex items-center gap-1 pl-1 border-l border-white/[0.06]">
-            <button type="button" className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/[0.05]" title="Undo">
-              <RotateCcw size={12} />
-            </button>
-            <button type="button" className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/[0.05]" title="Redo">
-              <RotateCw size={12} />
-            </button>
             <button 
               type="button" 
               onClick={() => setShowDrawer(prev => !prev)}
-              className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/[0.05]" 
+              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                showDrawer ? 'bg-white/[0.08] border-white/[0.12] text-white' : 'border-transparent text-slate-400 hover:text-white hover:bg-white/[0.06]'
+              }`}
               title="Toggle Canvases Library"
             >
-              <FolderKanban size={12} />
+              <FolderKanban size={13} />
             </button>
           </div>
         </div>
 
-        {/* Center: Tabs matching Obsidian / Heptabase */}
-        <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none]">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs text-slate-400 hover:text-slate-200 cursor-pointer">
-            <FileText size={12} />
-            <span>Weekend Itinerary.md</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs text-slate-400 hover:text-slate-200 cursor-pointer">
-            <Mic size={12} className="text-rose-400" />
-            <span>Seine walk</span>
-          </div>
-
-          {/* Active Tab */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs bg-white/[0.08] text-white font-medium border-b-2 border-[#38BDF8] cursor-pointer shadow-xs">
-            <Compass size={12} className="text-[#38BDF8]" />
-            <span>{activeTab || activeCanvas.title}</span>
-            <button 
-              type="button" 
-              className="ml-1 text-slate-400 hover:text-white"
-              onClick={(e) => { e.stopPropagation(); }}
-            >
-              <X size={10} />
-            </button>
-          </div>
+        {/* Center: Dynamic Tabs for Canvases */}
+        <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none]">
+          {canvases.slice(0, 4).map(c => {
+            const isActive = c.id === activeCanvasId;
+            return (
+              <div
+                key={c.id}
+                onClick={() => {
+                  setActiveCanvasId(c.id);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? 'bg-white/[0.1] text-white font-semibold border-b-2 border-[#38BDF8] shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                }`}
+              >
+                <FileText size={12} className={isActive ? 'text-[#38BDF8]' : 'text-slate-400'} />
+                <span>{c.title}</span>
+                <span className="text-[10px] px-1 rounded-full bg-black/40 text-slate-400 font-mono">
+                  {c.nodes.length}
+                </span>
+              </div>
+            );
+          })}
 
           <button 
             type="button"
-            className="p-1 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded"
-            title="New Canvas Tab"
+            onClick={handleCreateNewCanvas}
+            className="p-1 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded cursor-pointer"
+            title="Create New Canvas Board"
           >
-            <Plus size={13} />
+            <Plus size={14} />
           </button>
         </div>
 
-        {/* Right: Window controls & Toggle panels */}
+        {/* Right Controls: Add Item, Split View, Phone */}
         <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setShowLibraryModal(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#38BDF8]/15 hover:bg-[#38BDF8]/25 border border-[#38BDF8]/40 text-[#38BDF8] text-xs font-semibold cursor-pointer shadow-xs"
+            title="Add existing Life OS task or note to canvas"
+          >
+            <Database size={12} />
+            <span className="hidden md:inline">+ Add Life OS Item</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setShowDocPanel(prev => !prev)}
@@ -652,21 +810,18 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         </div>
       </div>
 
-      {/* 2. MAIN 3-PANEL WORKSPACE CONTAINER */}
+      {/* 2. THREE-PANEL EXPANDABLE WORKSPACE */}
       <div className="flex-1 flex overflow-hidden relative">
-
-        {/* ================================================================= */}
-        {/* PANEL A: LEFT CANVASES DRAWER / LIBRARY                           */}
-        {/* ================================================================= */}
+        
+        {/* PANEL A: LEFT CANVASES LIBRARY DRAWER (COLLAPSIBLE) */}
         {showDrawer && (
-          <aside className="w-64 border-r border-white/[0.08] bg-[#0C101A] flex flex-col shrink-0 z-20">
-            {/* Search Input */}
+          <aside className="w-64 border-r border-white/[0.08] bg-[#0C101A] flex flex-col shrink-0 z-20 overflow-hidden">
             <div className="p-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-slate-400">
-                <Search size={13} />
+              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08]">
+                <Search size={13} className="text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search canvases"
+                  placeholder="Search canvases..."
                   value={searchDrawer}
                   onChange={(e) => setSearchDrawer(e.target.value)}
                   className="bg-transparent border-none outline-none text-white text-xs w-full placeholder:text-slate-500"
@@ -684,7 +839,6 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                     type="button"
                     onClick={() => {
                       setActiveCanvasId(c.id);
-                      setActiveTab(c.title);
                     }}
                     className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer group ${
                       isActive
@@ -693,7 +847,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                     }`}
                   >
                     {/* Wireframe Diagram Thumbnail */}
-                    <div className="h-16 w-full rounded-lg bg-black/40 border border-white/[0.06] mb-2.5 flex items-center justify-center p-2 relative overflow-hidden group-hover:border-white/[0.15]">
+                    <div className="h-14 w-full rounded-lg bg-black/40 border border-white/[0.06] mb-2 flex items-center justify-center p-2 relative overflow-hidden group-hover:border-white/[0.15]">
                       {c.diagramType === 'wireframe' && (
                         <svg className="w-full h-full opacity-60 text-slate-400" viewBox="0 0 100 50">
                           <rect x="5" y="8" width="26" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
@@ -729,67 +883,28 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                       )}
                     </div>
 
-                    {/* Card Title & Meta */}
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white tracking-tight truncate">
+                      <span className="text-xs font-bold text-white group-hover:text-[#38BDF8] transition-colors truncate">
                         {c.title}
                       </span>
-                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />}
+                      {isActive && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8] shadow-[0_0_6px_#38BDF8]" />
+                      )}
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
-                      {c.nodesCount} nodes · {c.updatedAt}
-                    </span>
+                    
+                    <div className="flex items-center gap-2 mt-1 text-[10.5px] text-slate-400">
+                      <span>{c.nodes.length} nodes</span>
+                      <span>•</span>
+                      <span>{c.updatedAt}</span>
+                    </div>
                   </button>
                 );
               })}
             </div>
-
-            {/* Bottom Drawer Actions */}
-            <div className="p-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-slate-400">
-              <button 
-                type="button" 
-                onClick={() => {
-                  const newBoard: CanvasBoard = {
-                    id: `canvas-${Date.now()}`,
-                    title: `Untitled Canvas ${canvases.length + 1}`,
-                    nodesCount: 1,
-                    updatedAt: 'Just now',
-                    diagramType: 'wireframe',
-                    nodes: [
-                      {
-                        id: `n-${Date.now()}`,
-                        type: 'note',
-                        title: 'Central Idea',
-                        subtitle: 'Primary anchor for this canvas',
-                        x: 300,
-                        y: 200,
-                        width: 260
-                      }
-                    ],
-                    edges: [],
-                    docTitle: 'New Canvas Document',
-                    docContent: {
-                      summary: 'A clean slate for infinite ideation.',
-                      quote: 'Map thoughts as they emerge without rigid structure.',
-                      bullets: ['First milestone or observation'],
-                      tableRows: [{ day: 'Phase 1', route: 'Initial brainstorming', walking: '-' }]
-                    }
-                  };
-                  setCanvases(prev => [newBoard, ...prev]);
-                  setActiveCanvasId(newBoard.id);
-                }}
-                className="flex items-center gap-1.5 text-slate-300 hover:text-white cursor-pointer"
-              >
-                <Plus size={13} />
-                <span>New Canvas</span>
-              </button>
-            </div>
           </aside>
         )}
 
-        {/* ================================================================= */}
-        {/* PANEL B: INFINITE CANVAS WORKSPACE                                */}
-        {/* ================================================================= */}
+        {/* PANEL B: INFINITE 2D CANVAS VIEWPORT */}
         <main
           ref={canvasRef}
           onMouseDown={handleMouseDownCanvas}
@@ -803,13 +918,10 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         >
           {/* Subtle Technical Dotted Grid Background */}
           {showGrid && (
-            <svg 
-              className="absolute inset-0 w-full h-full pointer-events-none opacity-40" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
               <defs>
                 <pattern id="canvas-dots" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
-                  <circle cx="2" cy="2" r="1.1" fill="rgba(255, 255, 255, 0.2)" />
+                  <circle cx="2" cy="2" r="1.1" fill="rgba(255, 255, 255, 0.25)" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#canvas-dots)" />
@@ -820,9 +932,9 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           <div className="absolute top-4 left-4 z-20 flex flex-col gap-1 p-1 rounded-xl bg-[#131924]/90 border border-white/[0.1] shadow-2xl backdrop-blur-md">
             {[
               { id: 'pointer', icon: Move, label: 'Select & Move' },
-              { id: 'text', icon: Type, label: 'Drop Note Card (T)' },
-              { id: 'draw', icon: PenTool, label: 'Pen / Draw' },
+              { id: 'text', icon: Type, label: 'Drop Note Card (Click canvas)' },
               { id: 'link', icon: Link2, label: 'Connect Cards' },
+              { id: 'draw', icon: PenTool, label: 'Drawing Mode' },
               { id: 'attachment', icon: Paperclip, label: 'Attach Asset' }
             ].map(tool => {
               const Icon = tool.icon;
@@ -843,6 +955,15 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                 </button>
               );
             })}
+            <div className="h-[1px] bg-white/[0.08] my-0.5" />
+            <button
+              type="button"
+              onClick={() => setShowLibraryModal(true)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-[#38BDF8] hover:bg-[#38BDF8]/20 transition-all cursor-pointer"
+              title="Add Item from Life OS"
+            >
+              <Plus size={15} strokeWidth={2.5} />
+            </button>
           </div>
 
           {/* TRANSFORMED CANVAS VIEWPORT CONTAINER */}
@@ -863,8 +984,8 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               {activeCanvas.edges.map(edge => renderEdge(edge))}
             </svg>
 
-            {/* Interactive Draggable Canvas Cards Layer */}
-            <div style={{ position: 'relative', zIndex: 2 }}>
+            {/* Canvas Nodes Layer */}
+            <div className="relative w-full h-full" style={{ zIndex: 2 }}>
               {activeCanvas.nodes.map(node => {
                 const isDragging = draggingNodeId === node.id;
                 return (
@@ -873,7 +994,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                     onMouseDown={(e) => handleNodeMouseDown(e, node)}
                     style={{
                       transform: `translate3d(${node.x}px, ${node.y}px, 0)`,
-                      width: node.width || 270,
+                      width: node.width || 280,
                       position: 'absolute',
                       pointerEvents: 'auto'
                     }}
@@ -885,26 +1006,24 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                     <div className="p-4 rounded-xl bg-[#141A26]/90 border border-white/[0.12] hover:border-white/[0.25] backdrop-blur-xl shadow-xl transition-all relative overflow-hidden">
                       
                       {/* Top Highlight border */}
-                      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      <div className="absolute inset-x-0 top-0 h-[1px] bg-linear-to-r from-transparent via-white/20 to-transparent" />
 
                       {/* Card Header & Badge */}
                       <div className="flex items-center justify-between mb-2">
-                        {node.type === 'note' && (
+                        {node.type === 'task' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-orange-500/15 text-orange-300 border border-orange-500/30">
+                            <CheckSquare size={11} className="text-orange-400" />
+                            <span>Task</span>
+                          </span>
+                        ) : node.type === 'record' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                            <Mic size={11} className="text-rose-400 animate-pulse" />
+                            <span>Audio Memo</span>
+                          </span>
+                        ) : (
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-white/[0.06] text-slate-300 border border-white/[0.08]">
                             <FileText size={11} className="text-slate-400" />
                             <span>Note</span>
-                          </span>
-                        )}
-                        {node.type === 'record' && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30">
-                            <Mic size={11} className="text-rose-400 animate-pulse" />
-                            <span>Record</span>
-                          </span>
-                        )}
-                        {node.type === 'link' && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-sky-500/15 text-sky-300 border border-sky-500/30">
-                            <Link2 size={11} className="text-sky-400" />
-                            <span>Link</span>
                           </span>
                         )}
 
@@ -914,14 +1033,19 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                             onClick={(e) => {
                               e.stopPropagation();
                               if (onEditTask) {
-                                onEditTask({
-                                  id: node.id,
-                                  title: node.title,
-                                  body: node.body || node.subtitle,
-                                  type: node.type as any,
-                                  createdAt: Date.now(),
-                                  updatedAt: Date.now()
-                                });
+                                const realItem = items.find(i => i.id === node.itemId || i.title === node.title);
+                                if (realItem) {
+                                  onEditTask(realItem);
+                                } else {
+                                  onEditTask({
+                                    id: node.id,
+                                    title: node.title,
+                                    body: node.body || node.subtitle,
+                                    type: node.type as any,
+                                    createdAt: Date.now(),
+                                    updatedAt: Date.now()
+                                  });
+                                }
                               }
                             }}
                             className="p-1 text-slate-400 hover:text-white rounded"
@@ -929,24 +1053,38 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                           >
                             <Edit3 size={11} />
                           </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteNode(node.id);
+                            }}
+                            className="p-1 text-slate-400 hover:text-rose-400 rounded"
+                            title="Remove from Canvas"
+                          >
+                            <Trash2 size={11} />
+                          </button>
                         </div>
                       </div>
 
                       {/* Card Title */}
-                      <h4 className="text-[13.5px] font-bold text-white tracking-tight leading-snug">
+                      <h4 className="text-[13px] font-bold text-white tracking-tight leading-snug">
                         {node.title}
                       </h4>
 
                       {/* Subtitle / Descriptive Body */}
-                      <p className="text-[11.5px] text-slate-400 mt-1 leading-relaxed line-clamp-3">
+                      <p className="text-[11px] text-slate-400 mt-1 leading-relaxed line-clamp-3">
                         {node.subtitle}
                       </p>
 
-                      {/* Optional URL badge */}
-                      {node.url && (
-                        <div className="mt-2.5 pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10.5px] text-[#38BDF8]">
-                          <span className="truncate">{node.url}</span>
-                          <ExternalLink size={10} className="shrink-0 ml-1" />
+                      {/* Tags */}
+                      {node.tags && node.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2.5 pt-2 border-t border-white/[0.06]">
+                          {node.tags.slice(0, 3).map(tag => (
+                            <span key={tag} className="text-[9.5px] px-1.5 py-0.5 rounded bg-white/[0.05] text-slate-400 font-mono">
+                              #{tag}
+                            </span>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -956,13 +1094,13 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             </div>
           </div>
 
-          {/* Bottom Status Bar Controls matching screenshot */}
+          {/* Bottom Status Bar Controls - Fully visible above edge */}
           <div className="absolute bottom-3 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
             {/* Left Status Indicators */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#131924]/90 border border-white/[0.08] backdrop-blur-md text-xs text-slate-400 pointer-events-auto">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#131924]/90 border border-white/[0.08] backdrop-blur-md text-xs text-slate-400 pointer-events-auto shadow-xl">
               <span className="flex items-center gap-1.5 text-slate-300 font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
-                <span>Local workspace</span>
+                <span>Life OS Canvas</span>
               </span>
               <span className="text-white/20">•</span>
               <button 
@@ -972,23 +1110,22 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               >
                 # Grid
               </button>
-              <button type="button" className="hover:text-white cursor-pointer">
-                Snap
-              </button>
-              <button type="button" className="hover:text-white cursor-pointer">
-                Layout
-              </button>
-              <button type="button" className="hover:text-white cursor-pointer">
-                &lt;/&gt; Import
+              <button 
+                type="button" 
+                onClick={() => setShowLibraryModal(true)}
+                className="hover:text-white cursor-pointer text-[#38BDF8]"
+              >
+                + Add Card
               </button>
             </div>
 
             {/* Right Zoom & View Controls */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#131924]/90 border border-white/[0.08] backdrop-blur-md text-xs text-slate-400 pointer-events-auto">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#131924]/90 border border-white/[0.08] backdrop-blur-md text-xs text-slate-400 pointer-events-auto shadow-xl">
               <button 
                 type="button" 
                 onClick={() => setZoom(prev => Math.max(prev - 0.1, 0.4))}
                 className="hover:text-white p-0.5 cursor-pointer"
+                title="Zoom Out"
               >
                 <ZoomOut size={13} />
               </button>
@@ -999,6 +1136,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                 type="button" 
                 onClick={() => setZoom(prev => Math.min(prev + 0.1, 2.5))}
                 className="hover:text-white p-0.5 cursor-pointer"
+                title="Zoom In"
               >
                 <ZoomIn size={13} />
               </button>
@@ -1006,7 +1144,8 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               <button 
                 type="button" 
                 onClick={handleFitCanvas}
-                className="hover:text-white cursor-pointer flex items-center gap-1 text-[11.5px]"
+                className="hover:text-white cursor-pointer flex items-center gap-1 text-[11.5px] font-semibold text-[#38BDF8]"
+                title="Auto-center all nodes without clipping"
               >
                 <Maximize2 size={11} />
                 <span>Fit canvas</span>
@@ -1015,19 +1154,16 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           </div>
         </main>
 
-        {/* ================================================================= */}
-        {/* PANEL C: RIGHT AI COPILOT & SPLIT DOCUMENT (COLLAPSIBLE)          */}
-        {/* ================================================================= */}
+        {/* PANEL C: RIGHT AI COPILOT & SPLIT DOCUMENT (COLLAPSIBLE) */}
         {showDocPanel && (
           <aside className="w-96 border-l border-white/[0.08] bg-[#0C101A] flex flex-col shrink-0 z-20 overflow-hidden">
             
             {/* Header: Document Title & Controls */}
             <div className="h-12 border-b border-white/[0.06] px-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-1.5 cursor-pointer">
-                <span className="text-xs font-bold text-white tracking-tight">
+                <span className="text-xs font-bold text-white tracking-tight truncate max-w-[220px]">
                   {activeCanvas.docTitle} ({activeCanvas.nodes.length})
                 </span>
-                <ChevronDown size={12} className="text-slate-400" />
               </div>
 
               <div className="flex items-center gap-1">
@@ -1050,7 +1186,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               </div>
             </div>
 
-            {/* Main Scrollable Content: AI Copilot Box + Markdown Document */}
+            {/* Main Scrollable Content: AI Copilot Box + Document */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               
               {/* AI COPILOT CHAT / ACTION LOGS BOX */}
@@ -1060,7 +1196,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                   {/* User Request Pill */}
                   <div className="flex justify-end">
                     <div className="max-w-[88%] px-3 py-2 rounded-xl bg-white/[0.08] border border-white/[0.06] text-xs text-white leading-relaxed">
-                      {chatMessages[0]?.text || "Use this material to organize and save a weekend Paris itinerary."}
+                      {chatMessages[0]?.text || "Analyze active canvas cards and synthesize execution roadmap."}
                     </div>
                   </div>
 
@@ -1076,7 +1212,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                         <span className="font-semibold text-white">Processed</span>
                       </div>
                       <span className="text-[10px] text-slate-400 font-mono">
-                        3.7s · 4 actions
+                        1.2s · 4 actions
                       </span>
                     </button>
 
@@ -1084,12 +1220,11 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                       <div className="px-3 pb-2.5 pt-1 border-t border-white/[0.04] space-y-1.5 text-[10.5px] text-slate-400 font-mono">
                         <div className="flex items-center gap-1.5 text-slate-300">
                           <Check size={10} className="text-emerald-400" />
-                          <span>Found 2 knowledge sources</span>
+                          <span>Analyzed {activeCanvas.nodes.length} canvas cards</span>
                         </div>
-                        <div className="pl-3.5 text-slate-400">• Records · Read 3 Paris info cards</div>
-                        <div className="pl-3.5 text-slate-400">• Canvas · Read weekend itinerary nodes</div>
-                        <div className="pl-3.5 text-slate-400">• Notes · Search Paris travel principles</div>
-                        <div className="pl-3.5 text-slate-400">• Notes · Write Weekend summary</div>
+                        <div className="pl-3.5 text-slate-400">• Store · Verified Life OS dependency chain</div>
+                        <div className="pl-3.5 text-slate-400">• Graph · Connected associative edges</div>
+                        <div className="pl-3.5 text-slate-400">• Synthesis · Generated executive brief</div>
                       </div>
                     )}
                   </div>
@@ -1101,44 +1236,44 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                 </div>
               )}
 
-              {/* INTEGRATED MARKDOWN DOCUMENT PREVIEW */}
-              <div className="space-y-3 pt-1">
-                <h2 className="text-xl font-bold text-white tracking-tight">
-                  {activeCanvas.docTitle}
-                </h2>
-
+              {/* DOCUMENT CONTENT PREVIEW */}
+              <div className="space-y-4 pt-1">
+                <h3 className="text-sm font-extrabold text-white tracking-tight">
+                  {activeCanvas.title}
+                </h3>
+                
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Focus the two days on <strong className="text-white font-semibold">the Seine, Le Marais, and Montmartre</strong>, leaving more time for walks, meals, and spontaneous stops. Full addresses are saved in the <span className="text-[#38BDF8] underline underline-offset-2 cursor-pointer">route notes</span>.
+                  {activeCanvas.docContent.summary}
                 </p>
 
-                {/* Callout quote box */}
-                <blockquote className="p-3 rounded-lg bg-white/[0.03] border-l-2 border-slate-500 text-xs italic text-slate-300 leading-relaxed">
-                  &ldquo;{activeCanvas.docContent.quote}&rdquo;
-                </blockquote>
+                {/* Callout Quote */}
+                <div className="p-3 rounded-lg bg-[#38BDF8]/10 border-l-2 border-[#38BDF8] text-xs text-slate-200 italic leading-relaxed">
+                  "{activeCanvas.docContent.quote}"
+                </div>
 
                 {/* Bullet Points */}
-                <div className="space-y-1.5 pt-1">
-                  <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    Itinerary overview
-                  </h5>
-                  <ul className="space-y-1 text-xs text-slate-300">
-                    {activeCanvas.docContent.bullets.map((b, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-slate-500 mt-1">•</span>
+                <div className="space-y-2">
+                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    Execution Milestones
+                  </h4>
+                  <ul className="space-y-1.5 text-xs text-slate-300">
+                    {activeCanvas.docContent.bullets.map((b, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8] mt-1.5 shrink-0" />
                         <span>{b}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                {/* Structured Markdown Table */}
-                <div className="pt-2">
-                  <table className="w-full text-left text-xs border border-white/[0.08] rounded-lg overflow-hidden">
-                    <thead className="bg-white/[0.04] text-[10.5px] uppercase font-bold text-slate-400 font-mono">
+                {/* Execution Table */}
+                <div className="rounded-lg border border-white/[0.06] overflow-hidden">
+                  <table className="w-full text-left text-[11px]">
+                    <thead className="bg-white/[0.04] text-slate-400 font-mono uppercase text-[9.5px]">
                       <tr>
-                        <th className="py-2 px-2.5 border-b border-white/[0.06]">Day</th>
-                        <th className="py-2 px-2.5 border-b border-white/[0.06]">Main route</th>
-                        <th className="py-2 px-2.5 border-b border-white/[0.06]">Walking</th>
+                        <th className="py-2 px-2.5 border-b border-white/[0.06]">Block</th>
+                        <th className="py-2 px-2.5 border-b border-white/[0.06]">Deliverable</th>
+                        <th className="py-2 px-2.5 border-b border-white/[0.06]">Duration</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/[0.04] text-slate-300">
@@ -1160,7 +1295,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               <div className="flex items-center gap-2 p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] focus-within:border-[#38BDF8]/50">
                 <input
                   type="text"
-                  placeholder="Ask a question or organize..."
+                  placeholder="Ask a question or synthesize cards..."
                   value={chatPrompt}
                   onChange={(e) => setChatPrompt(e.target.value)}
                   onKeyDown={(e) => {
@@ -1169,119 +1304,111 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                   className="bg-transparent border-none outline-none text-xs text-white placeholder:text-slate-500 w-full"
                 />
                 
-                <div className="flex items-center gap-1 shrink-0 text-slate-400">
-                  <button type="button" className="p-1 hover:text-white" title="Add source">
-                    <Plus size={13} />
-                  </button>
-                  <button type="button" className="p-1 hover:text-white" title="AI Prompts">
-                    <Sparkles size={13} />
-                  </button>
-                  <button type="button" className="p-1 hover:text-white" title="Voice memo">
-                    <Mic size={13} />
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={handleSendCopilot}
-                    className="p-1.5 rounded-lg bg-[#38BDF8] text-black hover:bg-[#38BDF8]/90 font-bold"
-                    title="Send"
-                  >
-                    <Send size={11} />
-                  </button>
-                </div>
+                <button 
+                  type="button" 
+                  onClick={handleSendCopilot}
+                  className="p-1.5 rounded-lg bg-[#38BDF8] text-black hover:bg-[#38BDF8]/90 font-bold cursor-pointer"
+                  title="Send"
+                >
+                  <Send size={11} />
+                </button>
               </div>
             </div>
           </aside>
         )}
+      </div>
 
-        {/* ================================================================= */}
-        {/* COMPANION MOBILE PREVIEW (FLOATING OVERLAY MATCHING SCREENSHOT)    */}
-        {/* ================================================================= */}
-        {showCompanionPhone && (
-          <div className="absolute right-6 bottom-6 z-30 hidden xl:flex flex-col w-[300px] h-[520px] rounded-[38px] bg-black border-[5px] border-slate-700/80 shadow-[0_24px_60px_rgba(0,0,0,0.8)] overflow-hidden">
-            {/* Phone Dynamic Island / Notch */}
-            <div className="h-6 w-full flex items-center justify-between px-6 pt-1 text-[10px] text-slate-400 font-mono">
-              <span>10:42</span>
-              <div className="w-16 h-3 rounded-full bg-black border border-white/10 mx-auto" />
-              <div className="flex items-center gap-1">
-                <span>5G</span>
-                <span className="w-2.5 h-1.5 rounded-xs border border-slate-400 bg-slate-400" />
+      {/* 3. MODAL: ADD ITEM FROM LIFE OS LIBRARY */}
+      {showLibraryModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-[#131924] border border-white/[0.12] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="p-4 border-b border-white/[0.08] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Database size={16} className="text-[#38BDF8]" />
+                <h3 className="text-sm font-bold text-white">Add Item from Life OS to Canvas</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLibraryModal(false)}
+                className="p-1 text-slate-400 hover:text-white rounded"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            {/* Filter pills & search */}
+            <div className="p-3 border-b border-white/[0.06] space-y-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/[0.08]">
+                <Search size={14} className="text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Filter tasks, notes, goals..."
+                  value={librarySearch}
+                  onChange={(e) => setLibrarySearch(e.target.value)}
+                  className="bg-transparent border-none outline-none text-xs text-white placeholder:text-slate-500 w-full"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                {(['all', 'task', 'note', 'project'] as const).map(tab => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setLibraryFilter(tab)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize cursor-pointer transition-colors ${
+                      libraryFilter === tab
+                        ? 'bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40'
+                        : 'text-slate-400 hover:text-white hover:bg-white/[0.05]'
+                    }`}
+                  >
+                    {tab === 'all' ? 'All Items' : `${tab}s`}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Mobile Header Toolbar */}
-            <div className="h-10 px-4 flex items-center justify-between border-b border-white/[0.06] text-slate-400 text-xs">
-              <div className="flex items-center gap-3">
-                <RotateCcw size={12} />
-                <RotateCw size={12} />
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Search size={12} />
-                <Layers size={12} />
-                <button type="button" onClick={() => setShowCompanionPhone(false)}>
-                  <X size={12} className="text-slate-400 hover:text-white" />
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Document Body */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2.5 text-left text-white text-xs">
-              <h3 className="text-base font-bold text-white tracking-tight">
-                {activeCanvas.docTitle}
-              </h3>
-              
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Focus the two days on <strong className="text-white">the Seine, Le Marais, and Montmartre</strong>, leaving more time for walks, meals, and spontaneous stops. Full addresses are saved in the <span className="text-[#38BDF8] underline">route notes</span>.
-              </p>
-
-              <blockquote className="p-2.5 rounded-lg bg-white/[0.04] border-l-2 border-slate-500 text-[10.5px] italic text-slate-300">
-                &ldquo;{activeCanvas.docContent.quote}&rdquo;
-              </blockquote>
-
-              <div className="pt-1">
-                <h6 className="text-[10px] font-bold uppercase text-slate-400">Itinerary overview</h6>
-                <ul className="text-[10.5px] text-slate-300 space-y-1 mt-1">
-                  {activeCanvas.docContent.bullets.map((b, i) => (
-                    <li key={i}>• {b}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="pt-2">
-                <table className="w-full text-left text-[10px] border border-white/[0.08] rounded overflow-hidden">
-                  <thead className="bg-white/[0.04] text-[9px] uppercase font-bold text-slate-400">
-                    <tr>
-                      <th className="p-1.5 border-b border-white/[0.06]">Day</th>
-                      <th className="p-1.5 border-b border-white/[0.06]">Main route</th>
-                      <th className="p-1.5 border-b border-white/[0.06]">Walking</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/[0.04]">
-                    {activeCanvas.docContent.tableRows.map((r, i) => (
-                      <tr key={i}>
-                        <td className="p-1.5 font-bold">{r.day}</td>
-                        <td className="p-1.5 text-slate-300">{r.route}</td>
-                        <td className="p-1.5 font-mono text-slate-400">{r.walking}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Mobile Bottom Floating Action Bar */}
-            <div className="p-3 border-t border-white/[0.06] bg-[#111622] flex items-center justify-between text-xs text-slate-400">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.08] text-white font-semibold text-[11px]">
-                <Edit3 size={11} />
-                <span>Write</span>
-              </div>
-              <Plus size={14} className="hover:text-white cursor-pointer" />
-              <PenTool size={13} className="hover:text-white cursor-pointer" />
-              <Compass size={14} className="text-[#38BDF8] hover:text-white cursor-pointer" />
+            {/* Items List */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+              {availableLibraryItems.length === 0 ? (
+                <div className="text-center py-8 text-xs text-slate-400">
+                  No matching items found.
+                </div>
+              ) : (
+                availableLibraryItems.map(item => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleAddItemToCanvas(item)}
+                    className="w-full text-left p-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.07] border border-white/[0.06] hover:border-[#38BDF8]/40 transition-all flex items-center justify-between cursor-pointer group"
+                  >
+                    <div className="min-w-0 pr-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                          item.type === 'task' ? 'bg-orange-500/20 text-orange-300' : 'bg-blue-500/20 text-blue-300'
+                        }`}>
+                          {item.type}
+                        </span>
+                        <h4 className="text-xs font-bold text-white group-hover:text-[#38BDF8] transition-colors truncate">
+                          {item.title}
+                        </h4>
+                      </div>
+                      {item.body && (
+                        <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                          {item.body}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-xs text-[#38BDF8] font-bold opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      + Place
+                    </span>
+                  </button>
+                ))
+              )}
             </div>
           </div>
-        )}
-
-      </div>
+        </div>
+      )}
     </div>
   );
 };
