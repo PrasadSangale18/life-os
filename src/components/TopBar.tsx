@@ -120,7 +120,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Center: Tracked A I S A N K A L P Wordmark (Inspired by Prahari high-tech minimalism) */}
       <div className="hidden lg:flex items-center justify-center pointer-events-none select-none">
         <span className="font-mono font-black text-xs md:text-sm tracking-[0.42em] text-slate-800 dark:text-white uppercase pl-2">
-          A I &nbsp; S A N K A L P
+          AISANKALP
         </span>
       </div>
 

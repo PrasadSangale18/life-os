@@ -184,7 +184,7 @@ export default function App() {
     return (
       <div style={{ background: "var(--bg-base)", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-secondary)", gap: 10, fontFamily: "var(--font-sans)", fontSize: 13, letterSpacing: "0.02em" }}>
         <Sparkles size={16} color="var(--accent-primary)" style={{ animation: "spin 2s linear infinite" }} />
-        <span>Initializing Life OS...</span>
+        <span>Initializing aisankalp...</span>
       </div>
     );
   }

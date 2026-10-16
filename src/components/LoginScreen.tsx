@@ -191,7 +191,7 @@ export const LoginScreen = ({ onSuccess }: LoginScreenProps) => {
           <div className="reveal-0">
             <div className="brand-badge">
               <span className="brand-badge-dot" />
-              <span>Life OS v2 • System Ready</span>
+              <span>aisankalp • System Ready</span>
             </div>
           </div>
 
@@ -376,7 +376,7 @@ export const LoginScreen = ({ onSuccess }: LoginScreenProps) => {
                   ) : (
                     <>
                       <span>
-                        {mode === 'signin' && 'Sign in to Life OS'}
+                        {mode === 'signin' && 'Sign in to aisankalp'}
                         {mode === 'signup' && 'Create Your Workspace'}
                         {mode === 'magic' && 'Send Magic Link'}
                         {mode === 'forgot' && 'Send Reset Email'}
