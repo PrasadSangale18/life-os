@@ -13,11 +13,11 @@ export function generateMindMapData(items: Item[], showPrivate: boolean) {
   // Central Root Node
   nodes.push({ 
     id: 'ROOT', 
-    title: 'Life OS', 
+    title: 'AISANKALP', 
     isRoot: true, 
     group: 'root',
     type: 'root',
-    color: '#3b82f6'
+    color: '#FF5A1F'
   });
 
   // 5 Strategic Pillars

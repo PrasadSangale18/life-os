@@ -116,18 +116,18 @@ export const MindMap: React.FC<MindMapProps> = ({ onEditTask, onNewItem }) => {
               width: 34, 
               height: 34, 
               borderRadius: 8, 
-              background: "rgba(59, 130, 246, 0.12)", 
-              border: "1px solid rgba(59, 130, 246, 0.25)",
+              background: "rgba(255, 90, 31, 0.15)", 
+              border: "1px solid rgba(255, 90, 31, 0.3)",
               display: "flex", 
               alignItems: "center", 
               justifyContent: "center" 
             }}
           >
-            <GitBranch size={18} color="#3b82f6" />
+            <GitBranch size={18} color="#FF5A1F" />
           </div>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span className="card-title" style={{ fontSize: 16, fontWeight: 650 }}>Mind Map Topology</span>
+              <span className="card-title" style={{ fontSize: 16, fontWeight: 650 }}>Canvas &amp; Graph Topology</span>
               <span 
                 className="tabular-nums" 
                 style={{ 
@@ -194,7 +194,7 @@ export const MindMap: React.FC<MindMapProps> = ({ onEditTask, onNewItem }) => {
             ))}
           </div>
 
-          {/* Canvas vs Tree vs Graph Toggle */}
+          {/* Canvas vs Force Graph vs Hierarchy Tree Toggle */}
           <div className="segmented-nav" style={{ padding: 2 }}>
             <button 
               onClick={() => setView('canvas')} 
@@ -204,18 +204,18 @@ export const MindMap: React.FC<MindMapProps> = ({ onEditTask, onNewItem }) => {
               Canvas
             </button>
             <button 
-              onClick={() => setView('tree')} 
-              className={`segmented-nav-btn ${view === 'tree' ? 'active' : ''}`}
-              style={{ fontSize: 12, padding: "5px 12px" }}
-            >
-              Tree View
-            </button>
-            <button 
               onClick={() => setView('graph')} 
               className={`segmented-nav-btn ${view === 'graph' ? 'active' : ''}`}
               style={{ fontSize: 12, padding: "5px 12px" }}
             >
-              Graph View
+              Force Graph
+            </button>
+            <button 
+              onClick={() => setView('tree')} 
+              className={`segmented-nav-btn ${view === 'tree' ? 'active' : ''}`}
+              style={{ fontSize: 12, padding: "5px 12px" }}
+            >
+              Hierarchy Tree
             </button>
           </div>
 
@@ -348,7 +348,7 @@ const TreeView: React.FC<TreeViewProps> = ({ items, totalCount, onEditTask, onNe
             <Sparkles size={14} color="#3b82f6" />
           </div>
           <div>
-            <span style={{ fontSize: 13.5, fontWeight: 650, color: "var(--text-primary)" }}>Life OS Core Topology</span>
+            <span style={{ fontSize: 13.5, fontWeight: 650, color: "var(--text-primary)" }}>AISANKALP Core Topology</span>
             <span style={{ fontSize: 12, color: "var(--text-secondary)", marginLeft: 8 }}>
               Hierarchy &amp; Pillar Architecture ({totalCount} total items)
             </span>
@@ -842,10 +842,10 @@ const GraphView: React.FC<GraphViewProps> = ({ items, onEditTask }) => {
 
     // Force Simulation
     const simulation = forceSimulation(nodes)
-      .force("link", forceLink(links).id((d: any) => d.id).distance((d: any) => d.type === 'reference' ? 120 : 85))
-      .force("charge", forceManyBody().strength(-280).distanceMax(500))
+      .force("link", forceLink(links).id((d: any) => d.id).distance((d: any) => d.type === 'reference' ? 140 : 100))
+      .force("charge", forceManyBody().strength(-380).distanceMax(650))
       .force("center", forceCenter(width / 2, height / 2))
-      .force("collide", forceCollide().radius((d: any) => d.isRoot ? 40 : d.isPillar ? 30 : 22));
+      .force("collide", forceCollide().radius((d: any) => d.isRoot ? 48 : d.isPillar ? 36 : 24));
 
     // Links Rendering
     const link = g.append("g")
@@ -895,7 +895,7 @@ const GraphView: React.FC<GraphViewProps> = ({ items, onEditTask }) => {
     // Node Title Text
     node.append("text")
       .text((d: any) => {
-        if (d.isRoot) return "Life OS";
+        if (d.isRoot) return "AISANKALP";
         if (d.isPillar) return d.title;
         return d.title.length > 22 ? d.title.slice(0, 20) + '…' : d.title;
       })
@@ -1045,7 +1045,7 @@ const GraphView: React.FC<GraphViewProps> = ({ items, onEditTask }) => {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--accent-primary)" }} />
-          <span>Life OS Core</span>
+          <span>AISANKALP Core</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#3b82f6" }} />

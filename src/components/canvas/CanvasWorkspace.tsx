@@ -140,7 +140,7 @@ const generateLifeOSCanvases = (items: Item[]): CanvasBoard[] => {
     ] : [],
     docTitle: 'Daily Execution & Focus Matrix',
     docContent: {
-      summary: `Active execution stream connecting ${taskNodes.length} key tasks across your Life OS quadrants.`,
+      summary: `Active execution stream connecting ${taskNodes.length} key tasks across your AISANKALP quadrants.`,
       quote: 'Action produces clarity. Focus on the single highest-leverage deliverable.',
       bullets: taskNodes.map(t => `${t.title} (${t.priority || 'Normal'})`),
       tableRows: taskNodes.map((t, i) => ({
@@ -737,7 +737,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   // Export Canvas Synthesis as a Real Life OS Note
   const handleExportAsNote = async () => {
     const markdownContent = `# ${activeCanvas.title}\n\n` +
-      `*Exported from Life OS Canvas & Graph on ${new Date().toLocaleDateString()}*\n\n` +
+      `*Exported from AISANKALP Canvas & Graph on ${new Date().toLocaleDateString()}*\n\n` +
       `## Overview\n${activeCanvas.docContent.summary || 'Spatial canvas breakdown'}\n\n` +
       `> "${activeCanvas.docContent.quote}"\n\n` +
       `## Cards on this Board (${activeCanvas.nodes.length})\n` +
@@ -757,7 +757,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       tags: ['canvas-export', 'synthesis', 'review']
     });
 
-    alert(`Saved "${activeCanvas.title}" synthesis into your Life OS Notes!`);
+    alert(`Saved "${activeCanvas.title}" synthesis into your AISANKALP Notes!`);
   };
 
   // Create New Canvas Board
@@ -1555,7 +1555,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             <div className="p-4 border-b border-white/[0.08] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Database size={16} className="text-[#38BDF8]" />
-                <h3 className="text-sm font-bold text-white">Add Item from Life OS to Canvas</h3>
+                <h3 className="text-sm font-bold text-white">Add Item from AISANKALP to Canvas</h3>
               </div>
               <button
                 type="button"
