@@ -889,10 +889,10 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   }, [items, libraryFilter, librarySearch]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#0A0D14] text-slate-100 select-none overflow-hidden relative font-sans">
+    <div className="flex flex-col h-full w-full bg-[#05080C] text-slate-100 select-none overflow-hidden relative font-sans">
       
       {/* 1. TOP COMMAND BAR & FIRST-CLASS VIEW SWITCHER */}
-      <div className="h-13 border-b border-white/[0.08] bg-[#0E131F]/95 backdrop-blur-md px-4 flex items-center justify-between shrink-0 z-30 gap-3">
+      <div className="h-13 border-b border-[#1E293B] bg-[#080C14]/95 backdrop-blur-md px-4 flex items-center justify-between shrink-0 z-30 gap-3">
         
         {/* Left: View Switcher (Canvas / Force Graph / Tree) & Drawer Toggle */}
         <div className="flex items-center gap-2.5 shrink-0">
@@ -1074,7 +1074,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             </div>
 
             {/* Bottom Drawer Actions */}
-            <div className="p-3 border-t border-white/[0.06] bg-[#0A0D14] flex items-center justify-between">
+            <div className="p-3 border-t border-[#1E293B] bg-[#080C14] flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => setShowNewBoardModal(true)}
@@ -1106,7 +1106,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           onDoubleClick={handleDoubleClickCanvas}
           onClick={handleCanvasClick}
           onWheel={handleWheel}
-          className={`flex-1 relative overflow-hidden select-none bg-[#07090E] ${
+          className={`flex-1 relative overflow-hidden select-none bg-[#05080C] ${
             activeTool === 'pointer' ? (isPanning ? 'cursor-grabbing' : 'cursor-grab') :
             activeTool === 'link' ? 'cursor-crosshair' : 'cursor-crosshair'
           }`}
@@ -1125,7 +1125,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
 
           {/* Linking Mode Banner */}
           {activeTool === 'link' && (
-            <div className="absolute top-4 inset-x-0 mx-auto w-fit z-30 px-4 py-2 rounded-xl bg-[#0E131F]/90 border border-[#38BDF8]/50 text-white text-xs shadow-2xl flex items-center gap-2 backdrop-blur-md animate-fade-in">
+            <div className="absolute top-4 inset-x-0 mx-auto w-fit z-30 px-4 py-2 rounded-xl bg-[#080C14]/90 border border-[#38BDF8]/50 text-white text-xs shadow-2xl flex items-center gap-2 backdrop-blur-md animate-fade-in">
               <Link2 size={14} className="text-[#38BDF8] animate-pulse" />
               <span>{linkNotification || 'Connecting Mode: Click first card, then click second card.'}</span>
               {linkSourceNodeId && (
@@ -1396,10 +1396,10 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
 
         {/* PANEL C: RIGHT DOCUMENT & AI COPILOT SYNTHESIS */}
         {showDocPanel && (
-          <aside className="w-80 md:w-96 border-l border-white/[0.08] bg-[#0E131F] flex flex-col shrink-0 z-20 overflow-hidden">
+          <aside className="w-80 md:w-96 border-l border-[#1E293B] bg-[#080C14] flex flex-col shrink-0 z-20 overflow-hidden">
             
             {/* Header */}
-            <div className="p-3.5 border-b border-white/[0.08] flex items-center justify-between">
+            <div className="p-3.5 border-b border-[#1E293B] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles size={15} className="text-[#38BDF8]" />
                 <h3 className="text-xs font-bold text-white tracking-wide uppercase">
@@ -1417,7 +1417,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             </div>
 
             {/* Smart 1-Click Action Pills */}
-            <div className="p-3 border-b border-white/[0.06] bg-[#0A0D14]/80 flex items-center gap-2 flex-wrap">
+            <div className="p-3 border-b border-[#1E293B] bg-[#05080C]/80 flex items-center gap-2 flex-wrap">
               <button
                 type="button"
                 onClick={handleAutoTidyLayout}
@@ -1521,7 +1521,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             </div>
 
             {/* Bottom Copilot Input */}
-            <div className="p-3 border-t border-white/[0.08] bg-[#0A0D14]">
+            <div className="p-3 border-t border-[#1E293B] bg-[#05080C]">
               <div className="flex items-center gap-2 p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] focus-within:border-[#38BDF8]/50">
                 <input
                   type="text"

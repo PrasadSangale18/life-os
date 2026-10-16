@@ -203,32 +203,15 @@ export default function App() {
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: "var(--bg-base)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", overflow: "hidden", position: "relative" }}>
-      {/* Background Ambient Radial Spotlight (PRAHARI warm aesthetic) */}
-      <div 
-        style={{ 
-          position: "fixed", 
-          inset: 0, 
-          pointerEvents: "none", 
-          zIndex: 0, 
-          background: theme === 'dark' 
-            ? "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 90, 31, 0.08), transparent)" 
-            : "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 90, 31, 0.03), transparent)"
-        }} 
-      />
-
-      {/* PRAHARI Blueprint Engineering Grid Line Overlay */}
-      <div 
-        style={{ 
-          position: "fixed", 
-          inset: 0, 
-          pointerEvents: "none", 
-          zIndex: 0, 
-          backgroundImage: "linear-gradient(to right, var(--grid-line) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px)", 
-          backgroundSize: "24px 24px",
-          opacity: 1
-        }} 
-      />
+    <div className="flex h-screen bg-[#F8FAFC] dark:bg-[#05080C] text-slate-900 dark:text-slate-100 font-sans overflow-hidden relative">
+      {/* Futuristic Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {/* Cyber Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+        {/* Glowing Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '12s' }} />
+      </div>
 
       {isMobile && sidebarOpen && (
         <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" />

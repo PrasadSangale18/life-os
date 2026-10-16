@@ -125,7 +125,7 @@ const SortableTaskItem = ({
       className={`group/task relative flex items-start gap-2.5 p-3 rounded-xl transition-all duration-200 cursor-pointer ${
         isDone 
           ? 'bg-slate-100/60 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/[0.04]' 
-          : 'bg-white dark:bg-[#161B22] border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:border-slate-300 dark:hover:border-white/[0.16] hover:shadow-md hover:-translate-y-[1px]'
+          : 'bg-white dark:bg-[#161D27] border border-slate-200 dark:border-[#1E293B] shadow-xs hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md hover:-translate-y-[1px]'
       }`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -328,7 +328,7 @@ export const QuadrantCard = ({
   return (
     <div 
       ref={setNodeRef} 
-      className={`group/quadrant relative flex flex-col rounded-2xl bg-white dark:bg-[#0D1117]/90 border border-slate-200/90 dark:border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-slate-300 dark:hover:border-white/[0.2] overflow-hidden ${themeStyle.topBorder} ${themeStyle.surfaceClass}`}
+      className={`group/quadrant relative flex flex-col rounded-2xl bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700 overflow-hidden ${themeStyle.topBorder} ${themeStyle.surfaceClass}`}
       style={{ 
         height: isMobile ? 'auto' : '100%',
         minHeight: isMobile ? 320 : 280,

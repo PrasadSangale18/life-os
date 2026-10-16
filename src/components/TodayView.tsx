@@ -356,10 +356,10 @@ export const TodayView = ({
       {/* 1. HERO GREETING (Exact Prahari Reference Layout) */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Hello, {user?.name || "Prasad Sangale"}.
           </h1>
-          <p className="mt-1 text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-3xl">
+          <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl">
             AISankalp Autonomous Intelligence is online. Continuously calibrating your 5 Life Pillars, Eisenhower priority execution, and personal knowledge workspace to maximize cognitive momentum.
           </p>
         </div>
@@ -374,7 +374,7 @@ export const TodayView = ({
                 setShowTodayPromptModal(true);
               }
             }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-linear-to-r from-[#FF5A1F] to-[#EA580C] hover:from-[#EA580C] hover:to-[#C2410C] text-white text-xs font-black shadow-[0_4px_16px_rgba(255,90,31,0.35)] active:scale-95 transition-all cursor-pointer tracking-wide"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer tracking-wide"
           >
             <Sparkles size={15} />
             <span>Generate AI Daily Briefing</span>
@@ -386,76 +386,76 @@ export const TodayView = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
         
         {/* Card 1: CRITICAL / P0 FOCUS */}
-        <div className="rounded-2xl p-5 bg-white dark:bg-[#111622] border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] hover:bg-slate-50 dark:hover:bg-[#161D27] hover:border-slate-300 dark:hover:border-slate-700/80 hover:shadow-[0_0_24px_rgba(249,115,22,0.15)] hover:-translate-y-0.5 transition-all shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[10.5px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
               CRITICAL / P0 FOCUS
             </span>
-            <div className="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-500">
-              <AlertTriangle size={14} />
+            <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 dark:text-red-400">
+              <AlertTriangle size={16} strokeWidth={2} />
             </div>
           </div>
 
           <div className="flex items-baseline justify-between mt-3 mb-1">
-            <span className="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+            <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight leading-none">
               {criticalTasksCount}
             </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-mono">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 font-mono">
               ↗ +12.5%
             </span>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
             High-leverage tasks requiring immediate focus
           </p>
         </div>
 
         {/* Card 2: HABIT MOMENTUM */}
-        <div className="rounded-2xl p-5 bg-white dark:bg-[#111622] border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] hover:bg-slate-50 dark:hover:bg-[#161D27] hover:border-slate-300 dark:hover:border-slate-700/80 hover:shadow-[0_0_24px_rgba(249,115,22,0.15)] hover:-translate-y-0.5 transition-all shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[10.5px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
               HABIT MOMENTUM
             </span>
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-500">
-              <ShieldCheck size={14} />
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+              <ShieldCheck size={16} strokeWidth={2} />
             </div>
           </div>
 
           <div className="flex items-baseline justify-between mt-3 mb-1">
-            <span className="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+            <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight leading-none">
               {completedItemsCount}
             </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
               ↘ 92% Streak
             </span>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
             Atomic daily routines completed this cycle
           </p>
         </div>
 
         {/* Card 3: TOTAL KNOWLEDGE ASSETS */}
-        <div className="rounded-2xl p-5 bg-white dark:bg-[#111622] border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] hover:bg-slate-50 dark:hover:bg-[#161D27] hover:border-slate-300 dark:hover:border-slate-700/80 hover:shadow-[0_0_24px_rgba(249,115,22,0.15)] hover:-translate-y-0.5 transition-all shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[10.5px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
               TOTAL KNOWLEDGE ASSETS
             </span>
-            <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-500">
-              <FileText size={14} />
+            <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+              <FileText size={16} strokeWidth={2} />
             </div>
           </div>
 
           <div className="flex items-baseline justify-between mt-3 mb-1">
-            <span className="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+            <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight leading-none">
               {totalAssetsCount}
             </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-mono">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-mono">
               ↗ +15.7%
             </span>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
             Synchronized across 5 Life Pillars
           </p>
         </div>
@@ -465,7 +465,7 @@ export const TodayView = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         
         {/* Column 1: PILLAR EXECUTION DENSITY (Span 2) */}
-        <div className="lg:col-span-2 rounded-2xl p-5 bg-white dark:bg-[#111622] border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col">
+        <div className="lg:col-span-2 rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] shadow-xs flex flex-col">
           <div className="flex items-start justify-between flex-wrap gap-2 mb-4">
             <div>
               <div className="flex items-center gap-2">
@@ -532,7 +532,7 @@ export const TodayView = ({
         </div>
 
         {/* Column 2: COGNITIVE LOAD DISTRIBUTION (Circular Donut Chart) */}
-        <div className="rounded-2xl p-5 bg-white dark:bg-[#111622] border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2">
               <PieChart size={16} className="text-purple-400" />
@@ -613,7 +613,7 @@ export const TodayView = ({
       </div>
 
       {/* 4. FULL-WIDTH CARD: TOP PRODUCTIVITY BOTTLENECKS */}
-      <div className="rounded-2xl p-5 bg-white dark:bg-[#111622] border border-slate-200 dark:border-white/[0.08] shadow-xs">
+      <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] shadow-xs">
         <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
           <div className="flex items-center gap-2">
             <ShieldCheck size={16} className="text-amber-500" />
@@ -667,7 +667,7 @@ export const TodayView = ({
       </div>
 
       {/* 5. INTERACTIVE OPERATIONAL DELIVERABLES & QUICK CAPTURE */}
-      <div className="rounded-2xl p-5 bg-white dark:bg-[#111622] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-4">
+      <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] shadow-xs space-y-4">
         
         {/* Header & Tabs */}
         <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-200 dark:border-white/[0.06]">

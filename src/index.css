@@ -10,11 +10,11 @@
   --color-prahari-peachBorder: #FFD8BF;
   --color-prahari-peachText: #E04F16;
 
-  --color-dark-canvas: #0B0F17;
-  --color-dark-sidebar: #0E131F;
-  --color-dark-card: #131924;
-  --color-dark-cardHover: #1A2232;
-  --color-dark-border: rgba(255, 255, 255, 0.08);
+  --color-dark-canvas: #05080C;
+  --color-dark-sidebar: #080C14;
+  --color-dark-card: #11161D;
+  --color-dark-cardHover: #161D27;
+  --color-dark-border: #1E293B;
 
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.04);
   --shadow-cardDark: 0 8px 32px rgba(0, 0, 0, 0.35);
@@ -29,18 +29,18 @@
   --font-mono: 'IBM Plex Mono', 'JetBrains Mono', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Surfaces (PRAHARI Dark Enterprise Canvas) */
-  --bg-base: #0b0f17;
-  --bg-sidebar: #0e131f;
-  --bg-surface: #131924;
-  --bg-surface-elevated: #1a2232;
-  --bg-surface-hover: #222c3f;
-  --bg-surface-active: #2a374e;
-  --bg-overlay: rgba(5, 8, 14, 0.85);
+  --bg-base: #05080c;
+  --bg-sidebar: #080c14;
+  --bg-surface: #11161d;
+  --bg-surface-elevated: #161d27;
+  --bg-surface-hover: #1c2430;
+  --bg-surface-active: #242e3e;
+  --bg-overlay: rgba(5, 8, 12, 0.85);
 
   /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-default: rgba(255, 255, 255, 0.09);
-  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-subtle: #161f2e;
+  --border-default: #1e293b;
+  --border-strong: #334155;
   --border-focus: #ff5a1f;
 
   /* Text Colors */
@@ -86,7 +86,7 @@
   --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Surfaces (PRAHARI Clean Enterprise White & Blueprint Grid) */
-  --bg-base: #f8f9fa;
+  --bg-base: #f8fafc;
   --bg-sidebar: #ffffff;
   --bg-surface: #ffffff;
   --bg-surface-elevated: #f1f5f9;
