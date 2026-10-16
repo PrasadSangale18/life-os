@@ -76,7 +76,7 @@ export const UserProfileMenu = ({
             {user.name || "Prasad Sangale"}
           </span>
           <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">
-            Chief HSE Superintendent
+            Executive & Knowledge Lead
           </span>
         </div>
 

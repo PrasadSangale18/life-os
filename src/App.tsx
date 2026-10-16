@@ -552,9 +552,9 @@ export default function App() {
                     <span className="text-[11px] text-slate-500">Captured insights</span>
                   </div>
                   <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0c1017] border border-slate-200 dark:border-white/[0.06]">
-                    <span className="text-[10px] font-mono font-bold uppercase text-slate-400 block">SIF Precursors</span>
-                    <span className="text-2xl font-black text-[#FF5A1F] font-mono mt-1 block">29</span>
-                    <span className="text-[11px] text-slate-500">Under surveillance</span>
+                    <span className="text-[10px] font-mono font-bold uppercase text-slate-400 block">Focus Momentum</span>
+                    <span className="text-2xl font-black text-[#FF5A1F] font-mono mt-1 block">94%</span>
+                    <span className="text-[11px] text-slate-500">Cognitive clarity</span>
                   </div>
                 </div>
               </div>
@@ -987,7 +987,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Floating Prahari AI Copilot Toggle Pill */}
+      {/* Floating Antigravity AI Copilot Toggle Pill */}
       <button
         type="button"
         onClick={() => {
@@ -995,10 +995,10 @@ export default function App() {
           setShowCopilot(prev => !prev);
         }}
         className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full bg-linear-to-r from-[#FF5A1F] to-[#EA580C] text-white text-xs font-black shadow-[0_4px_20px_rgba(255,90,31,0.45)] hover:shadow-[0_6px_28px_rgba(255,90,31,0.6)] active:scale-95 transition-all cursor-pointer border border-white/20 select-none"
-        title="Toggle Prahari AI Copilot"
+        title="Toggle Antigravity AI Copilot"
       >
         <Sparkles size={15} />
-        <span className="hidden sm:inline">Prahari AI</span>
+        <span className="hidden sm:inline">Antigravity AI</span>
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
       </button>
 

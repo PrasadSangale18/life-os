@@ -232,11 +232,11 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
     const title = titleMatch ? titleMatch[1].replace(/[#*`_]/g, '').trim() : 'AI Intelligence Briefing';
     
     await addItem({
-      title: title || 'Prahari Safety Briefing',
+      title: title || 'Life OS Executive Daily Briefing',
       body: msg.text,
       type: 'note',
       pillar: 'mental',
-      tags: ['ai-copilot', 'prahari', 'safety', 'toolbox-talk']
+      tags: ['ai-copilot', 'life-os', 'daily-briefing', 'productivity']
     });
 
     addToast('Saved into My Notes workspace', 'success');
@@ -380,7 +380,7 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
             <div key={msg.id} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1.5`}>
               <div className="flex items-center gap-2 px-1">
                 <span className="text-[10px] font-mono text-slate-400 font-bold uppercase">
-                  {isUser ? (user?.name || 'You') : 'Prahari Copilot'}
+                  {isUser ? (user?.name || 'You') : 'Antigravity Copilot'}
                 </span>
                 <span className="text-[9.5px] text-slate-400 font-mono">
                   {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
