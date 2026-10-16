@@ -21,6 +21,10 @@ import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { DimensionFilter } from './components/DimensionFilter';
 import { HabitsView } from './components/habits/HabitsView';
+import { PrahariCopilotChat } from './components/chat/PrahariCopilotChat';
+import { DayTimeline } from './components/productivity/DayTimeline';
+import { FlowCockpitModal } from './components/focus/FlowCockpitModal';
+import { EveningChronicleModal } from './components/productivity/EveningChronicleModal';
 
 const MindMap = lazy(() => import('./components/MindMap').then(m => ({ default: m.MindMap })));
 import { FONT_URL } from './theme/tokens';
@@ -38,7 +42,8 @@ import {
   CalendarCheck,
   Download,
   Trash2,
-  Lock
+  Lock,
+  Clock
 } from 'lucide-react';
 import './App.css';
 
@@ -47,10 +52,18 @@ export default function App() {
 
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeSection, setActiveSection] = useState<string>("notes");
+  const [activeSection, setActiveSection] = useState<string>("dashboard");
   const [taskViewMode, setTaskViewMode] = useState<'matrix' | 'list' | 'projects' | 'inbox'>('matrix');
   const [activePillar, setActivePillar] = useState<PillarId>("physical");
   const [showUtilitiesModal, setShowUtilitiesModal] = useState(false);
+  
+  // Prahari Copilot, Flow, and Journal state
+  const [showCopilot, setShowCopilot] = useState(false);
+  const [copilotDocked, setCopilotDocked] = useState(false);
+  const [copilotPrompt, setCopilotPrompt] = useState<string | undefined>(undefined);
+  const [showFlowModal, setShowFlowModal] = useState(false);
+  const [flowFocusTask, setFlowFocusTask] = useState<Item | null>(null);
+  const [showJournalModal, setShowJournalModal] = useState(false);
   
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined') {
@@ -225,7 +238,12 @@ export default function App() {
       <Sidebar 
         currentTab={activeSection}
         onTabChange={(tab) => {
-          setActiveSection(tab);
+          if (tab === 'assistant') {
+            setCopilotPrompt(undefined);
+            setShowCopilot(true);
+          } else {
+            setActiveSection(tab);
+          }
           if (isMobile) setSidebarOpen(false);
         }}
         isMobile={isMobile}
@@ -248,6 +266,10 @@ export default function App() {
           isDarkMode={theme === 'dark'}
           onToggleDarkMode={toggleTheme}
           onOpenPromptWise={() => setShowPromptModal(true)}
+          onOpenCopilot={() => {
+            setCopilotPrompt(undefined);
+            setShowCopilot(true);
+          }}
           onQuickCapture={() => {
             setEditingTask(undefined);
             setCaptureTarget('inbox');
@@ -257,11 +279,16 @@ export default function App() {
           pageTitle={
             activeSection === "dashboard" || activeSection === "today" ? "Dashboard" :
             activeSection === "tasks" ? "To-do list" :
+            activeSection === "calendar" ? "Calendar & Schedule" :
+            activeSection === "focus" ? "Focus Timer" :
             activeSection === "habits" ? "Habits & Routines" :
             activeSection === "notes" ? "My Notes" :
+            activeSection === "projects" ? "Projects & Kanban" :
+            activeSection === "goals" ? "Goals & Milestones" :
             activeSection === "organizer" ? "Smart AI Organizer" :
             activeSection === "mindmap" ? "Canvas & Graph" :
-            activeSection === "projects" ? "Analytics" :
+            activeSection === "journal" ? "Daily Journal" :
+            activeSection === "analytics" ? "Productivity Analytics" :
             activeSection === "import" ? "CSV Bulk Import" :
             activeSection === "review" ? "Weekly Review" :
             activeSection === "settings" ? "Settings" :
@@ -422,6 +449,128 @@ export default function App() {
             <HabitsView />
           )}
 
+          {/* 6. CALENDAR & CIRCADIAN TIME BLOCKING */}
+          {activeSection === "calendar" && (
+            <div className="max-w-6xl mx-auto w-full space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/[0.08]">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Calendar & Circadian Time Blocking</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Interactive 24h schedule calibrated to human energy rhythms</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingTask(undefined);
+                    setCaptureTarget('quadrant');
+                    setShowTaskModal(true);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-linear-to-r from-[#FF5A1F] to-[#EA580C] text-white text-xs font-bold shadow-xs cursor-pointer hover:opacity-90"
+                >
+                  + Schedule Task
+                </button>
+              </div>
+              <DayTimeline 
+                tasks={pt}
+                onStartFocus={(task) => {
+                  setFlowFocusTask(task);
+                  setShowFlowModal(true);
+                }}
+                onEditTask={(task) => {
+                  setEditingTask(task);
+                  setShowTaskModal(true);
+                }}
+              />
+            </div>
+          )}
+
+          {/* 7. FOCUS TIMER & DEEP WORK FLOW COCKPIT */}
+          {activeSection === "focus" && (
+            <div className="max-w-3xl mx-auto w-full py-6">
+              <div className="rounded-3xl p-8 bg-white dark:bg-[#111622] border border-slate-200 dark:border-white/[0.08] shadow-lg text-center space-y-5">
+                <div className="w-14 h-14 rounded-2xl bg-orange-500/10 text-[#FF5A1F] flex items-center justify-center mx-auto shadow-inner">
+                  <Clock size={28} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 dark:text-white">Deep Work Flow Cockpit</h2>
+                  <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1">
+                    Binaural audio synthesis (40Hz gamma / 10Hz alpha), 25-minute Pomodoro focus blocks, and distraction parking.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#0c1017] border border-slate-200 dark:border-white/[0.06] max-w-md mx-auto text-left space-y-2 text-xs">
+                  <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 font-bold">
+                    <span>Active Focus Candidate:</span>
+                    <span className="font-mono text-[#FF5A1F]">{pt[0]?.title || 'Operational Briefing'}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                    <span>Estimated Duration:</span>
+                    <span className="font-mono">{pt[0]?.estMinutes || 25} minutes</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFlowFocusTask(pt[0] || null);
+                    setShowFlowModal(true);
+                  }}
+                  className="px-8 py-3.5 rounded-2xl bg-linear-to-r from-[#FF5A1F] to-[#EA580C] hover:from-[#EA580C] hover:to-[#C2410C] text-white font-black text-sm shadow-[0_4px_20px_rgba(255,90,31,0.35)] cursor-pointer active:scale-95 transition-all"
+                >
+                  Launch Flow Session Now
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 8. DAILY JOURNAL & EVENING CHRONICLE */}
+          {activeSection === "journal" && (
+            <div className="max-w-4xl mx-auto w-full py-4 space-y-4">
+              <div className="rounded-2xl p-6 bg-white dark:bg-[#111622] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/[0.08]">
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900 dark:text-white">Daily Journal & Evening Chronicle</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Daily win reflection, energy pulse calibration, and closing ritual</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowJournalModal(true)}
+                    className="px-4 py-2 rounded-xl bg-linear-to-r from-[#FF5A1F] to-[#EA580C] text-white text-xs font-bold cursor-pointer shadow-xs hover:opacity-90 active:scale-95 transition-all"
+                  >
+                    Open Evening Chronicle
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0c1017] border border-slate-200 dark:border-white/[0.06]">
+                    <span className="text-[10px] font-mono font-bold uppercase text-slate-400 block">Completed Today</span>
+                    <span className="text-2xl font-black text-emerald-500 font-mono mt-1 block">{doneTasks}</span>
+                    <span className="text-[11px] text-slate-500">Tasks closed</span>
+                  </div>
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0c1017] border border-slate-200 dark:border-white/[0.06]">
+                    <span className="text-[10px] font-mono font-bold uppercase text-slate-400 block">Active Notes</span>
+                    <span className="text-2xl font-black text-purple-500 font-mono mt-1 block">{totalNotesCount}</span>
+                    <span className="text-[11px] text-slate-500">Captured insights</span>
+                  </div>
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0c1017] border border-slate-200 dark:border-white/[0.06]">
+                    <span className="text-[10px] font-mono font-bold uppercase text-slate-400 block">SIF Precursors</span>
+                    <span className="text-2xl font-black text-[#FF5A1F] font-mono mt-1 block">29</span>
+                    <span className="text-[11px] text-slate-500">Under surveillance</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 9. GOALS & HORIZONS */}
+          {activeSection === "goals" && (
+            <ProjectsView 
+              onEditTask={(task) => { setEditingTask(task); setShowTaskModal(true); }}
+              onNewGoal={() => { setEditingTask(undefined); setTaskModalType('goal'); setShowTaskModal(true); }}
+              onNewProject={() => { setEditingTask(undefined); setTaskModalType('project'); setShowTaskModal(true); }}
+              onNewTaskInProject={() => { setEditingTask(undefined); setTaskModalType('task'); setShowTaskModal(true); }}
+            />
+          )}
+
           {/* PRAHARI DASHBOARD: Unified Command Center & Daily Focus */}
           {(activeSection === "dashboard" || activeSection === "today") && (
             <TodayView 
@@ -429,6 +578,11 @@ export default function App() {
               onAddTask={() => { setEditingTask(undefined); setCaptureTarget('inbox'); setNewTaskQuadrant('do'); setShowTaskModal(true); }}
               onGoToInbox={() => { setActiveSection('tasks'); setTaskViewMode('inbox'); }}
               onGoToMatrix={() => { setActiveSection('tasks'); setTaskViewMode('matrix'); }}
+              onNavigateSection={(sec) => setActiveSection(sec)}
+              onOpenCopilot={(prompt) => {
+                setCopilotPrompt(prompt);
+                setShowCopilot(true);
+              }}
             />
           )}
           {activeSection === "inbox" && <InboxView onEditTask={(task) => { setEditingTask(task); setShowTaskModal(true); }} />}
@@ -442,7 +596,7 @@ export default function App() {
           )}
           {activeSection === "import" && <ImportView />}
           {activeSection === "settings" && <SettingsView />}
-          {activeSection === "review" && <WeeklyReview />}
+          {(activeSection === "analytics" || activeSection === "review") && <WeeklyReview />}
           {activeSection === "trash" && <TrashView />}
         </div>
         
@@ -831,6 +985,47 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Floating Prahari AI Copilot Toggle Pill */}
+      <button
+        type="button"
+        onClick={() => {
+          setCopilotPrompt(undefined);
+          setShowCopilot(prev => !prev);
+        }}
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full bg-linear-to-r from-[#FF5A1F] to-[#EA580C] text-white text-xs font-black shadow-[0_4px_20px_rgba(255,90,31,0.45)] hover:shadow-[0_6px_28px_rgba(255,90,31,0.6)] active:scale-95 transition-all cursor-pointer border border-white/20 select-none"
+        title="Toggle Prahari AI Copilot"
+      >
+        <Sparkles size={15} />
+        <span className="hidden sm:inline">Prahari AI</span>
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+      </button>
+
+      {/* Prahari Antigravity AI Copilot Dock / Slide-out Chat */}
+      <PrahariCopilotChat
+        isOpen={showCopilot}
+        onClose={() => setShowCopilot(false)}
+        initialPrompt={copilotPrompt}
+        isDocked={copilotDocked}
+        onToggleDock={() => setCopilotDocked(prev => !prev)}
+      />
+
+      {/* Global Focus Flow Cockpit Modal */}
+      {showFlowModal && (
+        <FlowCockpitModal
+          task={flowFocusTask}
+          isOpen={showFlowModal}
+          onClose={() => setShowFlowModal(false)}
+        />
+      )}
+
+      {/* Global Evening Chronicle Modal */}
+      {showJournalModal && (
+        <EveningChronicleModal
+          isOpen={showJournalModal}
+          onClose={() => setShowJournalModal(false)}
+        />
       )}
     </div>
   );

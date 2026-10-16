@@ -1,3 +1,4 @@
+import React from 'react';
 import { 
   CheckSquare, 
   BookOpen, 
@@ -6,7 +7,13 @@ import {
   ChevronLeft, 
   LayoutDashboard, 
   Compass,
-  Flame
+  Flame,
+  Calendar,
+  Clock,
+  FolderKanban,
+  Target,
+  BarChart3,
+  Zap
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -20,6 +27,20 @@ interface SidebarProps {
   totalCount?: number;
 }
 
+interface NavItem {
+  id: string;
+  name: string;
+  icon: any;
+  subtitle: string;
+  count?: number;
+  badge?: string;
+}
+
+interface NavGroup {
+  category: string;
+  items: NavItem[];
+}
+
 export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onTabChange,
@@ -30,13 +51,42 @@ export const Sidebar: React.FC<SidebarProps> = ({
   completedCount = 0,
   totalCount = 0
 }) => {
-  const navItems = [
-    { id: 'notes', name: 'My Notes', icon: BookOpen, subtitle: 'Apple Notes + Notion + Obsidian', count: notesCount > 0 ? notesCount : undefined },
-    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, subtitle: 'Command center & daily focus' },
-    { id: 'tasks', name: 'To-do list', icon: CheckSquare, subtitle: 'Tasks, matrix & execution' },
-    { id: 'habits', name: 'Habits & Routines', icon: Flame, subtitle: 'Atomic streaks & heatmaps' },
-    { id: 'mindmap', name: 'Canvas & Graph', icon: Compass, subtitle: 'Visual second brain' },
-    { id: 'organizer', name: 'Smart AI Organizer', icon: Sparkles, subtitle: 'Bulk input & auto-sorting', badge: 'BULK AI' },
+  const pendingCount = Math.max(totalCount - completedCount, 0);
+
+  const navGroups: NavGroup[] = [
+    {
+      category: 'CORE EXECUTION',
+      items: [
+        { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, subtitle: 'Prahari command center' },
+        { id: 'tasks', name: 'Tasks & Matrix', icon: CheckSquare, subtitle: 'Eisenhower priority execution', count: pendingCount > 0 ? pendingCount : undefined },
+        { id: 'calendar', name: 'Calendar & Schedule', icon: Calendar, subtitle: 'Time blocking & day flow' },
+        { id: 'focus', name: 'Focus Timer', icon: Clock, subtitle: 'Pomodoro flow cockpit' }
+      ]
+    },
+    {
+      category: 'KNOWLEDGE & PROJECTS',
+      items: [
+        { id: 'notes', name: 'Notes & Knowledge', icon: BookOpen, subtitle: 'Apple Notes + Notion + Obsidian', count: notesCount > 0 ? notesCount : undefined },
+        { id: 'projects', name: 'Projects & Kanban', icon: FolderKanban, subtitle: 'Boards & milestones' },
+        { id: 'goals', name: 'Goals & Milestones', icon: Target, subtitle: 'Strategic horizons & OKRs' },
+        { id: 'mindmap', name: 'Canvas & Graph', icon: Compass, subtitle: 'Visual second brain' }
+      ]
+    },
+    {
+      category: 'HABITS & REFLECTION',
+      items: [
+        { id: 'habits', name: 'Habits & Routines', icon: Flame, subtitle: 'Atomic streaks & heatmaps' },
+        { id: 'journal', name: 'Daily Journal', icon: Sparkles, subtitle: 'Evening chronicle & wins' },
+        { id: 'analytics', name: 'Productivity Analytics', icon: BarChart3, subtitle: 'Reports & performance metrics' }
+      ]
+    },
+    {
+      category: 'INTELLIGENCE',
+      items: [
+        { id: 'assistant', name: 'Prahari AI Copilot', icon: Sparkles, subtitle: 'Antigravity real-time chat', badge: 'PRO' },
+        { id: 'organizer', name: 'Smart AI Organizer', icon: Zap, subtitle: 'Bulk input & auto-sorting', badge: 'AI' }
+      ]
+    }
   ];
 
   const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -83,75 +133,78 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
 
-        {/* Navigation Category Header */}
-        <div className="px-5 pt-5 pb-2 shrink-0">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            CONTROL ROOM
-          </span>
-        </div>
+        {/* Categorized Navigation Groups */}
+        <div className="px-3 py-3 space-y-4 flex-1">
+          {navGroups.map((group) => (
+            <div key={group.category} className="space-y-1">
+              <div className="px-3 py-1">
+                <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
+                  {group.category}
+                </span>
+              </div>
 
-        {/* Nav Links */}
-        <nav className="px-3 space-y-1 flex-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  onTabChange(item.id);
-                  if (isMobile && onClose) onClose();
-                }}
-                className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-xl text-left transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-[#FFF4EC] dark:bg-[#FF5A1F]/15 border border-[#FFD8BF] dark:border-[#FF5A1F]/30 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-dark-card border border-transparent'
-                }`}
-              >
-                <Icon className={`w-4 h-4 mt-0.5 shrink-0 transition-colors ${
-                  isActive ? 'text-[#FF5A1F]' : 'text-slate-400'
-                }`} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-bold truncate ${
-                      isActive ? 'text-[#E04F16] dark:text-[#FF5A1F]' : 'text-slate-800 dark:text-slate-200'
-                    }`}>
-                      {item.name}
-                    </span>
-                    {item.count !== undefined && (
-                      <span className="text-[10px] font-mono text-slate-400 px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 tabular-nums">
-                        {item.count}
-                      </span>
-                    )}
-                    {item.badge && (
-                      <span className="text-[9px] font-bold tracking-tight px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                    {item.subtitle}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
-        </nav>
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = currentTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        onTabChange(item.id);
+                        if (isMobile && onClose) onClose();
+                      }}
+                      className={`w-full flex items-start gap-2.5 px-3 py-2 rounded-xl text-left transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-[#FFF4EC] dark:bg-[#FF5A1F]/15 border border-[#FFD8BF] dark:border-[#FF5A1F]/30 shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-dark-card border border-transparent'
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 mt-0.5 shrink-0 transition-colors ${
+                        isActive ? 'text-[#FF5A1F]' : 'text-slate-400'
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className={`text-xs font-bold truncate ${
+                            isActive ? 'text-[#E04F16] dark:text-[#FF5A1F]' : 'text-slate-800 dark:text-slate-200'
+                          }`}>
+                            {item.name}
+                          </span>
+                          {item.count !== undefined && (
+                            <span className="text-[10px] font-mono text-slate-400 px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 tabular-nums">
+                              {item.count}
+                            </span>
+                          )}
+                          {item.badge && (
+                            <span className="text-[9px] font-bold tracking-tight px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                              {item.badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                          {item.subtitle}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Bottom Profile / Status */}
-      <div className="p-4 border-t border-slate-200 dark:border-dark-border shrink-0 bg-slate-50/50 dark:bg-dark-sidebar">
-        <div className="flex items-center justify-between mb-2 text-xs">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Task Completion</span>
-          <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 tabular-nums">
-            {totalCount > 0 ? `${completedCount}/${totalCount} (${pct}%)` : 'Active'}
-          </span>
+      {/* Footer Metrics (Prahari Task Completion) */}
+      <div className="p-4 border-t border-slate-200 dark:border-dark-border bg-slate-50/50 dark:bg-dark-card/30 shrink-0">
+        <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 font-mono">
+          <span className="text-[10px] uppercase text-slate-400">Task Completion</span>
+          <span>{completedCount}/{totalCount} ({pct}%)</span>
         </div>
-        <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+        <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-gradient-to-r from-[#FF5A1F] to-[#10B981] rounded-full transition-all duration-500"
-            style={{ width: `${totalCount > 0 ? pct : 100}%` }}
+            className="bg-linear-to-r from-[#FF5A1F] to-[#10B981] h-full transition-all duration-300 rounded-full"
+            style={{ width: `${pct}%` }}
           />
         </div>
       </div>
