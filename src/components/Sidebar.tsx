@@ -91,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-  if (isMobile && !isOpen) {
+  if (!isOpen) {
     return null;
   }
 

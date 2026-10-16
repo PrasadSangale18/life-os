@@ -2,14 +2,11 @@ import React from 'react';
 import { 
   Sun, 
   Moon, 
-  Search, 
-  Plus, 
   LayoutGrid, 
   List, 
   FolderKanban, 
   Inbox,
-  Menu,
-  Sparkles
+  PanelLeft
 } from 'lucide-react';
 
 interface TopBarProps {
@@ -37,13 +34,8 @@ export const TopBar: React.FC<TopBarProps> = ({
   inboxCount = 0,
   isDarkMode,
   onToggleDarkMode,
-  onQuickCapture,
-  onOpenPromptWise,
-  onOpenCopilot,
   pageTitle = "Shift Radar",
-  onSearchClick,
   onToggleSidebar,
-  isMobile = false,
   user,
   children
 }) => {
@@ -60,16 +52,17 @@ export const TopBar: React.FC<TopBarProps> = ({
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-white/70 dark:bg-[#05080C]/70 backdrop-blur-xl border-b border-slate-200 dark:border-[#1E293B] px-4 md:px-8 flex items-center justify-between transition-colors">
-      {/* Left: Breadcrumb / Title & View Selector */}
-      <div className="flex items-center gap-3 md:gap-5">
+      {/* Left: Sidebar Toggle + Page Title & View Selector */}
+      <div className="flex items-center gap-3">
         {onToggleSidebar && (
           <button
             type="button"
             onClick={onToggleSidebar}
-            className={`${isMobile ? 'block' : 'block lg:hidden'} p-2 rounded-xl border border-slate-200 dark:border-[#1E293B] text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-[#11161D] hover:bg-slate-100 dark:hover:bg-[#161D27] cursor-pointer`}
-            aria-label="Open navigation"
+            className="p-2 rounded-xl border border-slate-200 dark:border-[#1E293B] text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-[#11161D] hover:bg-slate-100 dark:hover:bg-[#161D27] cursor-pointer transition-colors flex items-center justify-center shrink-0"
+            aria-label="Toggle navigation"
+            title="Toggle Sidebar"
           >
-            <Menu size={18} strokeWidth={2.2} />
+            <PanelLeft size={17} strokeWidth={2.2} />
           </button>
         )}
 
@@ -77,9 +70,9 @@ export const TopBar: React.FC<TopBarProps> = ({
           {pageTitle}
         </h1>
 
-        {/* Segmented View Switcher */}
+        {/* Segmented View Switcher (when tasks view) */}
         {showViewSwitcher && (
-          <div className="hidden sm:flex items-center bg-slate-100 dark:bg-[#11161D] p-1 rounded-xl border border-slate-200/80 dark:border-[#1E293B]">
+          <div className="hidden xl:flex items-center bg-slate-100 dark:bg-[#11161D] p-1 rounded-xl border border-slate-200/80 dark:border-[#1E293B]">
             {[
               { id: 'matrix', label: 'Matrix', icon: LayoutGrid },
               { id: 'list', label: 'List', icon: List },
@@ -117,44 +110,20 @@ export const TopBar: React.FC<TopBarProps> = ({
         )}
       </div>
 
-      {/* Center: Absolute Centered Brand Title */}
+      {/* Center: Absolute Centered Brand Title (Exact PRAHARI Spacing) */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none text-center">
-        <span className="text-base sm:text-xl md:text-2xl font-black tracking-[0.22em] text-slate-900 dark:text-white uppercase font-mono">
+        <span className="text-base sm:text-lg md:text-xl font-black tracking-[0.35em] text-slate-900 dark:text-white uppercase font-mono">
           AISANKALP
         </span>
       </div>
 
-      {/* Right Controls */}
-      <div className="flex items-center gap-2 md:gap-3">
-        {/* Quick Search */}
-        <button 
-          type="button"
-          onClick={onSearchClick}
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] text-xs text-slate-500 hover:border-slate-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
-        >
-          <Search className="w-3.5 h-3.5" />
-          <span>Search</span>
-          <kbd className="text-[10px] font-mono bg-white dark:bg-slate-800 px-1 rounded border border-slate-200 dark:border-slate-700">⌘K</kbd>
-        </button>
-
-        {/* AI Productivity Studio / Copilot */}
-        {(onOpenCopilot || onOpenPromptWise) && (
-          <button
-            type="button"
-            onClick={onOpenCopilot || onOpenPromptWise}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 dark:border-orange-500/40 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0 shadow-xs"
-            title="Antigravity AI Copilot"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400" />
-            <span className="hidden sm:inline">AI Studio</span>
-          </button>
-        )}
-
+      {/* Right Controls: Exact PRAHARI 3-item layout (Theme toggle, Bell badge, Profile pill) */}
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Theme Toggle Button */}
         <button
           type="button"
           onClick={onToggleDarkMode}
-          className="p-2 rounded-xl bg-slate-50 dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] text-slate-400 hover:text-orange-400 dark:hover:text-orange-400 hover:border-orange-500/30 transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0"
+          className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] text-slate-400 hover:text-orange-400 dark:hover:text-orange-400 hover:border-orange-500/30 transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0"
           title="Toggle Theme"
         >
           {isDarkMode ? (
@@ -181,24 +150,11 @@ export const TopBar: React.FC<TopBarProps> = ({
           </span>
         </div>
 
-        {/* Quick Capture Button (Prahari Vivid Orange) */}
-        {onQuickCapture && (
-          <button
-            type="button"
-            onClick={onQuickCapture}
-            className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shrink-0"
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[3]" />
-            <span>Capture</span>
-            <kbd className="hidden md:inline-block bg-black/20 text-white/90 text-[10px] font-mono px-1 rounded ml-1">C</kbd>
-          </button>
-        )}
-
         {/* Organization / Profile Badge */}
         {children ? (
           children
         ) : (
-          <div className="hidden sm:flex items-center gap-2 pl-1">
+          <div className="flex items-center gap-2 pl-1">
             <span className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] text-[10px] font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono shadow-xs">
               AISANKALP WORKSPACE
             </span>
