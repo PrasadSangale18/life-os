@@ -117,10 +117,10 @@ export const TopBar: React.FC<TopBarProps> = ({
         )}
       </div>
 
-      {/* Center: Tracked P R A H A R I Wordmark matching reference screenshots */}
+      {/* Center: Tracked L I F E   O S Wordmark (Inspired by Prahari high-tech minimalism) */}
       <div className="hidden lg:flex items-center justify-center pointer-events-none select-none">
-        <span className="font-mono font-black text-xs md:text-sm tracking-[0.38em] text-slate-800 dark:text-white uppercase pl-2">
-          P R A H A R I
+        <span className="font-mono font-black text-xs md:text-sm tracking-[0.42em] text-slate-800 dark:text-white uppercase pl-2">
+          L I F E &nbsp; O S
         </span>
       </div>
 
@@ -200,7 +200,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         ) : (
           <div className="hidden sm:flex items-center gap-2 pl-1">
             <span className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-[#131924] border border-slate-200 dark:border-white/[0.1] text-[10px] font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono shadow-xs">
-              OIL INDIA LIMITED
+              EXECUTIVE WORKSPACE
             </span>
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF5A1F] to-[#EA580C] text-white flex items-center justify-center font-bold text-xs shadow-xs font-mono">
               {initials}

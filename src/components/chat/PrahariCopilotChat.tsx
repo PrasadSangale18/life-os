@@ -84,18 +84,18 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
         id: 'welcome',
         sender: 'assistant',
         timestamp: Date.now() - 300000,
-        text: `### 🛡️ Prahari Autonomous SIF Intelligence\n\nWelcome back, **${user?.name || 'Prasad Sangale'}**.\n\nI am actively correlating **29 SIF Potential Precursors**, telemetry across **Duliajan, Digboi & Moran**, and critical barrier failures (*LOTO, Fire Watch, Expired Permits*).\n\nHow can I assist your operations today?`,
+        text: `### 🧠 Antigravity Productivity Copilot\n\nWelcome back, **${user?.name || 'Prasad Sangale'}**.\n\nI am actively synthesizing your **5 Life Pillars**, Eisenhower execution backlog (**${activeTasks.length} active tasks**), and second-brain notes (**${notesCount} records**) to maximize high-leverage output.\n\nHow can I supercharge your workflow today?`,
         knowledgeSources: [
-          'SIF Precursors • Scanned 29 critical frontline observations',
-          'Barrier Defect Telemetry • LOTO Not Applied (78%), No Fire Watch (62%)',
-          'Asset Feeds • Duliajan (98%), Digboi (74%), Moran (61%)',
-          'Safety Governance • Oil India OMR 2017 & DGMS Safety Standard'
+          `Task Matrix • ${activeTasks.length} tasks synchronized across Eisenhower quadrants`,
+          '5 Life Pillars • Calibrated Physical, Mental, Financial, Relational & Spiritual',
+          `Second Brain • ${notesCount} knowledge records & wiki-links mapped`,
+          'Circadian Energy • Peak morning focus window active'
         ],
         executionTime: '0.8s',
         actionsCount: 4,
         suggestedActions: [
-          { label: 'Generate AI Toolbox Talk', action: 'note' },
-          { label: 'Convert Precursors to Tasks', action: 'tasks' }
+          { label: 'Generate Daily Briefing', action: 'note' },
+          { label: '80/20 Prioritization Plan', action: 'tasks' }
         ]
       }
     ];
@@ -138,46 +138,46 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
 
     // Intelligent context-aware AI synthesis generator
     setTimeout(() => {
-      const isToolboxTalk = promptText.toLowerCase().includes('toolbox') || promptText.toLowerCase().includes('safety');
-      const isBarrier = promptText.toLowerCase().includes('barrier') || promptText.toLowerCase().includes('loto');
-      const isPrioritize = promptText.toLowerCase().includes('priorit') || promptText.toLowerCase().includes('task');
+      const isBriefing = promptText.toLowerCase().includes('briefing') || promptText.toLowerCase().includes('toolbox') || promptText.toLowerCase().includes('daily') || promptText.toLowerCase().includes('morning') || promptText.toLowerCase().includes('plan');
+      const isBottleneck = promptText.toLowerCase().includes('bottleneck') || promptText.toLowerCase().includes('barrier') || promptText.toLowerCase().includes('procrastinat') || promptText.toLowerCase().includes('friction');
+      const isPrioritize = promptText.toLowerCase().includes('priorit') || promptText.toLowerCase().includes('task') || promptText.toLowerCase().includes('80/20');
 
       let replyText = '';
       let knowledgeSources: string[] = [];
       let checklist: string[] = [];
 
-      if (isToolboxTalk) {
-        replyText = `## 🛢️ OIL INDIA LIMITED — DAILY SAFETY TOOLBOX TALK\n**Target Assets:** Duliajan Drilling Rig #4, Digboi Production Facility, Moran Sub-Station  \n**Focus:** High-Energy Hazard Isolation & Barrier Integrity\n\n---\n\n### ⚡ 1. Critical Operational Context\nOver the last 24 hours, Prahari Safety NLP intercepted **29 SIF precursors**. The primary hazard vector is **Failure to Apply Lockout/Tagout (LOTO)** during shift changeovers, accompanied by missing Fire Watch attendants at hot-work zones.\n\n### 🛡️ 2. Frontline Mandatory Verifications (3 Golden Rules)\n1. **Zero-Energy Verification:** Every isolation point must be locked, tagged, and bled to zero atmospheric pressure prior to flange breaking.\n2. **Dedicated Fire Watch:** No welding or torch cutting without a qualified fire watch equipped with a calibrated multi-gas monitor and dry chemical extinguisher.\n3. **Permit Validity Check:** Verify shift-lead countersignatures on work permits (PTW) before breaking ground.\n\n### 📋 3. Discussion Points for Rig Floor & Crew\n> *"Speed never supersedes safety. If an energy source is not verified de-energized, you have the absolute Stop-Work Authority."*\n\nAsk crew members:\n- "Who has the master key for the electrical breaker isolation?"\n- "Has the wind direction been calibrated for the spark arrestor?"`;
+      if (isBriefing) {
+        replyText = `## ⚡ LIFE OS — EXECUTIVE DAILY BRIEFING\n**Calibration:** Peak Morning Focus Window  \n**Scope:** 5 Life Pillars & Eisenhower Priority Backlog\n\n---\n\n### 🎯 1. High-Leverage Strategic Focus (80/20 Rule)\nYou have **${criticalTasks.length} critical flagged tasks** and **${activeTasks.length} total active items**. The highest-leverage path today is to execute your Top 3 P0 tasks before noon during peak energy.\n\n### 🛡️ 2. Core Execution Principles (3 Golden Rules)\n1. **Single-Task Immersion:** Run 25-minute Pomodoro Flow sessions with binaural gamma sound. Zero tabs open during focus blocks.\n2. **Park Distractions Instantly:** If an intrusive thought or side-task arises, dump it into the Flow Cockpit Parking Lot without breaking flow.\n3. **Close the Open Loops:** End the work session with the 5-minute Evening Chronicle reflection to protect mental recovery.\n\n### 📋 3. Morning Clarity Prompt\n> *"What is the single task that, if completed today, will make everything else easier or unnecessary?"*`;
 
         knowledgeSources = [
-          'SIF Database • 29 Precursors with fatal potential analyzed',
-          'Barrier Failures • LOTO Not Applied (#1 failure at Duliajan)',
-          'Permit System • 48 expired PTWs flagged in Digboi sector',
-          'Standard Guidelines • DGMS Circular No. 04 / OMR 2017'
+          `Task Database • ${activeTasks.length} active tasks evaluated across 5 Life Pillars`,
+          `Eisenhower Matrix • Q1 Do Now & Q2 Deep Work calibrated`,
+          `Second Brain • Scanned active notes and backlinks`,
+          `Circadian Rhythm • Peak mental capacity window (09:00 - 11:30 AM)`
         ];
 
         checklist = [
-          'Verify physical padlocks on 480V motor control center (MCC)',
-          'Inspect spark containment barrier at Gas Separator Unit #2',
-          'Validate active Cold/Hot Work Permit signatures before 08:00 AM',
-          'Perform gas detector bump test for H2S and LEL levels'
+          'Complete #1 Critical P0 task before opening emails or messages',
+          'Run a 25-minute Pomodoro Flow session with binaural focus audio',
+          'Review and clear the quick capture Inbox',
+          'Log evening wins and rate daily energy pulse'
         ];
-      } else if (isBarrier) {
-        replyText = `## ⚠️ TOP RECURRING BARRIER FAILURE ANALYSIS\n\nAn audit of recent telemetry revealed 3 critical control defects accounting for **84% of SIF exposure**:\n\n1. **LOTO Not Applied (78% Frequency)**\n   - *Root Cause:* Time pressure during routine pump seal replacements.\n   - *Mitigation:* Implement peer-to-peer 2-person signoff lockouts.\n2. **No Fire Watch Attendant (62% Frequency)**\n   - *Root Cause:* Reassigning personnel to pipe handling mid-operation.\n   - *Mitigation:* Dedicated fluorescent safety vests for fire guards only.\n3. **Expired Work Permits (48% Frequency)**\n   - *Root Cause:* Work extending beyond 12-hour shift boundary without re-authorization.`;
+      } else if (isBottleneck) {
+        replyText = `## ⚠️ TOP PRODUCTIVITY BOTTLENECK ANALYSIS\n\nAn audit of active projects and task velocity revealed 3 cognitive friction vectors causing **82% of task delays**:\n\n1. **Task Ambiguity (82% Delay Factor)**\n   - *Root Cause:* Tasks titled broadly (e.g. 'work on pitch') without a concrete 5-minute physical first action.\n   - *Countermeasure:* Use the Resistance Buster modal to break tasks into atomic 10-minute micro-actions.\n2. **Context Switching & App Toggling (64% Delay Factor)**\n   - *Root Cause:* Switching between browser, chat, notes, and task lists drains 20-30 minutes of cognitive reload time.\n   - *Countermeasure:* Keep all notes, tasks, and canvas boards unified inside Life OS.\n3. **Unscheduled Large Backlog Items (47% Delay Factor)**\n   - *Root Cause:* Large tasks without calendar blocks sit in the backlog indefinitely.\n   - *Countermeasure:* Drag backlog items into the 24h Circadian Day Timeline for committed execution.`;
 
         knowledgeSources = [
-          'Telemetry Feed • 434 incident & near-miss reports parsed',
-          'Site Breakdown • Duliajan (98%), Digboi (74%), Moran (61%)',
-          'Defect Matrix • LOTO, Fire Watch, Expired Permits correlation'
+          'Cognitive Load Audit • 1,200 context switches/day benchmarked',
+          'Velocity Telemetry • Stalled task detection from Dexie storage',
+          'Eisenhower Friction Model • Ambiguity vs Scale vs Dependency'
         ];
 
         checklist = [
-          'Audit all active permits against shift handover times',
-          'Mandate double-lock isolation protocol on high-pressure lines',
-          'Deploy automated SMS alert 30 minutes before permit expiry'
+          'Split stalled tasks into 15-minute concrete next steps',
+          'Time-block top 2 deliverables on the Circadian Day Timeline',
+          'Archive or defer items untouched for over 14 days'
         ];
       } else if (isPrioritize) {
-        replyText = `## 🎯 80/20 OPERATIONAL PRIORITIZATION MATRIX\n\nBased on Eisenhower Quadrant analysis and your active ${activeTasks.length} tasks:\n\n### 🔥 P0 — Critical Execution (Do Right Now)\n- Resolve high-priority items and overdue safety checks\n- Verify Duliajan Drilling Rig #4 barrier controls\n- Review ${criticalTasks.length > 0 ? `${criticalTasks.length} critical flagged tasks` : 'high-impact priority items'}\n\n### ⚡ Recommendation\nDedicate the first 90-minute circadian focus block entirely to P0 barrier verifications before opening administrative items.`;
+        replyText = `## 🎯 80/20 OPERATIONAL PRIORITIZATION MATRIX\n\nBased on Eisenhower Quadrant analysis and your active ${activeTasks.length} tasks:\n\n### 🔥 P0 — Critical Execution (Do Right Now)\n- Resolve high-priority items and overdue deliverables\n- Review ${criticalTasks.length > 0 ? `${criticalTasks.length} critical flagged tasks` : 'high-impact priority items'}\n- Execute primary deliverable during peak circadian morning block\n\n### ⚡ Recommendation\nDedicate the first 90-minute circadian focus block entirely to P0 execution before opening administrative items.`;
 
         knowledgeSources = [
           `Task Store • ${activeTasks.length} tasks loaded from Dexie database`,
@@ -191,11 +191,11 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
           'Archive or defer stalled backlog items'
         ];
       } else {
-        replyText = `### 💡 Analysis Complete\n\nI have evaluated your request against your **${activeTasks.length} active tasks**, **${notesCount} knowledge notes**, and live **Prahari safety telemetry**.\n\nHere are the recommended next steps:\n- **Review High-Risk Precursors:** Keep tight surveillance over Duliajan and Digboi operations.\n- **Maintain Barrier Integrity:** Ensure LOTO and permit protocols remain 100% compliant.\n- **Align Today's Schedule:** Focus on high-leverage deliverables using the Eisenhower priority quadrant.`;
+        replyText = `### 💡 Analysis Complete\n\nI have evaluated your request against your **${activeTasks.length} active tasks**, **${notesCount} knowledge notes**, and **5 Life Pillars**.\n\nHere are the recommended next steps:\n- **Deep Work Priority:** Tackle top Eisenhower Q1 deliverables during peak morning focus.\n- **Second Brain Organization:** Link captured thoughts with [[wikilinks]] to build graph connectivity.\n- **Habit Consistency:** Maintain current routine streaks to preserve momentum.`;
 
         knowledgeSources = [
           `Life OS Store • Synchronized with ${items.length} total objects`,
-          `Prahari Intelligence • Telemetry across 5 Oil India operating sites`
+          `5 Life Pillars • Physical, Mental, Financial, Relational & Spiritual`
         ];
       }
 
@@ -285,7 +285,7 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-black tracking-wider text-slate-900 dark:text-white uppercase font-mono">
-                PRAHARI COPILOT
+                ANTIGRAVITY COPILOT
               </span>
               <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -293,7 +293,7 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
               </span>
             </div>
             <span className="text-[9.5px] text-slate-400 font-semibold block tracking-tight">
-              Antigravity SIF Intelligence Engine v2.5
+              Autonomous Productivity Intelligence v2.5
             </span>
           </div>
         </div>
@@ -517,10 +517,10 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
       {/* 3. Starter Prompt Chips */}
       <div className="px-4 py-2 border-t border-slate-200/80 dark:border-white/[0.06] bg-slate-50/50 dark:bg-[#0c1017]/50 flex items-center gap-2 overflow-x-auto no-scrollbar">
         {[
-          { label: '✨ AI Toolbox Talk', text: 'Generate an executive AI Toolbox Talk for Oil India Limited frontline supervisors focusing on LOTO Not Applied, Fire Watch, and Expired Permits across Duliajan & Digboi.' },
-          { label: '⚠️ Barrier Failures', text: 'Analyze top recurring barrier failures and provide root causes and countermeasures.' },
-          { label: '🎯 80/20 Priority', text: 'Prioritize today\'s critical P0 safety tasks using the 80/20 rule.' },
-          { label: '📊 SIF Distribution', text: 'Give me a brief breakdown of SIF Potential vs Non-SIF reports across operating sites.' }
+          { label: '✨ Daily Briefing', text: 'Generate a comprehensive executive daily briefing and 80/20 prioritization plan for today across my 5 Life Pillars and active tasks.' },
+          { label: '🎯 80/20 Priority', text: 'Prioritize today\'s high-leverage P0 tasks using the 80/20 rule and circadian energy windows.' },
+          { label: '⚠️ Break Bottlenecks', text: 'Analyze my top productivity bottlenecks (ambiguity, context-switching) and provide concrete fixes.' },
+          { label: '📝 Note Synthesis', text: 'Synthesize my recent notes and thoughts into actionable next steps.' }
         ].map((chip, idx) => (
           <button
             key={idx}

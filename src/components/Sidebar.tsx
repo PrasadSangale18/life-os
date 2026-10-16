@@ -57,7 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       category: 'CORE EXECUTION',
       items: [
-        { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, subtitle: 'Prahari command center' },
+        { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, subtitle: 'Executive command center' },
         { id: 'tasks', name: 'Tasks & Matrix', icon: CheckSquare, subtitle: 'Eisenhower priority execution', count: pendingCount > 0 ? pendingCount : undefined },
         { id: 'calendar', name: 'Calendar & Schedule', icon: Calendar, subtitle: 'Time blocking & day flow' },
         { id: 'focus', name: 'Focus Timer', icon: Clock, subtitle: 'Pomodoro flow cockpit' }
@@ -83,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       category: 'INTELLIGENCE',
       items: [
-        { id: 'assistant', name: 'Prahari AI Copilot', icon: Sparkles, subtitle: 'Antigravity real-time chat', badge: 'PRO' },
+        { id: 'assistant', name: 'AI Copilot', icon: Sparkles, subtitle: 'Antigravity real-time chat', badge: 'PRO' },
         { id: 'organizer', name: 'Smart AI Organizer', icon: Zap, subtitle: 'Bulk input & auto-sorting', badge: 'AI' }
       ]
     }
