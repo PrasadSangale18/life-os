@@ -20,9 +20,9 @@ export default defineConfig({
       },
       manifest: {
         id: base,
-        name: 'Life OS',
-        short_name: 'Life OS',
-        description: 'Multi-device Personal Operating System',
+        name: 'AISANKALP — Life OS',
+        short_name: 'AISankalp',
+        description: 'AI-Powered Personal Life Operating System & Notes Workspace',
         theme_color: '#07070f',
         background_color: '#07070f',
         display: 'standalone',

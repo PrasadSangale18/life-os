@@ -109,14 +109,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-black tracking-wider text-slate-900 dark:text-white uppercase font-mono">
-                  LIFE OS
+                  AISANKALP
                 </span>
                 <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
                   V2.5
                 </span>
               </div>
               <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tight block">
-                Autonomous Intelligence
+                Autonomous Life OS
               </span>
             </div>
           </div>

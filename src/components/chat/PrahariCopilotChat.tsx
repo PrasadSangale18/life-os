@@ -84,7 +84,7 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
         id: 'welcome',
         sender: 'assistant',
         timestamp: Date.now() - 300000,
-        text: `### 🧠 Antigravity Productivity Copilot\n\nWelcome back, **${user?.name || 'Prasad Sangale'}**.\n\nI am actively synthesizing your **5 Life Pillars**, Eisenhower execution backlog (**${activeTasks.length} active tasks**), and second-brain notes (**${notesCount} records**) to maximize high-leverage output.\n\nHow can I supercharge your workflow today?`,
+        text: `### 🧠 AISankalp Productivity Copilot\n\nWelcome back, **${user?.name || 'Prasad Sangale'}**.\n\nI am actively synthesizing your **5 Life Pillars**, Eisenhower execution backlog (**${activeTasks.length} active tasks**), and second-brain notes (**${notesCount} records**) to maximize high-leverage output.\n\nHow can I supercharge your workflow today?`,
         knowledgeSources: [
           `Task Matrix • ${activeTasks.length} tasks synchronized across Eisenhower quadrants`,
           '5 Life Pillars • Calibrated Physical, Mental, Financial, Relational & Spiritual',
@@ -232,11 +232,11 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
     const title = titleMatch ? titleMatch[1].replace(/[#*`_]/g, '').trim() : 'AI Intelligence Briefing';
     
     await addItem({
-      title: title || 'Life OS Executive Daily Briefing',
+      title: title || 'AISankalp Executive Daily Briefing',
       body: msg.text,
       type: 'note',
       pillar: 'mental',
-      tags: ['ai-copilot', 'life-os', 'daily-briefing', 'productivity']
+      tags: ['ai-copilot', 'aisankalp', 'daily-briefing', 'productivity']
     });
 
     addToast('Saved into My Notes workspace', 'success');
@@ -285,7 +285,7 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-black tracking-wider text-slate-900 dark:text-white uppercase font-mono">
-                ANTIGRAVITY COPILOT
+                AISANKALP COPILOT
               </span>
               <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -380,7 +380,7 @@ export const PrahariCopilotChat: React.FC<PrahariCopilotChatProps> = ({
             <div key={msg.id} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1.5`}>
               <div className="flex items-center gap-2 px-1">
                 <span className="text-[10px] font-mono text-slate-400 font-bold uppercase">
-                  {isUser ? (user?.name || 'You') : 'Antigravity Copilot'}
+                  {isUser ? (user?.name || 'You') : 'AISankalp Copilot'}
                 </span>
                 <span className="text-[9.5px] text-slate-400 font-mono">
                   {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

@@ -987,7 +987,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Floating Antigravity AI Copilot Toggle Pill */}
+      {/* Floating AISankalp AI Copilot Toggle Pill */}
       <button
         type="button"
         onClick={() => {
@@ -995,10 +995,10 @@ export default function App() {
           setShowCopilot(prev => !prev);
         }}
         className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full bg-linear-to-r from-[#FF5A1F] to-[#EA580C] text-white text-xs font-black shadow-[0_4px_20px_rgba(255,90,31,0.45)] hover:shadow-[0_6px_28px_rgba(255,90,31,0.6)] active:scale-95 transition-all cursor-pointer border border-white/20 select-none"
-        title="Toggle Antigravity AI Copilot"
+        title="Toggle AISankalp AI Copilot"
       >
         <Sparkles size={15} />
-        <span className="hidden sm:inline">Antigravity AI</span>
+        <span className="hidden sm:inline">AISankalp AI</span>
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
       </button>
 

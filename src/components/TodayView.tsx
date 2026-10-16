@@ -360,7 +360,7 @@ export const TodayView = ({
             Hello, {user?.name || "Prasad Sangale"}.
           </h1>
           <p className="mt-1 text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-3xl">
-            Life OS Autonomous Intelligence is online. Continuously calibrating your 5 Life Pillars, Eisenhower priority execution, and personal knowledge workspace to maximize cognitive momentum.
+            AISankalp Autonomous Intelligence is online. Continuously calibrating your 5 Life Pillars, Eisenhower priority execution, and personal knowledge workspace to maximize cognitive momentum.
           </p>
         </div>
 
