@@ -61,44 +61,61 @@ export const useStore = create<LifeOSState>((set) => ({
   setShowPrivate: (val) => set({ showPrivate: val }),
 
   init: async () => {
-    // 30-day purge logic
-    const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-    const now = Date.now();
-    const allItems = await db.items.toArray();
-    
-    const toDelete = allItems.filter(i => i.deletedAt && (now - i.deletedAt > THIRTY_DAYS));
-    if (toDelete.length > 0) {
-      for (const i of toDelete) {
-        await db.items.delete(i.id);
-        await pushToOutbox('delete', { id: i.id });
+    try {
+      // 30-day purge logic
+      const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      const allItems = await db.items.toArray();
+      
+      const toDelete = allItems.filter(i => i.deletedAt && (now - i.deletedAt > THIRTY_DAYS));
+      if (toDelete.length > 0) {
+        for (const i of toDelete) {
+          await db.items.delete(i.id);
+          await pushToOutbox('delete', { id: i.id });
+        }
       }
-    }
-    
-    let items = await db.items.toArray();
-    const userRecord = await db.store.get('user');
+      
+      let items = await db.items.toArray();
+      const userRecord = await db.store.get('user');
 
-    // Auto-seed Prasad's life dataset on first run if database is empty (outside unit tests)
-    const isTest = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test';
-    const seededFlag = await db.store.get('has_seeded_prasad_lifeos');
-    if (!isTest && !seededFlag && items.length === 0) {
-      const { INITIAL_SEED_ITEMS } = await import('../db/seedData');
-      const nowTs = Date.now();
-      const seedWithIds = INITIAL_SEED_ITEMS.map((item, idx) => ({
-        ...item,
-        id: uuidv4(),
-        createdAt: nowTs - (idx * 60000),
-        updatedAt: nowTs - (idx * 60000),
-      }));
-      await db.items.bulkAdd(seedWithIds);
-      await db.store.put({ key: 'has_seeded_prasad_lifeos', value: true });
-      items = await db.items.toArray();
-    }
+      // Auto-seed Prasad's life dataset on first run if database is empty (outside unit tests)
+      const isTest = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test';
+      const seededFlag = await db.store.get('has_seeded_prasad_lifeos');
+      if (!isTest && !seededFlag && items.length === 0) {
+        try {
+          const { INITIAL_SEED_ITEMS } = await import('../db/seedData');
+          const nowTs = Date.now();
+          const seedWithIds = INITIAL_SEED_ITEMS.map((item, idx) => ({
+            ...item,
+            id: uuidv4(),
+            createdAt: nowTs - (idx * 60000),
+            updatedAt: nowTs - (idx * 60000),
+          }));
+          await db.items.bulkAdd(seedWithIds);
+          await db.store.put({ key: 'has_seeded_prasad_lifeos', value: true });
+          items = await db.items.toArray();
+        } catch (seedErr) {
+          console.warn('Seed data load skipped or failed:', seedErr);
+        }
+      }
 
-    set({
-      items,
-      user: userRecord ? userRecord.value : null,
-      isLoaded: true
-    });
+      const defaultUser = isTest 
+        ? null 
+        : { name: 'Prasad Sangale', email: 'prasad@lifeos.internal' };
+
+      set({
+        items,
+        user: userRecord ? userRecord.value : defaultUser,
+        isLoaded: true
+      });
+    } catch (err) {
+      console.error('LifeOS Store init error:', err);
+      const isTest = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test';
+      set({
+        isLoaded: true,
+        user: isTest ? null : { name: 'Prasad Sangale', email: 'prasad@lifeos.internal' }
+      });
+    }
   },
 
   seedDefaultData: async () => {

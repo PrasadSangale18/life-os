@@ -93,6 +93,13 @@ export default function App() {
   useEffect(() => {
     init();
     
+    // Safety fallback: ensure isLoaded never hangs indefinitely
+    const safetyTimer = setTimeout(() => {
+      if (!useStore.getState().isLoaded) {
+        useStore.setState({ isLoaded: true });
+      }
+    }, 1500);
+
     const handleSyncPull = () => {
       init();
     };
@@ -112,6 +119,7 @@ export default function App() {
     window.addEventListener("resize", check);
 
     return () => {
+      clearTimeout(safetyTimer);
       try { document.head.removeChild(link); } catch {}
       window.removeEventListener("resize", check);
       window.removeEventListener('lifeos-sync-pull', handleSyncPull);
