@@ -216,6 +216,8 @@ export const SmartOrganizer = () => {
       if (isTask) taskCount++;
       else noteCount++;
 
+      const finalStatus = isTask ? (i.suggestedStatus || 'todo') : undefined;
+
       return {
         id: uuidv4(),
         type: i.suggestedType,
@@ -223,7 +225,8 @@ export const SmartOrganizer = () => {
         body: i.rawText !== i.suggestedTitle ? i.rawText : undefined,
         pillar: i.suggestedPillar || 'mental',
         quadrant: isTask ? (i.suggestedQuadrant || 'do') : undefined,
-        status: isTask ? (i.suggestedStatus || 'todo') : undefined,
+        status: finalStatus,
+        completedAt: finalStatus === 'done' ? now : undefined,
         priority: i.suggestedPriority || 'normal',
         isPriority: i.suggestedPriority === 'critical' || i.suggestedPriority === 'high',
         deadline: i.suggestedDeadline,

@@ -291,7 +291,7 @@ export const QuadrantCard = ({
   const showPrivate = useStore(state => state.showPrivate);
   const [now] = useState(() => Date.now());
 
-  const { setNodeRef } = useDroppable({ id: quadrantId, data: { type: 'Quadrant', quadrantId } });
+  const { setNodeRef, isOver } = useDroppable({ id: quadrantId, data: { type: 'Quadrant', quadrantId } });
   const themeStyle = QUADRANT_STYLES[quadrantId] || QUADRANT_STYLES.do;
 
   const qTasks = items.filter(t => 
@@ -328,7 +328,11 @@ export const QuadrantCard = ({
   return (
     <div 
       ref={setNodeRef} 
-      className={`group/quadrant relative flex flex-col rounded-2xl bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700 overflow-hidden ${themeStyle.topBorder} ${themeStyle.surfaceClass}`}
+      className={`group/quadrant relative flex flex-col rounded-2xl bg-white dark:bg-[#11161D] border transition-all duration-300 overflow-hidden ${
+        isOver 
+          ? 'border-[#FF5A1F] ring-2 ring-[#FF5A1F]/30 shadow-lg' 
+          : 'border-slate-200 dark:border-[#1E293B] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-slate-300 dark:hover:border-slate-700'
+      } ${themeStyle.topBorder} ${themeStyle.surfaceClass}`}
       style={{ 
         height: isMobile ? 'auto' : '100%',
         minHeight: isMobile ? 320 : 280,
@@ -394,13 +398,25 @@ export const QuadrantCard = ({
           /* Interactive Tactile Dashed Drop Zone */
           <div 
             onClick={onAddTaskClick}
-            className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-white/[0.06] hover:border-slate-300 dark:hover:border-white/[0.15] rounded-xl m-2 transition-all group cursor-pointer bg-slate-50/40 dark:bg-white/[0.01] hover:bg-slate-50 dark:hover:bg-white/[0.02]"
+            className={`flex-1 flex flex-col items-center justify-center border-2 border-dashed rounded-xl m-2 transition-all group cursor-pointer ${
+              isOver 
+                ? 'border-[#FF5A1F] bg-[#FF5A1F]/10 scale-[1.01]' 
+                : 'border-slate-200 dark:border-white/[0.06] hover:border-slate-300 dark:hover:border-white/[0.15] bg-slate-50/40 dark:bg-white/[0.01] hover:bg-slate-50 dark:hover:bg-white/[0.02]'
+            }`}
           >
-            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.04] flex items-center justify-center text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-white group-hover:scale-110 transition-all mb-2">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all mb-2 ${
+              isOver
+                ? 'bg-[#FF5A1F]/20 text-[#FF5A1F] scale-110'
+                : 'bg-slate-100 dark:bg-white/[0.04] text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-white group-hover:scale-110'
+            }`}>
               <Plus className="w-4 h-4" strokeWidth={1.75} />
             </div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200">No active tasks</p>
-            <p className="text-[10px] text-slate-400 dark:text-slate-600 group-hover:text-slate-500 mt-0.5">Click or drag items here</p>
+            <p className={`text-xs font-medium ${isOver ? 'text-[#FF5A1F] font-semibold' : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'}`}>
+              {isOver ? 'Drop task here' : 'No active tasks'}
+            </p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-600 group-hover:text-slate-500 mt-0.5">
+              {isOver ? `Move item to ${q.name}` : 'Click or drag items here'}
+            </p>
           </div>
         ) : (
           <AnimatePresence>

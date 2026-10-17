@@ -17,7 +17,8 @@ import {
   PieChart,
   Activity,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Clock
 } from 'lucide-react';
 import { PromptWiseModal } from './PromptWiseModal';
 import { FlowCockpitModal } from './focus/FlowCockpitModal';
@@ -145,6 +146,21 @@ export const TodayView = ({
     return items.filter(i => !i.deletedAt).length;
   }, [items]);
 
+  // Focus Capacity Calculation (Linear / Sunsama standard: 6h / 360m deep work max)
+  const focusStats = useMemo(() => {
+    const plannedMinutes = dueTodayTasks.reduce((sum, t) => sum + (t.estMinutes || 30), 0);
+    const maxCapacityMinutes = 360;
+    const percentLoaded = Math.round((plannedMinutes / maxCapacityMinutes) * 100);
+
+    return {
+      plannedMinutes,
+      plannedHours: (plannedMinutes / 60).toFixed(1),
+      maxCapacityMinutes,
+      percentLoaded,
+      isOverloaded: plannedMinutes > maxCapacityMinutes
+    };
+  }, [dueTodayTasks]);
+
   // Pillar Execution Density across the 5 Life Pillars
   const pillarStats = useMemo(() => {
     const pCounts: Record<string, { pending: number; done: number }> = {
@@ -197,6 +213,13 @@ export const TodayView = ({
   const handleDeferTask = (task: Item) => {
     const nextDay = startOfToday + 86400000 + 12 * 3600000;
     updateItem(task.id, { deadline: nextDay });
+  };
+
+  const handleRescheduleAllOverdueToToday = async () => {
+    const todayNoon = startOfToday + 12 * 3600000;
+    for (const task of overdueTasks) {
+      await updateItem(task.id, { deadline: todayNoon });
+    }
   };
 
   const renderTaskCard = (task: Item, badge?: { label: string; color: string }) => {
@@ -670,6 +693,46 @@ export const TodayView = ({
         </div>
       </div>
 
+      {/* OVERDUE TRIAGE BANNER (Sunsama / Things 3 Standard) */}
+      {overdueTasks.length > 0 && (
+        <div className="rounded-2xl p-4 bg-rose-500/10 dark:bg-rose-950/20 border border-rose-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_4px_20px_-4px_rgba(244,63,94,0.12)]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {overdueTasks.length} {overdueTasks.length === 1 ? 'Task Overdue' : 'Tasks Overdue'}
+                </h4>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-600 dark:text-rose-400 font-mono">
+                  Attention Required
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Past due tasks add cognitive friction. Reschedule them to regain a clean daily focus.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleRescheduleAllOverdueToToday}
+              className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            >
+              Reschedule All to Today
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('overdue')}
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Review Tasks →
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 5. INTERACTIVE OPERATIONAL DELIVERABLES & QUICK CAPTURE */}
       <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] shadow-xs space-y-4">
         
@@ -734,6 +797,40 @@ export const TodayView = ({
                 {tab.label}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Daily Planned Focus Capacity Meter (Sunsama / Linear 6h limit) */}
+        <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
+              <Clock size={13} className="text-[#FF5A1F]" />
+              <span>Planned Focus Capacity</span>
+              <span className="text-[11px] text-slate-400 font-mono">
+                ({focusStats.plannedHours}h / 6.0h target)
+              </span>
+            </div>
+            <span className={`text-[11px] font-bold font-mono ${
+              focusStats.isOverloaded 
+                ? 'text-rose-500' 
+                : focusStats.percentLoaded > 80 
+                ? 'text-amber-500' 
+                : 'text-emerald-500'
+            }`}>
+              {focusStats.percentLoaded}% allocated {focusStats.isOverloaded && '(Overloaded)'}
+            </span>
+          </div>
+          <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+            <div 
+              className={`h-full rounded-full transition-all duration-500 ${
+                focusStats.isOverloaded 
+                  ? 'bg-rose-500' 
+                  : focusStats.percentLoaded > 80 
+                  ? 'bg-amber-500' 
+                  : 'bg-emerald-500'
+              }`}
+              style={{ width: `${Math.min(focusStats.percentLoaded, 100)}%` }}
+            />
           </div>
         </div>
 
