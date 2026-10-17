@@ -13,7 +13,7 @@ export function generateMindMapData(items: Item[], showPrivate: boolean) {
   // Central Root Node
   nodes.push({ 
     id: 'ROOT', 
-    title: 'AISANKALP', 
+    title: 'SANKALP', 
     isRoot: true, 
     group: 'root',
     type: 'root',

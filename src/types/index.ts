@@ -35,6 +35,7 @@ export interface Item {
   estMinutes?: number;
   deadline?: number;
   status?: TaskStatus;
+  completedAt?: number;
   delegatedTo?: string;
   goalId?: string;
   projectId?: string;
