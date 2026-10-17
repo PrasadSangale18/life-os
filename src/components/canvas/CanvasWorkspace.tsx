@@ -25,10 +25,15 @@ import {
   FolderPlus, 
   BookOpen, 
   Target, 
-  Sliders 
+  Sliders,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { useStore } from '../../store';
+import { PILLARS } from '../../theme/tokens';
 import type { Item } from '../../types';
+import { ForceGraphView } from './ForceGraphView';
+import { HierarchyTreeView } from './HierarchyTreeView';
 
 export interface CanvasNode {
   id: string;
@@ -370,6 +375,38 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
     }
   ]);
   const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
+
+  // Unified Multi-Mode Workspace State (Canvas | Force Graph | Hierarchy Tree)
+  const [internalView, setInternalView] = useState<'canvas' | 'tree' | 'graph'>(() => {
+    try {
+      const saved = localStorage.getItem('sankalp_active_canvas_view');
+      if (saved === 'canvas' || saved === 'graph' || saved === 'tree') return saved;
+    } catch (e) {
+      // ignore
+    }
+    return _currentView || 'canvas';
+  });
+
+  const activeView = _currentView && _currentView !== 'canvas' && _currentView !== internalView ? _currentView : internalView;
+
+  const handleViewChange = (newView: 'canvas' | 'tree' | 'graph') => {
+    setInternalView(newView);
+    try {
+      localStorage.setItem('sankalp_active_canvas_view', newView);
+    } catch (e) {
+      // ignore
+    }
+    onViewChange?.(newView);
+  };
+
+  // Graph & Tree Interactive Controls
+  const [graphSearch, setGraphSearch] = useState<string>('');
+  const [graphTypeFilter, setGraphTypeFilter] = useState<'all' | 'task' | 'note' | 'project'>('all');
+  const [treeSearch, setTreeSearch] = useState<string>('');
+  const [treeTypeFilter, setTreeTypeFilter] = useState<'all' | 'task' | 'note' | 'project'>('all');
+  const [selectedPillarFilter, setSelectedPillarFilter] = useState<string | null>(null);
+  const [expandAllSignal, setExpandAllSignal] = useState<number>(0);
+  const [collapseAllSignal, setCollapseAllSignal] = useState<number>(0);
 
   const activeCanvas = useMemo(() => {
     return canvases.find(c => c.id === activeCanvasId) || canvases[0] || {
@@ -899,8 +936,12 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           <div className="flex items-center bg-black/60 border border-white/[0.1] rounded-xl p-0.5 shadow-inner">
             <button 
               type="button"
-              onClick={() => onViewChange?.('canvas')}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40 shadow-xs cursor-pointer"
+              onClick={() => handleViewChange('canvas')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                activeView === 'canvas'
+                  ? 'bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40 shadow-xs'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
+              }`}
               title="Infinite 2D Spatial Canvas"
             >
               <Compass size={13} />
@@ -908,8 +949,12 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             </button>
             <button 
               type="button"
-              onClick={() => onViewChange?.('graph')}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+              onClick={() => handleViewChange('graph')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                activeView === 'graph'
+                  ? 'bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40 shadow-xs'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
+              }`}
               title="Interactive D3 Force Graph"
             >
               <Share2 size={13} />
@@ -917,8 +962,12 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             </button>
             <button 
               type="button"
-              onClick={() => onViewChange?.('tree')}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+              onClick={() => handleViewChange('tree')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                activeView === 'tree'
+                  ? 'bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40 shadow-xs'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
+              }`}
               title="Pillar Hierarchy Tree"
             >
               <Layers size={13} />
@@ -932,78 +981,212 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
               showDrawer ? 'bg-white/[0.08] border-white/[0.15] text-white' : 'border-transparent text-slate-400 hover:text-white hover:bg-white/[0.06]'
             }`}
-            title="Toggle Boards Drawer"
+            title={activeView === 'canvas' ? "Toggle Boards Drawer" : "Toggle Pillars Navigator"}
           >
             <FolderKanban size={14} />
           </button>
         </div>
 
-        {/* Center: Active Canvas Tabs Strip */}
-        <div className="flex-1 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] max-w-2xl px-2">
-          {canvases.map(c => {
-            const isActive = c.id === activeCanvasId;
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => {
-                  setActiveCanvasId(c.id);
-                  setLinkSourceNodeId(null);
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
-                  isActive
-                    ? 'bg-white/[0.12] text-white font-semibold border-[#38BDF8]/60 shadow-xs'
-                    : 'bg-white/[0.02] border-white/[0.05] text-slate-400 hover:text-slate-200 hover:bg-white/[0.05]'
-                }`}
-              >
-                <FileText size={12} className={isActive ? 'text-[#38BDF8]' : 'text-slate-400'} />
-                <span className="max-w-[140px] truncate">{c.title}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/40 text-slate-400 font-mono">
-                  {c.nodes.length}
-                </span>
-              </button>
-            );
-          })}
+        {/* Center: Contextual Tools depending on activeView */}
+        <div className="flex-1 flex items-center justify-center gap-2 overflow-x-auto [scrollbar-width:none] px-2 min-w-0">
+          {activeView === 'canvas' && (
+            <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] max-w-2xl px-2">
+              {canvases.map(c => {
+                const isActive = c.id === activeCanvasId;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveCanvasId(c.id);
+                      setLinkSourceNodeId(null);
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+                      isActive
+                        ? 'bg-white/[0.12] text-white font-semibold border-[#38BDF8]/60 shadow-xs'
+                        : 'bg-white/[0.02] border-white/[0.05] text-slate-400 hover:text-slate-200 hover:bg-white/[0.05]'
+                    }`}
+                  >
+                    <FileText size={12} className={isActive ? 'text-[#38BDF8]' : 'text-slate-400'} />
+                    <span className="max-w-[140px] truncate">{c.title}</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/40 text-slate-400 font-mono">
+                      {c.nodes.length}
+                    </span>
+                  </button>
+                );
+              })}
 
-          <button 
-            type="button"
-            onClick={() => setShowNewBoardModal(true)}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-lg border border-dashed border-white/10 shrink-0 cursor-pointer"
-            title="Create New Canvas Board"
-          >
-            <Plus size={13} />
-          </button>
+              <button 
+                type="button"
+                onClick={() => setShowNewBoardModal(true)}
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-lg border border-dashed border-white/10 shrink-0 cursor-pointer"
+                title="Create New Canvas Board"
+              >
+                <Plus size={13} />
+              </button>
+            </div>
+          )}
+
+          {activeView === 'graph' && (
+            <div className="flex items-center gap-2.5 max-w-xl w-full">
+              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/[0.08] text-xs w-full max-w-xs">
+                <Search size={13} className="text-slate-400 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Filter graph nodes..."
+                  value={graphSearch}
+                  onChange={(e) => setGraphSearch(e.target.value)}
+                  className="bg-transparent border-none outline-none text-white text-xs w-full placeholder:text-slate-500"
+                />
+                {graphSearch && (
+                  <button onClick={() => setGraphSearch('')} className="text-slate-400 hover:text-white cursor-pointer">
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+
+              <div className="hidden sm:flex items-center gap-1 bg-black/40 border border-white/[0.08] rounded-xl p-0.5">
+                {(['all', 'task', 'note', 'project'] as const).map(t => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setGraphTypeFilter(t)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer ${
+                      graphTypeFilter === t
+                        ? 'bg-white/[0.12] text-white shadow-xs'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {t === 'all' ? 'All' : `${t}s`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeView === 'tree' && (
+            <div className="flex items-center gap-2.5 max-w-xl w-full">
+              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/[0.08] text-xs w-full max-w-xs">
+                <Search size={13} className="text-slate-400 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Search hierarchy items..."
+                  value={treeSearch}
+                  onChange={(e) => setTreeSearch(e.target.value)}
+                  className="bg-transparent border-none outline-none text-white text-xs w-full placeholder:text-slate-500"
+                />
+                {treeSearch && (
+                  <button onClick={() => setTreeSearch('')} className="text-slate-400 hover:text-white cursor-pointer">
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+
+              <div className="hidden sm:flex items-center gap-1 bg-black/40 border border-white/[0.08] rounded-xl p-0.5">
+                {(['all', 'task', 'note', 'project'] as const).map(t => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setTreeTypeFilter(t)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer ${
+                      treeTypeFilter === t
+                        ? 'bg-white/[0.12] text-white shadow-xs'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {t === 'all' ? 'All' : `${t}s`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right Action Tools: Add Item, Fit View, Tidy, AI Toggle */}
+        {/* Right Action Tools */}
         <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            type="button"
-            onClick={() => setShowLibraryModal(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#38BDF8]/15 hover:bg-[#38BDF8]/25 border border-[#38BDF8]/40 text-[#38BDF8] text-xs font-semibold cursor-pointer shadow-xs transition-colors"
-            title="Add existing task or note to this canvas"
-          >
-            <Plus size={13} />
-            <span>Add Card</span>
-          </button>
+          {activeView === 'canvas' && (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowLibraryModal(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#38BDF8]/15 hover:bg-[#38BDF8]/25 border border-[#38BDF8]/40 text-[#38BDF8] text-xs font-semibold cursor-pointer shadow-xs transition-colors"
+                title="Add existing task or note to this canvas"
+              >
+                <Plus size={13} />
+                <span>Add Card</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={handleAutoTidyLayout}
-            className="p-1.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
-            title="Auto-Tidy Layout (Clean non-overlapping grid)"
-          >
-            <Sliders size={13} />
-          </button>
+              <button
+                type="button"
+                onClick={handleAutoTidyLayout}
+                className="p-1.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+                title="Auto-Tidy Layout (Clean non-overlapping grid)"
+              >
+                <Sliders size={13} />
+              </button>
 
-          <button
-            type="button"
-            onClick={handleFitCanvas}
-            className="p-1.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
-            title="Fit to View"
-          >
-            <Maximize2 size={13} />
-          </button>
+              <button
+                type="button"
+                onClick={handleFitCanvas}
+                className="p-1.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+                title="Fit to View"
+              >
+                <Maximize2 size={13} />
+              </button>
+            </>
+          )}
+
+          {activeView === 'graph' && (
+            <>
+              {_onNewItem && (
+                <button
+                  type="button"
+                  onClick={() => _onNewItem()}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#38BDF8]/15 hover:bg-[#38BDF8]/25 border border-[#38BDF8]/40 text-[#38BDF8] text-xs font-semibold cursor-pointer shadow-xs transition-colors"
+                  title="Capture New Item"
+                >
+                  <Plus size={13} />
+                  <span>Capture</span>
+                </button>
+              )}
+            </>
+          )}
+
+          {activeView === 'tree' && (
+            <>
+              {_onNewItem && (
+                <button
+                  type="button"
+                  onClick={() => _onNewItem()}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#38BDF8]/15 hover:bg-[#38BDF8]/25 border border-[#38BDF8]/40 text-[#38BDF8] text-xs font-semibold cursor-pointer shadow-xs transition-colors"
+                  title="Capture New Item"
+                >
+                  <Plus size={13} />
+                  <span>Capture</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setExpandAllSignal(prev => prev + 1)}
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06] text-xs cursor-pointer"
+                title="Expand All Pillars"
+              >
+                <ChevronDown size={13} />
+                <span>Expand</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCollapseAllSignal(prev => prev + 1)}
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06] text-xs cursor-pointer"
+                title="Collapse All Pillars"
+              >
+                <ChevronRight size={13} />
+                <span>Collapse</span>
+              </button>
+            </>
+          )}
 
           <button
             type="button"
@@ -1021,83 +1204,157 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       {/* 2. THREE-PANEL EXPANDABLE WORKSPACE */}
       <div className="flex-1 flex overflow-hidden relative">
         
-        {/* PANEL A: LEFT CANVASES LIBRARY DRAWER */}
+        {/* PANEL A: LEFT CANVASES / PILLARS LIBRARY DRAWER */}
         {showDrawer && (
           <aside className="w-64 border-r border-white/[0.08] bg-[#0C101A] flex flex-col shrink-0 z-20 overflow-hidden">
-            <div className="p-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08]">
-                <Search size={13} className="text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search canvases..."
-                  value={searchDrawer}
-                  onChange={(e) => setSearchDrawer(e.target.value)}
-                  className="bg-transparent border-none outline-none text-white text-xs w-full placeholder:text-slate-500"
-                />
-              </div>
-            </div>
+            {activeView === 'canvas' ? (
+              <>
+                <div className="p-3 border-b border-white/[0.06]">
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08]">
+                    <Search size={13} className="text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search canvases..."
+                      value={searchDrawer}
+                      onChange={(e) => setSearchDrawer(e.target.value)}
+                      className="bg-transparent border-none outline-none text-white text-xs w-full placeholder:text-slate-500"
+                    />
+                  </div>
+                </div>
 
-            {/* Canvases Cards List */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
-              {filteredCanvases.map(c => {
-                const isActive = c.id === activeCanvasId;
-                return (
+                {/* Canvases Cards List */}
+                <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
+                  {filteredCanvases.map(c => {
+                    const isActive = c.id === activeCanvasId;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveCanvasId(c.id);
+                          setLinkSourceNodeId(null);
+                        }}
+                        className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer group ${
+                          isActive
+                            ? 'bg-white/[0.08] border-[#38BDF8]/60 shadow-[0_4px_20px_rgba(56,189,248,0.15)] ring-1 ring-[#38BDF8]/40'
+                            : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.14] hover:bg-white/[0.04]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-white group-hover:text-[#38BDF8] transition-colors truncate">
+                            {c.title}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            {c.nodes.length} cards
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1.5 text-[10.5px] text-slate-400">
+                          <span className="capitalize">{c.diagramType || 'board'}</span>
+                          <span>•</span>
+                          <span>{c.updatedAt}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Bottom Drawer Actions */}
+                <div className="p-3 border-t border-[#1E293B] bg-[#080C14] flex items-center justify-between">
                   <button
-                    key={c.id}
                     type="button"
-                    onClick={() => {
-                      setActiveCanvasId(c.id);
-                      setLinkSourceNodeId(null);
-                    }}
-                    className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer group ${
-                      isActive
-                        ? 'bg-white/[0.08] border-[#38BDF8]/60 shadow-[0_4px_20px_rgba(56,189,248,0.15)] ring-1 ring-[#38BDF8]/40'
-                        : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.14] hover:bg-white/[0.04]'
+                    onClick={() => setShowNewBoardModal(true)}
+                    className="flex items-center gap-1.5 text-xs text-[#38BDF8] hover:underline font-semibold cursor-pointer"
+                  >
+                    <FolderPlus size={13} />
+                    <span>New Board</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResetToDefaults}
+                    className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-white cursor-pointer"
+                    title="Reset to default store layout"
+                  >
+                    <RefreshCw size={11} />
+                    <span>Reset</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="p-3 border-b border-white/[0.06] flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                    5 Life Pillars
+                  </span>
+                  {selectedPillarFilter && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPillarFilter(null)}
+                      className="text-[10px] text-[#38BDF8] hover:underline cursor-pointer"
+                    >
+                      Reset filter
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPillarFilter(null)}
+                    className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                      selectedPillarFilter === null
+                        ? 'bg-white/[0.08] border-[#38BDF8]/60 text-white font-bold shadow-xs'
+                        : 'bg-white/[0.02] border-white/[0.06] text-slate-400 hover:text-white hover:bg-white/[0.04]'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white group-hover:text-[#38BDF8] transition-colors truncate">
-                        {c.title}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-mono">
-                        {c.nodes.length} cards
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#38BDF8]" />
+                      <span className="text-xs">All Pillars</span>
                     </div>
-                    <div className="flex items-center gap-2 mt-1.5 text-[10.5px] text-slate-400">
-                      <span className="capitalize">{c.diagramType || 'board'}</span>
-                      <span>•</span>
-                      <span>{c.updatedAt}</span>
-                    </div>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white/[0.06] text-slate-300">
+                      {items.filter(i => !i.deletedAt && !i.isArchived).length}
+                    </span>
                   </button>
-                );
-              })}
-            </div>
 
-            {/* Bottom Drawer Actions */}
-            <div className="p-3 border-t border-[#1E293B] bg-[#080C14] flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => setShowNewBoardModal(true)}
-                className="flex items-center gap-1.5 text-xs text-[#38BDF8] hover:underline font-semibold cursor-pointer"
-              >
-                <FolderPlus size={13} />
-                <span>New Board</span>
-              </button>
+                  {PILLARS.map(p => {
+                    const count = items.filter(i => i.pillar === p.id && !i.deletedAt && !i.isArchived).length;
+                    const isSelected = selectedPillarFilter === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSelectedPillarFilter(isSelected ? null : p.id)}
+                        className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                          isSelected
+                            ? 'bg-white/[0.08] text-white font-bold shadow-xs'
+                            : 'bg-white/[0.02] border-white/[0.06] text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                        }`}
+                        style={{ borderColor: isSelected ? p.color : undefined }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
+                          <span className="text-xs font-semibold text-white">{p.name}</span>
+                        </div>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white/[0.06] text-slate-300">
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-              <button
-                type="button"
-                onClick={handleResetToDefaults}
-                className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-white cursor-pointer"
-                title="Reset to default store layout"
-              >
-                <RefreshCw size={11} />
-                <span>Reset</span>
-              </button>
-            </div>
+                <div className="p-3 border-t border-[#1E293B] bg-[#080C14]">
+                  <div className="text-[10.5px] text-slate-400 leading-snug">
+                    Filter nodes or tree sections by tapping any core pillar above.
+                  </div>
+                </div>
+              </>
+            )}
           </aside>
         )}
 
         {/* PANEL B: CENTER INFINITE 2D CANVAS */}
+        {activeView === 'canvas' && (
         <main 
           ref={canvasRef}
           onMouseDown={handleMouseDownCanvas}
@@ -1393,6 +1650,37 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             </div>
           </div>
         </main>
+        )}
+
+        {/* PANEL B: FORCE GRAPH VIEW */}
+        {activeView === 'graph' && (
+          <div className="flex-1 relative overflow-hidden bg-[#05080C]">
+            <ForceGraphView 
+              items={items}
+              searchQuery={graphSearch}
+              typeFilter={graphTypeFilter}
+              selectedPillarFilter={selectedPillarFilter}
+              onEditTask={onEditTask}
+              showGrid={showGrid}
+            />
+          </div>
+        )}
+
+        {/* PANEL B: HIERARCHY TREE VIEW */}
+        {activeView === 'tree' && (
+          <div className="flex-1 relative overflow-hidden bg-[#05080C]">
+            <HierarchyTreeView 
+              items={items}
+              searchQuery={treeSearch}
+              typeFilter={treeTypeFilter}
+              selectedPillarFilter={selectedPillarFilter}
+              onEditTask={onEditTask}
+              onNewItem={_onNewItem ? () => _onNewItem() : undefined}
+              expandAllSignal={expandAllSignal}
+              collapseAllSignal={collapseAllSignal}
+            />
+          </div>
+        )}
 
         {/* PANEL C: RIGHT DOCUMENT & AI COPILOT SYNTHESIS */}
         {showDocPanel && (
