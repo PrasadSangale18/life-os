@@ -3,13 +3,11 @@ import {
   CheckSquare, 
   BookOpen, 
   Sparkles, 
-  LayoutDashboard, 
   Compass,
   Flame,
   Calendar,
   Clock,
   FolderKanban,
-  Target,
   BarChart3,
   Zap,
   Cpu,
@@ -96,7 +94,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       category: 'CONTROL ROOM',
       items: [
-        { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
         { id: 'tasks', name: 'Tasks & Matrix', icon: CheckSquare, count: pendingCount > 0 ? pendingCount : undefined },
         { id: 'calendar', name: 'Calendar & Schedule', icon: Calendar },
         { id: 'focus', name: 'Focus Timer', icon: Clock }
@@ -106,8 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       category: 'KNOWLEDGE & WORKSPACE',
       items: [
         { id: 'notes', name: 'Notes & Knowledge', icon: BookOpen, count: notesCount > 0 ? notesCount : undefined },
-        { id: 'projects', name: 'Projects & Kanban', icon: FolderKanban },
-        { id: 'goals', name: 'Goals & Milestones', icon: Target },
+        { id: 'projects', name: 'Projects & Goals', icon: FolderKanban },
         { id: 'mindmap', name: 'Canvas & Graph', icon: Compass }
       ]
     },
@@ -152,7 +148,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button 
               type="button"
               onClick={() => {
-                onTabChange('today');
+                onTabChange('tasks');
                 if (onClose) onClose();
               }}
               className="flex items-center gap-3 group text-left cursor-pointer transition-transform"

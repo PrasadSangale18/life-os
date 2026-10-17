@@ -48,9 +48,9 @@ import {
 import './App.css';
 
 const PATH_TO_SECTION: Record<string, string> = {
-  '/': 'dashboard',
-  '/dashboard': 'dashboard',
-  '/today': 'today',
+  '/': 'tasks',
+  '/dashboard': 'tasks',
+  '/today': 'tasks',
   '/tasks': 'tasks',
   '/matrix': 'tasks',
   '/todo': 'tasks',
@@ -59,7 +59,7 @@ const PATH_TO_SECTION: Record<string, string> = {
   '/habits': 'habits',
   '/notes': 'notes',
   '/projects': 'projects',
-  '/goals': 'goals',
+  '/goals': 'projects',
   '/organizer': 'organizer',
   '/canvas': 'mindmap',
   '/mindmap': 'mindmap',
@@ -72,15 +72,15 @@ const PATH_TO_SECTION: Record<string, string> = {
 };
 
 const SECTION_TO_PATH: Record<string, string> = {
+  tasks: '/',
   dashboard: '/',
   today: '/today',
-  tasks: '/tasks',
   calendar: '/calendar',
   focus: '/focus',
   habits: '/habits',
   notes: '/notes',
   projects: '/projects',
-  goals: '/goals',
+  goals: '/projects',
   organizer: '/organizer',
   mindmap: '/canvas',
   journal: '/journal',
@@ -92,15 +92,15 @@ const SECTION_TO_PATH: Record<string, string> = {
 };
 
 const SECTION_TITLES: Record<string, string> = {
-  dashboard: 'Dashboard',
+  tasks: 'Tasks & Matrix',
+  dashboard: 'Tasks & Matrix',
   today: 'Executive Daily Briefing',
-  tasks: 'To-do & Matrix',
   calendar: 'Calendar & Schedule',
   focus: 'Flow Cockpit',
   habits: 'Habits & Routines',
   notes: 'My Notes',
-  projects: 'Projects Kanban',
-  goals: 'Goals & Milestones',
+  projects: 'Projects & Goals',
+  goals: 'Projects & Goals',
   organizer: 'Smart AI Organizer',
   mindmap: 'Canvas & Graph',
   journal: 'Daily Journal',
@@ -118,7 +118,7 @@ const getInitialSection = (): string => {
       return PATH_TO_SECTION[path];
     }
   }
-  return 'dashboard';
+  return 'tasks';
 };
 
 export default function App() {
@@ -181,7 +181,7 @@ export default function App() {
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
       const path = window.location.pathname.replace(/\/+$/, '') || '/';
-      const sec = PATH_TO_SECTION[path] || e.state?.section || 'dashboard';
+      const sec = PATH_TO_SECTION[path] || e.state?.section || 'tasks';
       setActiveSectionState(sec);
     };
 
@@ -423,14 +423,12 @@ export default function App() {
             setShowTaskModal(true);
           }}
           pageTitle={
-            activeSection === "dashboard" || activeSection === "today" ? "Dashboard" :
-            activeSection === "tasks" ? "To-do list" :
+            activeSection === "tasks" ? "Tasks & Matrix" :
             activeSection === "calendar" ? "Calendar & Schedule" :
-            activeSection === "focus" ? "Focus Timer" :
+            activeSection === "focus" ? "Flow Cockpit" :
             activeSection === "habits" ? "Habits & Routines" :
             activeSection === "notes" ? "My Notes" :
-            activeSection === "projects" ? "Projects & Kanban" :
-            activeSection === "goals" ? "Goals & Milestones" :
+            activeSection === "projects" || activeSection === "goals" ? "Projects & Goals" :
             activeSection === "organizer" ? "Smart AI Organizer" :
             activeSection === "mindmap" ? "Canvas & Graph" :
             activeSection === "journal" ? "Daily Journal" :
@@ -438,7 +436,8 @@ export default function App() {
             activeSection === "import" ? "CSV Bulk Import" :
             activeSection === "review" ? "Weekly Review" :
             activeSection === "settings" ? "Settings" :
-            "Dashboard"
+            activeSection === "today" ? "Executive Daily Briefing" :
+            "Tasks & Matrix"
           }
           onSearchClick={() => setShowCommandPalette(true)}
           onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
@@ -448,7 +447,7 @@ export default function App() {
           isDesktopOpen={isDesktopVisible}
           isPinned={isPinned}
           isMobile={isMobile}
-          onLogoClick={() => setActiveSection('today')}
+          onLogoClick={() => setActiveSection('tasks')}
           user={user}
         >
           <UserProfileMenu
@@ -713,16 +712,6 @@ export default function App() {
             </div>
           )}
 
-          {/* 9. GOALS & HORIZONS */}
-          {activeSection === "goals" && (
-            <ProjectsView 
-              onEditTask={(task) => { setEditingTask(task); setShowTaskModal(true); }}
-              onNewGoal={() => { setEditingTask(undefined); setTaskModalType('goal'); setShowTaskModal(true); }}
-              onNewProject={() => { setEditingTask(undefined); setTaskModalType('project'); setShowTaskModal(true); }}
-              onNewTaskInProject={() => { setEditingTask(undefined); setTaskModalType('task'); setShowTaskModal(true); }}
-            />
-          )}
-
           {/* PRAHARI DASHBOARD: Unified Command Center & Daily Focus */}
           {(activeSection === "dashboard" || activeSection === "today") && (
             <TodayView 
@@ -738,7 +727,7 @@ export default function App() {
             />
           )}
           {activeSection === "inbox" && <InboxView onEditTask={(task) => { setEditingTask(task); setShowTaskModal(true); }} />}
-          {activeSection === "projects" && (
+          {(activeSection === "projects" || activeSection === "goals") && (
             <ProjectsView 
               onEditTask={(task) => { setEditingTask(task); setShowTaskModal(true); }}
               onNewGoal={() => { setEditingTask(undefined); setTaskModalType('goal'); setShowTaskModal(true); }}
