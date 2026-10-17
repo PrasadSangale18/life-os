@@ -113,7 +113,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Center: Absolute Centered Brand Title (Exact PRAHARI Spacing) */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none text-center">
         <span className="text-base sm:text-lg md:text-xl font-black tracking-[0.35em] text-slate-900 dark:text-white uppercase font-mono">
-          AISANKALP
+          SANKALP
         </span>
       </div>
 
@@ -156,7 +156,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         ) : (
           <div className="flex items-center gap-2 pl-1">
             <span className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] text-[10px] font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono shadow-xs">
-              AISANKALP WORKSPACE
+              SANKALP WORKSPACE
             </span>
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-bold text-xs shadow-xs font-mono">
               {initials}
