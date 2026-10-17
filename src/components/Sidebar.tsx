@@ -19,12 +19,15 @@ import {
 interface SidebarProps {
   currentTab: string;
   onTabChange: (tab: string) => void;
-  isMobile?: boolean;
-  isOpen?: boolean;
-  onClose?: () => void;
+  isOpen: boolean;            // Mobile open state
+  isDesktopOpen: boolean;     // Desktop (pinned || hovered) state
+  onClose: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
   notesCount?: number;
   completedCount?: number;
   totalCount?: number;
+  isMobile?: boolean;
 }
 
 interface NavItem {
@@ -44,12 +47,15 @@ interface NavGroup {
 export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onTabChange,
-  isMobile = false,
-  isOpen = true,
+  isOpen,
+  isDesktopOpen,
   onClose,
+  onMouseEnter,
+  onMouseLeave,
   notesCount = 0,
   completedCount = 0,
-  totalCount = 0
+  totalCount = 0,
+  isMobile = false
 }) => {
   const pendingCount = Math.max(totalCount - completedCount, 0);
 
@@ -91,47 +97,57 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <aside className={`w-64 bg-white dark:bg-dark-sidebar border-r border-slate-200 dark:border-dark-border flex flex-col justify-between transition-all duration-300 min-h-screen ${
-      isMobile ? 'fixed inset-y-0 left-0 z-50 shadow-2xl' : 'relative shrink-0'
-    }`}>
-      <div className="flex flex-col flex-1 overflow-y-auto">
-        {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-200/80 dark:border-dark-border shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FF5A1F] to-[#EA580C] flex items-center justify-center shadow-[0_2px_10px_rgba(255,90,31,0.3)] shrink-0">
-              <Layers className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black tracking-wider text-slate-900 dark:text-white uppercase font-mono">
-                  SANKALP
-                </span>
-                <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                  V2.5
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sliding Navigation Container */}
+      <aside
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-white/95 lg:bg-white/90 dark:bg-[#0A0E14]/95 lg:dark:bg-[#0A0E14]/90 backdrop-blur-xl border-r border-slate-200 dark:border-[#1E293B] flex flex-col justify-between transition-all duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } ${isDesktopOpen ? 'lg:translate-x-0 shadow-2xl' : 'lg:-translate-x-full'}`}
+      >
+        <div className="flex flex-col flex-1 overflow-y-auto">
+          {/* Brand Header */}
+          <div className="h-16 flex items-center justify-between px-5 border-b border-slate-200/80 dark:border-dark-border shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FF5A1F] to-[#EA580C] flex items-center justify-center shadow-[0_2px_10px_rgba(255,90,31,0.3)] shrink-0">
+                <Layers className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-black tracking-wider text-slate-900 dark:text-white uppercase font-mono">
+                    SANKALP
+                  </span>
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                    V2.5
+                  </span>
+                </div>
+                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tight block">
+                  Autonomous Life OS
                 </span>
               </div>
-              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tight block">
-                Autonomous Life OS
-              </span>
             </div>
-          </div>
 
-          {isMobile && onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-dark-border text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer"
-              title="Close Navigation"
-            >
-              <ChevronLeft size={16} />
-            </button>
-          )}
-        </div>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="lg:hidden p-1.5 rounded-lg border border-slate-200 dark:border-dark-border text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer"
+                title="Close Navigation"
+              >
+                <ChevronLeft size={16} />
+              </button>
+            )}
+          </div>
 
         {/* Categorized Navigation Groups */}
         <div className="px-3 py-3 space-y-4 flex-1">
@@ -209,5 +225,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
     </aside>
-  );
+  </>
+);
 };

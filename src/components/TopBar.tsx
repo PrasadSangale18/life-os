@@ -7,6 +7,7 @@ import {
   FolderKanban, 
   Inbox,
   PanelLeft,
+  PanelLeftClose,
   Menu
 } from 'lucide-react';
 
@@ -23,6 +24,12 @@ interface TopBarProps {
   pageTitle?: string;
   onSearchClick?: () => void;
   onToggleSidebar?: () => void;
+  onMenuToggle?: () => void;
+  onDesktopMenuToggle?: () => void;
+  onDesktopMouseEnter?: () => void;
+  onDesktopMouseLeave?: () => void;
+  isDesktopOpen?: boolean;
+  isPinned?: boolean;
   isMobile?: boolean;
   user?: { name: string; email: string } | null;
   children?: React.ReactNode;
@@ -37,6 +44,12 @@ export const TopBar: React.FC<TopBarProps> = ({
   onToggleDarkMode,
   pageTitle = "Shift Radar",
   onToggleSidebar,
+  onMenuToggle,
+  onDesktopMenuToggle,
+  onDesktopMouseEnter,
+  onDesktopMouseLeave,
+  isDesktopOpen,
+  isPinned,
   user,
   children
 }) => {
@@ -55,16 +68,38 @@ export const TopBar: React.FC<TopBarProps> = ({
     <header className="sticky top-0 z-30 h-16 bg-white/70 dark:bg-[#05080C]/70 backdrop-blur-xl border-b border-slate-200 dark:border-[#1E293B] px-3 sm:px-4 md:px-8 flex items-center justify-between transition-colors">
       {/* Left: Sidebar Toggle + Page Title & View Selector */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {onToggleSidebar && (
+        {/* Mobile Toggle Button (Clean 3 horizontal lines) */}
+        {(onMenuToggle || onToggleSidebar) && (
           <button
             type="button"
-            onClick={onToggleSidebar}
-            className="w-9 h-9 rounded-xl border border-slate-200 dark:border-[#1E293B] text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-[#11161D] hover:bg-slate-100 dark:hover:bg-[#161D27] cursor-pointer transition-colors flex items-center justify-center shrink-0"
-            aria-label="Toggle navigation"
-            title="Toggle Sidebar"
+            onClick={onMenuToggle || onToggleSidebar}
+            className="lg:hidden w-9 h-9 rounded-xl border border-slate-200 dark:border-[#1E293B] text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-[#11161D] hover:bg-slate-100 dark:hover:bg-[#161D27] cursor-pointer transition-colors flex items-center justify-center shrink-0"
+            aria-label="Toggle navigation drawer"
+            title="Toggle Navigation"
           >
-            <Menu size={18} strokeWidth={2.2} className="block md:hidden text-slate-700 dark:text-slate-200" />
-            <PanelLeft size={17} strokeWidth={2.2} className="hidden md:block" />
+            <Menu size={18} strokeWidth={2.2} />
+          </button>
+        )}
+
+        {/* Desktop Toggle Button (Peek-on-hover & Pin) */}
+        {(onDesktopMenuToggle || onToggleSidebar) && (
+          <button
+            type="button"
+            onClick={onDesktopMenuToggle || onToggleSidebar}
+            onMouseEnter={onDesktopMouseEnter}
+            onMouseLeave={onDesktopMouseLeave}
+            className={`hidden lg:flex w-9 h-9 rounded-xl border transition-all items-center justify-center shrink-0 group relative cursor-pointer ${
+              isDesktopOpen
+                ? 'bg-slate-100 dark:bg-[#161D27] border-orange-500/30 text-orange-500'
+                : 'border-slate-200 dark:border-[#1E293B] text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-[#11161D] hover:bg-slate-100 dark:hover:bg-[#161D27]'
+            }`}
+            title={isPinned ? 'Collapse sidebar (Ctrl+Shift+S)' : 'Pin sidebar open (Ctrl+Shift+S)'}
+          >
+            {isPinned ? (
+              <PanelLeftClose size={17} strokeWidth={2.2} className="text-[#FF5A1F]" />
+            ) : (
+              <PanelLeft size={17} strokeWidth={2.2} className={isDesktopOpen ? 'text-[#FF5A1F]' : 'group-hover:text-[#FF5A1F] transition-colors'} />
+            )}
           </button>
         )}
 

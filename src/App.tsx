@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from './store';
 import { Dashboard } from './components/Dashboard';
@@ -125,7 +125,47 @@ export default function App() {
   const { isLoaded, init, user, setUser, addItem, updateItem, showPrivate, setShowPrivate } = useStore();
 
   const [isMobile, setIsMobile] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile drawer state
+  const [isPinned, setIsPinned] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sankalp_sidebar_pinned');
+      if (saved !== null) return saved === 'true';
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
+
+  const [isHovered, setIsHovered] = useState(false);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMouseEnter = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 250);
+  };
+
+  const togglePin = () => {
+    setIsPinned(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('sankalp_sidebar_pinned', String(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  // Desktop visibility is active if pinned OR hovered
+  const isDesktopVisible = isPinned || isHovered;
+
   const [activeSection, setActiveSectionState] = useState<string>(getInitialSection);
 
   const setActiveSection = useCallback((sec: string) => {
@@ -243,6 +283,12 @@ export default function App() {
 
   useEffect(() => {
     const handleGlobalKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        togglePin();
+        return;
+      }
+
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setShowCommandPalette(prev => !prev);
@@ -315,11 +361,7 @@ export default function App() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '12s' }} />
       </div>
 
-      {isMobile && sidebarOpen && (
-        <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" />
-      )}
-
-      {/* Prahari Control Room Sidebar */}
+      {/* SANKALP Sliding Sidebar */}
       <Sidebar 
         currentTab={activeSection}
         onTabChange={(tab) => {
@@ -333,15 +375,21 @@ export default function App() {
         }}
         isMobile={isMobile}
         isOpen={sidebarOpen}
+        isDesktopOpen={isDesktopVisible}
         onClose={() => setSidebarOpen(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         notesCount={totalNotesCount}
         completedCount={doneTasks}
         totalCount={pt.length}
       />
 
-      {/* Main Content Area */}
-      <main style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", position: "relative", zIndex: 1, overflow: "hidden" }}>
-        
+      {/* Main Content Area with Dynamic Offset */}
+      <main 
+        className={`flex-1 flex flex-col h-screen relative z-1 overflow-hidden transition-all duration-300 ease-in-out ${
+          isPinned ? 'lg:pl-64' : 'lg:pl-0'
+        }`}
+      >
         {/* Prahari Top Command Bar */}
         <TopBar
           currentView={taskViewMode}
@@ -380,7 +428,12 @@ export default function App() {
             "Dashboard"
           }
           onSearchClick={() => setShowCommandPalette(true)}
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+          onDesktopMenuToggle={togglePin}
+          onDesktopMouseEnter={handleMouseEnter}
+          onDesktopMouseLeave={handleMouseLeave}
+          isDesktopOpen={isDesktopVisible}
+          isPinned={isPinned}
           isMobile={isMobile}
           user={user}
         >
