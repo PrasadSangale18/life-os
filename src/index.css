@@ -22,6 +22,64 @@
 }
 
 :root,
+[data-theme="light"],
+.light {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'DM Serif Display', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Surfaces (PRAHARI Clean Enterprise White & Blueprint Grid) */
+  --bg-base: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #f1f5f9;
+  --bg-surface-hover: #e2e8f0;
+  --bg-surface-active: #cbd5e1;
+  --bg-overlay: rgba(15, 23, 42, 0.4);
+
+  /* Borders */
+  --border-subtle: #f1f5f9;
+  --border-default: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-focus: #ff5a1f;
+
+  /* Text Colors */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-muted: #94a3b8;
+
+  /* Accents (PRAHARI Signature Vivid Orange & Soft Peach Pill Active) */
+  --accent-primary: #ff5a1f;
+  --accent-hover: #e04f16;
+  --accent-bg: #fff4ec;
+  --accent-border: #ffd8bf;
+  --accent-warm: #f59e0b;
+
+  /* Signature Highlights from Mockup */
+  --hl-lilac: #ede9fe;
+  --hl-lilac-text: #6d28d9;
+  --hl-green: #dcfce7;
+  --hl-green-text: #15803d;
+  --hl-yellow: #fef08a;
+  --hl-yellow-text: #854d0e;
+  --hl-blue: #dbeafe;
+  --hl-blue-text: #1d4ed8;
+  --hl-coral: #ffe4e6;
+  --hl-coral-text: #be123c;
+
+  /* Shadows matching PRAHARI soft elevated card */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.06), 0 4px 8px rgba(0, 0, 0, 0.03);
+  --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+
+  /* Grid Line matching PRAHARI canvas technical blueprint */
+  --grid-line: rgba(0, 0, 0, 0.035);
+
+  color-scheme: light;
+}
+
 [data-theme="dark"],
 .dark {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -78,63 +136,6 @@
   --grid-line: rgba(255, 255, 255, 0.03);
 
   color-scheme: dark;
-}
-
-[data-theme="light"],
-.light {
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-
-  /* Surfaces (PRAHARI Clean Enterprise White & Blueprint Grid) */
-  --bg-base: #f8fafc;
-  --bg-sidebar: #ffffff;
-  --bg-surface: #ffffff;
-  --bg-surface-elevated: #f1f5f9;
-  --bg-surface-hover: #e2e8f0;
-  --bg-surface-active: #cbd5e1;
-  --bg-overlay: rgba(15, 23, 42, 0.4);
-
-  /* Borders */
-  --border-subtle: #f1f5f9;
-  --border-default: #e2e8f0;
-  --border-strong: #cbd5e1;
-  --border-focus: #ff5a1f;
-
-  /* Text Colors */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #64748b;
-  --text-muted: #94a3b8;
-
-  /* Accents (PRAHARI Signature Vivid Orange & Soft Peach Pill Active) */
-  --accent-primary: #ff5a1f;
-  --accent-hover: #e04f16;
-  --accent-bg: #fff4ec;
-  --accent-border: #ffd8bf;
-  --accent-warm: #f59e0b;
-
-  /* Signature Highlights from Mockup */
-  --hl-lilac: #ede9fe;
-  --hl-lilac-text: #6d28d9;
-  --hl-green: #dcfce7;
-  --hl-green-text: #15803d;
-  --hl-yellow: #fef08a;
-  --hl-yellow-text: #854d0e;
-  --hl-blue: #dbeafe;
-  --hl-blue-text: #1d4ed8;
-  --hl-coral: #ffe4e6;
-  --hl-coral-text: #be123c;
-
-  /* Shadows matching PRAHARI soft elevated card */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.06), 0 4px 8px rgba(0, 0, 0, 0.03);
-  --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
-
-  /* Grid Line matching PRAHARI canvas technical blueprint */
-  --grid-line: rgba(0, 0, 0, 0.035);
-
-  color-scheme: light;
 }
 
 *, *::before, *::after {

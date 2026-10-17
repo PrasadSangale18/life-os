@@ -28,7 +28,7 @@
     <script>
       (function() {
         try {
-          var t = localStorage.getItem('lifeos_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          var t = localStorage.getItem('lifeos_theme_mode') || 'light';
           document.documentElement.setAttribute('data-theme', t);
           if (t === 'dark') {
             document.documentElement.classList.add('dark');

@@ -209,11 +209,10 @@ export default function App() {
   
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('lifeos_theme');
+      const stored = localStorage.getItem('lifeos_theme_mode');
       if (stored === 'light' || stored === 'dark') return stored;
-      if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
     }
-    return 'dark';
+    return 'light'; // Clean light UI mode by default
   });
 
   const [showExportModal, setShowExportModal] = useState(false);
@@ -228,6 +227,7 @@ export default function App() {
       document.documentElement.classList.remove('dark');
       document.documentElement.classList.add('light');
     }
+    localStorage.setItem('lifeos_theme_mode', theme);
     localStorage.setItem('lifeos_theme', theme);
   }, [theme]);
 

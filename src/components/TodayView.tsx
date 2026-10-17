@@ -15,7 +15,9 @@ import {
   FileText, 
   BarChart2, 
   PieChart,
-  Activity
+  Activity,
+  TrendingUp,
+  TrendingDown
 } from 'lucide-react';
 import { PromptWiseModal } from './PromptWiseModal';
 import { FlowCockpitModal } from './focus/FlowCockpitModal';
@@ -353,12 +355,12 @@ export const TodayView = ({
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-12 font-sans select-none">
       
       {/* 1. HERO GREETING (Exact Prahari Reference Layout) */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 pt-1">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             Hello, {user?.name || "Prasad Sangale"}.
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl">
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-4xl">
             AISankalp Autonomous Intelligence is online. Continuously calibrating your 5 Life Pillars, Eisenhower priority execution, and personal knowledge workspace to maximize cognitive momentum.
           </p>
         </div>
@@ -373,9 +375,9 @@ export const TodayView = ({
                 setShowTodayPromptModal(true);
               }
             }}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-linear-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer tracking-wide"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer tracking-wide"
           >
-            <Sparkles size={16} />
+            <Sparkles className="w-5 h-5" />
             <span>Generate AI Daily Briefing</span>
           </button>
         </div>
@@ -385,13 +387,13 @@ export const TodayView = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
         
         {/* Card 1: CRITICAL / P0 FOCUS */}
-        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] hover:bg-slate-50 dark:hover:bg-[#161D27] hover:border-slate-300 dark:hover:border-slate-700/80 hover:shadow-[0_0_24px_rgba(249,115,22,0.15)] hover:-translate-y-0.5 transition-all shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200/80 dark:border-[#1E293B] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:border-slate-300 dark:hover:border-slate-700/80 hover:-translate-y-0.5 transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono">
               CRITICAL / P0 FOCUS
             </span>
-            <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 dark:text-red-400">
-              <AlertTriangle size={16} strokeWidth={2} />
+            <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 dark:text-red-400">
+              <AlertTriangle className="w-5 h-5" strokeWidth={2} />
             </div>
           </div>
 
@@ -399,24 +401,25 @@ export const TodayView = ({
             <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight leading-none">
               {criticalTasksCount}
             </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 font-mono">
-              ↗ +12.5%
-            </span>
+            <div className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg border bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 font-mono shrink-0">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>+12.5%</span>
+            </div>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+          <p className="text-xs text-slate-400 dark:text-slate-400 mt-2">
             High-leverage tasks requiring immediate focus
           </p>
         </div>
 
         {/* Card 2: HABIT MOMENTUM */}
-        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] hover:bg-slate-50 dark:hover:bg-[#161D27] hover:border-slate-300 dark:hover:border-slate-700/80 hover:shadow-[0_0_24px_rgba(249,115,22,0.15)] hover:-translate-y-0.5 transition-all shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200/80 dark:border-[#1E293B] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:border-slate-300 dark:hover:border-slate-700/80 hover:-translate-y-0.5 transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono">
               HABIT MOMENTUM
             </span>
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-              <ShieldCheck size={16} strokeWidth={2} />
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+              <ShieldCheck className="w-5 h-5" strokeWidth={2} />
             </div>
           </div>
 
@@ -424,24 +427,25 @@ export const TodayView = ({
             <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight leading-none">
               {completedItemsCount}
             </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
-              ↘ 92% Streak
-            </span>
+            <div className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-mono shrink-0">
+              <TrendingDown className="w-3.5 h-3.5" />
+              <span>-4.3%</span>
+            </div>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+          <p className="text-xs text-slate-400 dark:text-slate-400 mt-2">
             Atomic daily routines completed this cycle
           </p>
         </div>
 
         {/* Card 3: TOTAL KNOWLEDGE ASSETS */}
-        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] hover:bg-slate-50 dark:hover:bg-[#161D27] hover:border-slate-300 dark:hover:border-slate-700/80 hover:shadow-[0_0_24px_rgba(249,115,22,0.15)] hover:-translate-y-0.5 transition-all shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200/80 dark:border-[#1E293B] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:border-slate-300 dark:hover:border-slate-700/80 hover:-translate-y-0.5 transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono">
               TOTAL KNOWLEDGE ASSETS
             </span>
-            <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
-              <FileText size={16} strokeWidth={2} />
+            <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+              <FileText className="w-5 h-5" strokeWidth={2} />
             </div>
           </div>
 
@@ -449,12 +453,13 @@ export const TodayView = ({
             <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight leading-none">
               {totalAssetsCount}
             </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-mono">
-              ↗ +15.7%
-            </span>
+            <div className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg border bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 font-mono shrink-0">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>+15.7%</span>
+            </div>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+          <p className="text-xs text-slate-400 dark:text-slate-400 mt-2">
             Synchronized across 5 Life Pillars
           </p>
         </div>
@@ -464,29 +469,29 @@ export const TodayView = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         
         {/* Column 1: PILLAR EXECUTION DENSITY (Span 2) */}
-        <div className="lg:col-span-2 rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] shadow-xs flex flex-col">
+        <div className="lg:col-span-2 rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200/80 dark:border-[#1E293B] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all flex flex-col">
           <div className="flex items-start justify-between flex-wrap gap-2 mb-4">
             <div>
               <div className="flex items-center gap-2">
                 <BarChart2 size={16} className="text-[#FF5A1F]" />
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white font-mono">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white font-mono">
                   PILLAR EXECUTION DENSITY
                 </h3>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-[11px] text-slate-400 mt-0.5">
                 Pending vs Completed execution per Life Pillar
               </p>
             </div>
 
             {/* Legend */}
-            <div className="flex items-center gap-3 text-[10.5px] font-semibold">
+            <div className="flex items-center gap-3 text-xs font-semibold">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-xs bg-[#EF4444]" />
-                <span className="text-slate-600 dark:text-slate-300">Pending</span>
+                <span className="text-slate-600 dark:text-slate-400">Pending</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-xs bg-[#10B981]" />
-                <span className="text-slate-600 dark:text-slate-300">Completed</span>
+                <span className="text-slate-600 dark:text-slate-400">Completed</span>
               </div>
             </div>
           </div>
@@ -495,24 +500,24 @@ export const TodayView = ({
           <div className="space-y-4 pt-1 flex-1">
             {pillarStats.map(row => (
               <div key={row.id} className="flex items-center text-xs">
-                <span className="w-24 text-right pr-3 font-semibold text-slate-600 dark:text-slate-400 text-[11px] shrink-0 truncate">
+                <span className="w-24 text-right pr-4 font-semibold text-slate-700 dark:text-slate-300 text-xs shrink-0 truncate">
                   {row.label}
                 </span>
 
-                <div className="flex-1 flex flex-col gap-1 relative">
+                <div className="flex-1 flex flex-col gap-1.5 relative">
                   {/* Pending Bar (Red) */}
-                  <div className="h-2.5 bg-slate-100 dark:bg-white/[0.04] rounded-full overflow-hidden w-full">
+                  <div className="h-2 bg-slate-100 dark:bg-slate-800/60 rounded-full overflow-hidden w-full">
                     <div 
                       className="h-full bg-[#EF4444] rounded-full transition-all duration-500"
-                      style={{ width: `${row.pending}%` }}
+                      style={{ width: `${Math.max(row.pending, row.pending > 0 ? 4 : 0)}%` }}
                     />
                   </div>
 
                   {/* Completed Bar (Green) */}
-                  <div className="h-2.5 bg-slate-100 dark:bg-white/[0.04] rounded-full overflow-hidden w-full">
+                  <div className="h-2 bg-slate-100 dark:bg-slate-800/60 rounded-full overflow-hidden w-full">
                     <div 
                       className="h-full bg-[#10B981] rounded-full transition-all duration-500"
-                      style={{ width: `${row.done}%` }}
+                      style={{ width: `${Math.max(row.done, row.done > 0 ? 4 : 0)}%` }}
                     />
                   </div>
                 </div>
@@ -520,7 +525,7 @@ export const TodayView = ({
             ))}
 
             {/* X-Axis Scale Grid (0, 25, 50, 75, 100) */}
-            <div className="flex items-center text-[10px] text-slate-400 font-mono pt-2 pl-24 border-t border-slate-200 dark:border-white/[0.06] justify-between">
+            <div className="flex items-center text-[10px] text-slate-400 font-mono pt-3 pl-28 border-t border-slate-200/80 dark:border-slate-800 justify-between">
               <span>0%</span>
               <span>25%</span>
               <span>50%</span>
@@ -531,15 +536,15 @@ export const TodayView = ({
         </div>
 
         {/* Column 2: COGNITIVE LOAD DISTRIBUTION (Circular Donut Chart) */}
-        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200/80 dark:border-[#1E293B] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <PieChart size={16} className="text-purple-400" />
-              <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white font-mono">
+              <PieChart size={16} className="text-purple-500" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white font-mono">
                 COGNITIVE LOAD DISTRIBUTION
               </h3>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-400 mt-0.5">
               Multi-tier Eisenhower allocation across active items
             </p>
           </div>
@@ -554,7 +559,7 @@ export const TodayView = ({
                 stroke="currentColor"
                 strokeWidth="18"
                 fill="transparent"
-                className="text-slate-100 dark:text-white/[0.04]"
+                className="text-slate-100 dark:text-slate-800/60"
               />
               {/* Green Arc (Completed) */}
               <circle
@@ -586,40 +591,40 @@ export const TodayView = ({
 
             {/* Centered Donut Label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+              <span className="text-3xl font-black text-slate-900 dark:text-white font-mono">
                 {totalAssetsCount}
               </span>
-              <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-400 font-mono">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 font-mono">
                 ASSETS
               </span>
             </div>
           </div>
 
           {/* Donut Legend */}
-          <div className="flex items-center justify-around pt-3 border-t border-slate-200 dark:border-white/[0.06] text-xs font-semibold">
+          <div className="flex items-center justify-around pt-3 border-t border-slate-100 dark:border-slate-800/60 text-xs font-semibold">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
               <span className="text-slate-500 dark:text-slate-400">Critical / Focus</span>
-              <span className="font-mono text-slate-900 dark:text-white">{criticalTasksCount}</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white ml-1">{criticalTasksCount}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
               <span className="text-slate-500 dark:text-slate-400">Done</span>
-              <span className="font-mono text-slate-900 dark:text-white">{completedItemsCount}</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white ml-1">{completedItemsCount}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* 4. FULL-WIDTH CARD: TOP PRODUCTIVITY BOTTLENECKS */}
-      <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] shadow-xs">
+      <div className="rounded-2xl p-5 bg-white dark:bg-[#11161D] border border-slate-200/80 dark:border-[#1E293B] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all">
         <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
           <div className="flex items-center gap-2">
             <ShieldCheck size={16} className="text-amber-500" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white font-mono">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white font-mono">
               TOP PRODUCTIVITY BOTTLENECKS
             </h3>
-            <span className="px-2 py-0.5 rounded-md text-[9.5px] font-bold uppercase tracking-wider bg-amber-400/10 text-amber-500 border border-amber-400/30 font-mono">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-400/10 text-amber-600 dark:text-amber-400 border border-amber-400/20 font-mono">
               COGNITIVE FRICTION DEFECTS
             </span>
           </div>
@@ -628,7 +633,7 @@ export const TodayView = ({
             <button
               type="button"
               onClick={() => onNavigateSection('analytics')}
-              className="text-xs font-bold text-amber-500 hover:text-amber-400 flex items-center gap-1 cursor-pointer transition-colors"
+              className="text-xs font-bold text-amber-500 hover:text-amber-600 flex items-center gap-1 cursor-pointer transition-colors"
             >
               <span>Productivity Analytics Deep Dive</span>
               <ArrowRight size={13} />
@@ -636,7 +641,7 @@ export const TodayView = ({
           )}
         </div>
 
-        <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-4">
+        <p className="text-[11px] text-slate-400 mb-4">
           Cognitive friction vectors with the highest delay and procrastination correlation across active projects
         </p>
 
@@ -648,10 +653,10 @@ export const TodayView = ({
             { label: 'Unscheduled Large Backlog Items', color: '#8B5CF6', pct: 47 }
           ].map(b => (
             <div key={b.label} className="flex items-center text-xs">
-              <span className="w-52 text-right pr-3 font-semibold text-slate-700 dark:text-slate-300 text-[11px] shrink-0 truncate">
+              <span className="w-52 text-right pr-3 font-semibold text-slate-700 dark:text-slate-300 text-xs shrink-0 truncate">
                 {b.label}
               </span>
-              <div className="flex-1 h-3 bg-slate-100 dark:bg-white/[0.04] rounded-full overflow-hidden">
+              <div className="flex-1 h-2.5 bg-slate-100 dark:bg-slate-800/60 rounded-full overflow-hidden">
                 <div 
                   className="h-full rounded-full transition-all duration-500"
                   style={{ width: `${b.pct}%`, backgroundColor: b.color }}
