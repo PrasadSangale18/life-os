@@ -208,9 +208,28 @@ a:focus-visible {
     min-height: 42px;
     font-size: 14px;
   }
+  .segmented-nav {
+    display: flex;
+    overflow-x: auto;
+    max-width: 100%;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .segmented-nav::-webkit-scrollbar {
+    display: none;
+  }
   .segmented-nav-btn {
     min-height: 40px;
     padding: 8px 12px;
     font-size: 13px;
+    flex-shrink: 0;
   }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

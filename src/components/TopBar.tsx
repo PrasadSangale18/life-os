@@ -6,7 +6,8 @@ import {
   List, 
   FolderKanban, 
   Inbox,
-  PanelLeft
+  PanelLeft,
+  Menu
 } from 'lucide-react';
 
 interface TopBarProps {
@@ -51,22 +52,24 @@ export const TopBar: React.FC<TopBarProps> = ({
   const initials = getInitials(user?.name);
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/70 dark:bg-[#05080C]/70 backdrop-blur-xl border-b border-slate-200 dark:border-[#1E293B] px-4 md:px-8 flex items-center justify-between transition-colors">
+    <header className="sticky top-0 z-30 h-16 bg-white/70 dark:bg-[#05080C]/70 backdrop-blur-xl border-b border-slate-200 dark:border-[#1E293B] px-3 sm:px-4 md:px-8 flex items-center justify-between transition-colors">
       {/* Left: Sidebar Toggle + Page Title & View Selector */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {onToggleSidebar && (
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="p-2 rounded-xl border border-slate-200 dark:border-[#1E293B] text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-[#11161D] hover:bg-slate-100 dark:hover:bg-[#161D27] cursor-pointer transition-colors flex items-center justify-center shrink-0"
+            className="w-9 h-9 rounded-xl border border-slate-200 dark:border-[#1E293B] text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-[#11161D] hover:bg-slate-100 dark:hover:bg-[#161D27] cursor-pointer transition-colors flex items-center justify-center shrink-0"
             aria-label="Toggle navigation"
             title="Toggle Sidebar"
           >
-            <PanelLeft size={17} strokeWidth={2.2} />
+            <Menu size={18} strokeWidth={2.2} className="block md:hidden text-slate-700 dark:text-slate-200" />
+            <PanelLeft size={17} strokeWidth={2.2} className="hidden md:block" />
           </button>
         )}
 
-        <h1 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 whitespace-nowrap">
+        {/* Page Title - Hidden on mobile to prevent collision with centered brand wordmark */}
+        <h1 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight hidden md:flex items-center gap-2 whitespace-nowrap">
           {pageTitle}
         </h1>
 
@@ -150,19 +153,21 @@ export const TopBar: React.FC<TopBarProps> = ({
           </span>
         </div>
 
-        {/* Organization / Profile Badge */}
-        {children ? (
-          children
-        ) : (
-          <div className="flex items-center gap-2 pl-1">
-            <span className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] text-[10px] font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono shadow-xs">
-              SANKALP WORKSPACE
-            </span>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-bold text-xs shadow-xs font-mono">
-              {initials}
+        {/* Organization / Profile Badge - Hidden on mobile so right controls don't crowd center title */}
+        <div className="hidden sm:flex items-center">
+          {children ? (
+            children
+          ) : (
+            <div className="flex items-center gap-2 pl-1">
+              <span className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] text-[10px] font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono shadow-xs">
+                SANKALP WORKSPACE
+              </span>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-bold text-xs shadow-xs font-mono">
+                {initials}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );

@@ -129,7 +129,7 @@ export const WeeklyReview = () => {
         </div>
 
         {/* Step Buttons */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 8 }}>
+        <div className="flex sm:grid sm:grid-cols-5 gap-2 overflow-x-auto no-scrollbar pb-1">
           {STEPS.map(s => {
             const isActive = step === s.num;
             const isCompleted = step > s.num;
@@ -137,39 +137,23 @@ export const WeeklyReview = () => {
               <button 
                 key={s.num} 
                 onClick={() => setStep(s.num)}
-                style={{ 
-                  display: "flex", 
-                  alignItems: "center", 
-                  gap: 8, 
-                  padding: "10px 12px", 
-                  borderRadius: 8, 
-                  background: isActive ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.02)", 
-                  border: `1px solid ${isActive ? "var(--border-strong)" : "var(--border-subtle)"}`, 
-                  color: isActive ? "var(--text-primary)" : "var(--text-secondary)", 
-                  cursor: "pointer", 
-                  textAlign: "left",
-                  transition: "all 0.15s ease"
-                }}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all cursor-pointer text-left shrink-0 min-w-[130px] sm:min-w-0 ${
+                  isActive
+                    ? 'bg-slate-100 dark:bg-[#161D27] border-orange-500/30 text-slate-900 dark:text-white shadow-xs'
+                    : 'bg-white dark:bg-[#11161D] border-slate-200 dark:border-[#1E293B] text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
               >
                 <div 
-                  style={{ 
-                    width: 20, 
-                    height: 20, 
-                    borderRadius: "50%", 
-                    background: isActive ? "var(--accent-primary)" : (isCompleted ? "#10b981" : "rgba(255,255,255,0.06)"), 
-                    color: (isActive || isCompleted) ? "#000" : "var(--text-tertiary)", 
-                    fontSize: 10, 
-                    fontWeight: 700, 
-                    display: "flex", 
-                    alignItems: "center", 
-                    justifyContent: "center",
-                    flexShrink: 0
-                  }}
+                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 font-mono ${
+                    isActive 
+                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white' 
+                      : (isCompleted ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500')
+                  }`}
                 >
                   {isCompleted ? <Check size={11} strokeWidth={3} /> : s.num}
                 </div>
-                <div style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  <div style={{ fontSize: 12, fontWeight: isActive ? 600 : 450 }}>{s.title}</div>
+                <div className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
+                  <div className={`text-xs ${isActive ? 'font-bold' : 'font-medium'}`}>{s.title}</div>
                 </div>
               </button>
             );
@@ -187,35 +171,24 @@ export const WeeklyReview = () => {
             </div>
           </div>
           
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="flex flex-col gap-2.5">
             {inboxItems.map(i => (
               <div 
                 key={i.id} 
-                style={{ 
-                  display: "flex", 
-                  alignItems: "center", 
-                  justifyContent: "space-between", 
-                  padding: "10px 14px", 
-                  borderRadius: 8, 
-                  background: "rgba(255,255,255,0.03)", 
-                  border: "1px solid var(--border-subtle)",
-                  flexWrap: "wrap",
-                  gap: 10
-                }}
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] gap-3"
               >
-                <div style={{ display: "flex", flexDirection: "column", gap: 3, flex: 1, minWidth: 200 }}>
-                  <span style={{ fontSize: 13.5, color: "var(--text-primary)", fontWeight: 500 }}>{i.title}</span>
-                  <span className="ui-pill" style={{ alignSelf: "flex-start", fontSize: 10, color: "#f59e0b" }}>Needs Classification</span>
+                <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                  <span className="text-sm font-semibold text-slate-900 dark:text-white break-words">{i.title}</span>
+                  <span className="self-start text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 font-mono">Needs Classification</span>
                 </div>
 
                 {/* 1-Click Triage Controls */}
-                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   {/* Pillar Selector */}
                   <select
                     value={i.pillar || ''}
                     onChange={e => updateItem(i.id, { pillar: (e.target.value as PillarId) || undefined })}
-                    className="ui-select"
-                    style={{ padding: "4px 8px", fontSize: 11.5, height: 28 }}
+                    className="flex-1 sm:w-36 h-9 px-2.5 py-1 text-xs rounded-xl border border-slate-200 dark:border-[#1E293B] bg-slate-50 dark:bg-[#161D27] text-slate-800 dark:text-slate-200 font-medium cursor-pointer"
                   >
                     <option value="">Select Pillar...</option>
                     {PILLARS.map(p => (
@@ -227,8 +200,7 @@ export const WeeklyReview = () => {
                   <select
                     value={i.quadrant || ''}
                     onChange={e => updateItem(i.id, { quadrant: (e.target.value as QuadrantId) || undefined })}
-                    className="ui-select"
-                    style={{ padding: "4px 8px", fontSize: 11.5, height: 28 }}
+                    className="flex-1 sm:w-40 h-9 px-2.5 py-1 text-xs rounded-xl border border-slate-200 dark:border-[#1E293B] bg-slate-50 dark:bg-[#161D27] text-slate-800 dark:text-slate-200 font-medium cursor-pointer"
                   >
                     <option value="">Assign Quadrant...</option>
                     {QUADRANTS.map(q => (
@@ -239,11 +211,10 @@ export const WeeklyReview = () => {
                   {/* Trash button */}
                   <button
                     onClick={() => trashItem(i.id)}
-                    className="btn-ghost"
-                    style={{ padding: "5px 8px", color: "var(--text-tertiary)" }}
+                    className="w-9 h-9 rounded-xl border border-slate-200 dark:border-[#1E293B] bg-slate-50 dark:bg-[#161D27] text-slate-400 hover:text-red-500 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
                     title="Move to Trash"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>

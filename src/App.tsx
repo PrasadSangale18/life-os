@@ -586,62 +586,34 @@ export default function App() {
         {/* Mobile Fixed Bottom Navigation Bar - Exactly 4 Core Workspaces + Central Capture */}
         {isMobile && (
           <nav 
-            style={{ 
-              position: "fixed", 
-              bottom: 0, 
-              left: 0, 
-              right: 0, 
-              height: 60, 
-              background: "rgba(10, 12, 18, 0.95)", 
-              backdropFilter: "blur(20px)", 
-              borderTop: "1px solid var(--border-default)", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "space-around", 
-              zIndex: 35,
-              padding: "0 8px"
-            }}
+            className="fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-[#05080C]/85 backdrop-blur-2xl border-t border-slate-200 dark:border-[#1E293B] flex items-center justify-around z-35 px-2 pb-[env(safe-area-inset-bottom,0px)]"
           >
             {/* 1. To-do list */}
             <button
               type="button"
               onClick={() => setActiveSection("tasks")}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 2,
-                background: "transparent",
-                border: "none",
-                color: activeSection === "tasks" ? "var(--text-primary)" : "var(--text-tertiary)",
-                cursor: "pointer",
-                padding: "6px 8px",
-                minWidth: 48
-              }}
+              className={`flex flex-col items-center gap-1 bg-transparent border-0 cursor-pointer p-1.5 min-w-[52px] transition-colors ${
+                activeSection === "tasks" 
+                  ? "text-orange-500 dark:text-orange-400 font-bold" 
+                  : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
+              }`}
             >
-              <CheckSquare size={18} strokeWidth={activeSection === "tasks" ? 2.4 : 1.7} />
-              <span style={{ fontSize: 10, fontWeight: activeSection === "tasks" ? 700 : 500 }}>To-do</span>
+              <CheckSquare size={19} strokeWidth={activeSection === "tasks" ? 2.5 : 1.8} />
+              <span className="text-[10px] tracking-tight">To-do</span>
             </button>
 
             {/* 2. My Notes */}
             <button
               type="button"
               onClick={() => setActiveSection("notes")}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 2,
-                background: "transparent",
-                border: "none",
-                color: activeSection === "notes" ? "var(--text-primary)" : "var(--text-tertiary)",
-                cursor: "pointer",
-                padding: "6px 8px",
-                minWidth: 48
-              }}
+              className={`flex flex-col items-center gap-1 bg-transparent border-0 cursor-pointer p-1.5 min-w-[52px] transition-colors ${
+                activeSection === "notes" 
+                  ? "text-orange-500 dark:text-orange-400 font-bold" 
+                  : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
+              }`}
             >
-              <BookOpen size={18} strokeWidth={activeSection === "notes" ? 2.4 : 1.7} />
-              <span style={{ fontSize: 10, fontWeight: activeSection === "notes" ? 700 : 500 }}>My Notes</span>
+              <BookOpen size={19} strokeWidth={activeSection === "notes" ? 2.5 : 1.8} />
+              <span className="text-[10px] tracking-tight">My Notes</span>
             </button>
 
             {/* 3. Central Elevated Quick Capture */}
@@ -654,65 +626,37 @@ export default function App() {
                 setShowTaskModal(true); 
               }}
               aria-label="Quick Capture"
-              style={{
-                width: 46,
-                height: 46,
-                borderRadius: "50%",
-                background: theme === 'light' ? "#181a20" : "#ffffff",
-                color: theme === 'light' ? "#ffffff" : "#0e1015",
-                border: "none",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: theme === 'light' ? "0 6px 20px rgba(24,26,32,0.3)" : "0 6px 20px rgba(0,0,0,0.5)",
-                cursor: "pointer",
-                transform: "translateY(-8px)",
-                flexShrink: 0
-              }}
+              className="w-12 h-12 rounded-full -translate-y-3 bg-linear-to-r from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/35 hover:scale-105 active:scale-95 transition-all cursor-pointer border-2 border-white dark:border-[#05080C] shrink-0"
             >
-              <Plus size={22} strokeWidth={2.6} />
+              <Plus size={22} strokeWidth={2.8} />
             </button>
 
             {/* 4. Mind Map & Graph */}
             <button
               type="button"
               onClick={() => setActiveSection("mindmap")}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 2,
-                background: "transparent",
-                border: "none",
-                color: activeSection === "mindmap" ? "var(--text-primary)" : "var(--text-tertiary)",
-                cursor: "pointer",
-                padding: "6px 8px",
-                minWidth: 48
-              }}
+              className={`flex flex-col items-center gap-1 bg-transparent border-0 cursor-pointer p-1.5 min-w-[52px] transition-colors ${
+                activeSection === "mindmap" 
+                  ? "text-orange-500 dark:text-orange-400 font-bold" 
+                  : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
+              }`}
             >
-              <GitBranch size={18} strokeWidth={activeSection === "mindmap" ? 2.4 : 1.7} />
-              <span style={{ fontSize: 10, fontWeight: activeSection === "mindmap" ? 700 : 500 }}>Mind Map</span>
+              <GitBranch size={19} strokeWidth={activeSection === "mindmap" ? 2.5 : 1.8} />
+              <span className="text-[10px] tracking-tight">Mind Map</span>
             </button>
 
             {/* 5. Smart AI Organizer */}
             <button
               type="button"
               onClick={() => setActiveSection("organizer")}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 2,
-                background: "transparent",
-                border: "none",
-                color: activeSection === "organizer" ? "var(--text-primary)" : "var(--text-tertiary)",
-                cursor: "pointer",
-                padding: "6px 8px",
-                minWidth: 48
-              }}
+              className={`flex flex-col items-center gap-1 bg-transparent border-0 cursor-pointer p-1.5 min-w-[52px] transition-colors ${
+                activeSection === "organizer" 
+                  ? "text-orange-500 dark:text-orange-400 font-bold" 
+                  : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
+              }`}
             >
-              <Wand2 size={18} strokeWidth={activeSection === "organizer" ? 2.4 : 1.7} />
-              <span style={{ fontSize: 10, fontWeight: activeSection === "organizer" ? 700 : 500 }}>Organizer</span>
+              <Wand2 size={19} strokeWidth={activeSection === "organizer" ? 2.5 : 1.8} />
+              <span className="text-[10px] tracking-tight">Organizer</span>
             </button>
           </nav>
         )}
@@ -970,18 +914,18 @@ export default function App() {
         </div>
       )}
 
-      {/* Floating AISankalp AI Copilot Toggle Pill */}
+      {/* Floating SANKALP AI Copilot Toggle Pill */}
       <button
         type="button"
         onClick={() => {
           setCopilotPrompt(undefined);
           setShowCopilot(prev => !prev);
         }}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full bg-linear-to-r from-[#FF5A1F] to-[#EA580C] text-white text-xs font-black shadow-[0_4px_20px_rgba(255,90,31,0.45)] hover:shadow-[0_6px_28px_rgba(255,90,31,0.6)] active:scale-95 transition-all cursor-pointer border border-white/20 select-none"
-        title="Toggle AISankalp AI Copilot"
+        className="fixed bottom-[74px] sm:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-linear-to-r from-orange-500 to-amber-500 text-white text-xs font-black shadow-[0_4px_20px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_28px_rgba(249,115,22,0.55)] active:scale-95 transition-all cursor-pointer border border-white/20 select-none"
+        title="Toggle SANKALP AI Copilot"
       >
         <Sparkles size={15} />
-        <span className="hidden sm:inline">AISankalp AI</span>
+        <span className="hidden sm:inline font-mono">SANKALP AI</span>
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
       </button>
 

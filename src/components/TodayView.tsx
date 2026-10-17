@@ -364,7 +364,7 @@ export const TodayView = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
           <button 
             type="button"
             onClick={() => {
@@ -374,9 +374,9 @@ export const TodayView = ({
                 setShowTodayPromptModal(true);
               }
             }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer tracking-wide"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-linear-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer tracking-wide"
           >
-            <Sparkles size={15} />
+            <Sparkles size={16} />
             <span>Generate AI Daily Briefing</span>
           </button>
         </div>
