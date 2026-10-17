@@ -102,7 +102,7 @@ const SECTION_TITLES: Record<string, string> = {
   projects: 'Projects & Goals',
   goals: 'Projects & Goals',
   organizer: 'Smart AI Organizer',
-  mindmap: 'Canvas & Graph',
+  mindmap: 'Mind Map',
   journal: 'Daily Journal',
   analytics: 'Productivity Analytics',
   import: 'CSV Bulk Import',
@@ -430,7 +430,7 @@ export default function App() {
             activeSection === "notes" ? "My Notes" :
             activeSection === "projects" || activeSection === "goals" ? "Projects & Goals" :
             activeSection === "organizer" ? "Smart AI Organizer" :
-            activeSection === "mindmap" ? "Canvas & Graph" :
+            activeSection === "mindmap" ? "Mind Map" :
             activeSection === "journal" ? "Daily Journal" :
             activeSection === "analytics" ? "Productivity Analytics" :
             activeSection === "import" ? "CSV Bulk Import" :

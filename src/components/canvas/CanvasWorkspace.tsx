@@ -10,8 +10,6 @@ import {
   Type, 
   Link2, 
   FileText, 
-  Sparkles, 
-  Send, 
   ZoomIn, 
   ZoomOut, 
   Layers, 
@@ -337,7 +335,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
 
   // Layout Controls
   const [showDrawer, setShowDrawer] = useState<boolean>(true);
-  const [showDocPanel, setShowDocPanel] = useState<boolean>(true);
+  const [showDocPanel, setShowDocPanel] = useState<boolean>(false);
   const [activeTool, setActiveTool] = useState<'pointer' | 'text' | 'link'>('pointer');
   const [showGrid, setShowGrid] = useState<boolean>(true);
 
@@ -365,16 +363,6 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   const [showLibraryModal, setShowLibraryModal] = useState<boolean>(false);
   const [librarySearch, setLibrarySearch] = useState<string>('');
   const [libraryFilter, setLibraryFilter] = useState<'all' | 'task' | 'note' | 'project'>('all');
-
-  // AI Copilot state
-  const [chatPrompt, setChatPrompt] = useState<string>('');
-  const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
-    {
-      role: 'assistant',
-      text: 'Canvas Copilot active. I can synthesize your cards, identify execution paths, or auto-organize this board.'
-    }
-  ]);
-  const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
 
   // Unified Multi-Mode Workspace State (Canvas | Force Graph | Hierarchy Tree)
   const [internalView, setInternalView] = useState<'canvas' | 'tree' | 'graph'>(() => {
@@ -774,8 +762,8 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   // Export Canvas Synthesis as a Real Life OS Note
   const handleExportAsNote = async () => {
     const markdownContent = `# ${activeCanvas.title}\n\n` +
-      `*Exported from AISANKALP Canvas & Graph on ${new Date().toLocaleDateString()}*\n\n` +
-      `## Overview\n${activeCanvas.docContent.summary || 'Spatial canvas breakdown'}\n\n` +
+      `*Exported from AISANKALP Mind Map on ${new Date().toLocaleDateString()}*\n\n` +
+      `## Overview\n${activeCanvas.docContent.summary || 'Spatial mind map breakdown'}\n\n` +
       `> "${activeCanvas.docContent.quote}"\n\n` +
       `## Cards on this Board (${activeCanvas.nodes.length})\n` +
       activeCanvas.nodes.map(n => `- **[${n.type.toUpperCase()}]** ${n.title}\n  *${n.subtitle}*`).join('\n') +
@@ -787,14 +775,14 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       }).join('\n');
 
     await addItemToStore({
-      title: `${activeCanvas.title} (Canvas Synthesis)`,
+      title: `${activeCanvas.title} (Mind Map Outline)`,
       body: markdownContent,
       type: 'note',
       pillar: 'mental',
-      tags: ['canvas-export', 'synthesis', 'review']
+      tags: ['mindmap-export', 'outline', 'review']
     });
 
-    alert(`Saved "${activeCanvas.title}" synthesis into your AISANKALP Notes!`);
+    alert(`Saved "${activeCanvas.title}" outline into your AISANKALP Notes!`);
   };
 
   // Create New Canvas Board
@@ -834,38 +822,6 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
     setActiveCanvasId(newId);
     setNewBoardName('');
     setShowNewBoardModal(false);
-  };
-
-  // Send Copilot Query
-  const handleSendCopilot = () => {
-    if (!chatPrompt.trim()) return;
-    const userMsg = chatPrompt;
-    setChatMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-    setChatPrompt('');
-    setIsAiThinking(true);
-
-    setTimeout(() => {
-      setIsAiThinking(false);
-      const q = userMsg.toLowerCase();
-      let reply = '';
-
-      if (q.includes('priority') || q.includes('first') || q.includes('do')) {
-        const tasks = activeCanvas.nodes.filter(n => n.type === 'task');
-        if (tasks.length > 0) {
-          reply = `Top priority execution order: 1) "${tasks[0].title}" (Urgent). Tackle this item first to unblock dependent streams.`;
-        } else {
-          reply = `This board has no tasks yet. Add high-leverage tasks using the [+ Add Item] button.`;
-        }
-      } else if (q.includes('summar') || q.includes('overview') || q.includes('plan')) {
-        reply = `Board contains ${activeCanvas.nodes.length} cards across ${activeCanvas.edges.length} connections. Core focus: ${activeCanvas.nodes.slice(0, 3).map(n => n.title).join(', ')}.`;
-      } else if (q.includes('link') || q.includes('connect')) {
-        reply = `Use the Link tool from the left toolbar, click your first card, then click your target card to establish a relationship.`;
-      } else {
-        reply = `Synthesized "${userMsg}" across your ${activeCanvas.nodes.length} cards. Recommended next action: verify key milestone deliverables and maintain momentum.`;
-      }
-
-      setChatMessages(prev => [...prev, { role: 'assistant', text: reply }]);
-    }, 600);
   };
 
   // Connector Bezier line renderer
@@ -942,10 +898,10 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                   ? 'bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40 shadow-xs'
                   : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
               }`}
-              title="Infinite 2D Spatial Canvas"
+              title="Infinite 2D Spatial Mind Map"
             >
               <Compass size={13} />
-              <span>Canvas</span>
+              <span>Mind Map</span>
             </button>
             <button 
               type="button"
@@ -1119,10 +1075,31 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={handleAutoTidyLayout}
-                className="p-1.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06] text-xs transition-colors cursor-pointer"
                 title="Auto-Tidy Layout (Clean non-overlapping grid)"
               >
-                <Sliders size={13} />
+                <Sliders size={12} className="text-[#38BDF8]" />
+                <span className="hidden sm:inline">Auto-Tidy</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAutoLinkRelated}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06] text-xs transition-colors cursor-pointer"
+                title="Auto-Link related cards by pillar & tags"
+              >
+                <Link2 size={12} className="text-pink-400" />
+                <span className="hidden sm:inline">Auto-Link</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExportAsNote}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06] text-xs transition-colors cursor-pointer"
+                title="Save as Note in My Notes"
+              >
+                <BookOpen size={12} className="text-emerald-400" />
+                <span className="hidden sm:inline">Save Note</span>
               </button>
 
               <button
@@ -1132,6 +1109,17 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                 title="Fit to View"
               >
                 <Maximize2 size={13} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowDocPanel(prev => !prev)}
+                className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                  showDocPanel ? 'bg-[#38BDF8]/20 border-[#38BDF8]/50 text-[#38BDF8]' : 'border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06]'
+                }`}
+                title="Toggle Board Outline & Cards"
+              >
+                <Columns size={13} />
               </button>
             </>
           )}
@@ -1187,17 +1175,6 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               </button>
             </>
           )}
-
-          <button
-            type="button"
-            onClick={() => setShowDocPanel(prev => !prev)}
-            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-              showDocPanel ? 'bg-[#38BDF8]/15 border-[#38BDF8]/40 text-[#38BDF8]' : 'border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06]'
-            }`}
-            title="Toggle AI Synthesis & Copilot"
-          >
-            <Columns size={13} />
-          </button>
         </div>
       </div>
 
@@ -1682,82 +1659,91 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           </div>
         )}
 
-        {/* PANEL C: RIGHT DOCUMENT & AI COPILOT SYNTHESIS */}
-        {showDocPanel && (
-          <aside className="w-80 md:w-96 border-l border-[#1E293B] bg-[#080C14] flex flex-col shrink-0 z-20 overflow-hidden">
-            
+        {/* PANEL C: RIGHT BOARD OUTLINE & CARD INSPECTOR (NO FAKE CHAT) */}
+        {activeView === 'canvas' && showDocPanel && (
+          <aside className="w-80 md:w-88 border-l border-[#1E293B] bg-[#080C14] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl">
             {/* Header */}
             <div className="p-3.5 border-b border-[#1E293B] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles size={15} className="text-[#38BDF8]" />
+                <FileText size={15} className="text-[#38BDF8]" />
                 <h3 className="text-xs font-bold text-white tracking-wide uppercase">
-                  Canvas Copilot & Synthesis
+                  Board Outline & Cards
                 </h3>
               </div>
               <button 
                 type="button"
                 onClick={() => setShowDocPanel(false)}
                 className="p-1 text-slate-400 hover:text-white rounded cursor-pointer"
-                title="Collapse panel"
+                title="Close outline"
               >
                 <X size={14} />
               </button>
             </div>
 
-            {/* Smart 1-Click Action Pills */}
-            <div className="p-3 border-b border-[#1E293B] bg-[#05080C]/80 flex items-center gap-2 flex-wrap">
+            {/* Quick Actions */}
+            <div className="p-2.5 border-b border-[#1E293B] bg-[#05080C]/80 flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleAutoTidyLayout}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-xs text-slate-200 cursor-pointer transition-colors"
-                title="Arrange cards neatly"
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-xs text-slate-200 cursor-pointer transition-colors"
+                title="Auto-Tidy Layout"
               >
                 <Sliders size={12} className="text-[#38BDF8]" />
                 <span>Auto-Tidy</span>
               </button>
-
               <button
                 type="button"
                 onClick={handleAutoLinkRelated}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-xs text-slate-200 cursor-pointer transition-colors"
-                title="Connect related cards"
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-xs text-slate-200 cursor-pointer transition-colors"
+                title="Auto-Link Related Cards"
               >
                 <Link2 size={12} className="text-pink-400" />
                 <span>Auto-Link</span>
               </button>
-
               <button
                 type="button"
                 onClick={handleExportAsNote}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#38BDF8]/15 hover:bg-[#38BDF8]/25 border border-[#38BDF8]/30 text-xs text-[#38BDF8] font-semibold cursor-pointer transition-colors"
-                title="Save as note in My Notes"
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-[#38BDF8]/15 hover:bg-[#38BDF8]/25 border border-[#38BDF8]/30 text-xs text-[#38BDF8] font-semibold cursor-pointer transition-colors"
+                title="Save as Note"
               >
                 <BookOpen size={12} />
-                <span>Save as Note</span>
+                <span>Save Note</span>
               </button>
             </div>
 
-            {/* Content & Copilot Chat */}
+            {/* Board Content & Cards List (Clean, No Chat Simulator!) */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
               {/* Board Real Summary */}
-              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
+              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
                 <div className="flex items-center justify-between">
                   <h4 className="font-bold text-white text-xs">{activeCanvas.title}</h4>
-                  <span className="text-[10px] text-slate-400 font-mono">{canvasSummary.total} cards</span>
+                  <span className="text-[10px] text-slate-400 font-mono">{activeCanvas.nodes.length} cards • {activeCanvas.edges.length} links</span>
                 </div>
                 <p className="text-[11.5px] text-slate-300 leading-relaxed">
-                  {activeCanvas.docContent.summary || `Active canvas with ${canvasSummary.tasks} tasks and ${canvasSummary.notes} notes.`}
+                  {activeCanvas.docContent.summary || `Active board with ${canvasSummary.tasks} tasks and ${canvasSummary.notes} notes.`}
                 </p>
-                <div className="p-2.5 rounded-lg bg-[#38BDF8]/10 border-l-2 border-[#38BDF8] text-[11px] text-slate-200 italic">
-                  &ldquo;{activeCanvas.docContent.quote}&rdquo;
-                </div>
+                {activeCanvas.docContent.quote && (
+                  <div className="p-2.5 rounded-lg bg-[#38BDF8]/10 border-l-2 border-[#38BDF8] text-[11px] text-slate-200 italic">
+                    &ldquo;{activeCanvas.docContent.quote}&rdquo;
+                  </div>
+                )}
               </div>
 
-              {/* Active Cards Breakdown */}
+              {/* Active Cards List with 1-Click Jump/Edit */}
               <div>
-                <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  Active Cards ({activeCanvas.nodes.length})
-                </h5>
+                <div className="flex items-center justify-between mb-2">
+                  <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    Active Cards ({activeCanvas.nodes.length})
+                  </h5>
+                  <button
+                    type="button"
+                    onClick={() => setShowLibraryModal(true)}
+                    className="text-[11px] text-[#38BDF8] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus size={11} /> Add
+                  </button>
+                </div>
+
                 <div className="space-y-1.5">
                   {activeCanvas.nodes.map(n => (
                     <div 
@@ -1766,70 +1752,19 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                         const realItem = items.find(i => i.id === n.itemId || i.title === n.title);
                         if (realItem && onEditTask) onEditTask(realItem);
                       }}
-                      className="p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.05] flex items-center justify-between cursor-pointer group"
+                      className="p-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] flex items-center justify-between cursor-pointer transition-colors group"
+                      title="Click to view or edit item details"
                     >
                       <div className="min-w-0 pr-2">
-                        <span className="text-white font-medium truncate block">{n.title}</span>
-                        <span className="text-[10px] text-slate-400">{n.subtitle}</span>
+                        <span className="text-white font-medium truncate block group-hover:text-[#38BDF8] transition-colors">{n.title}</span>
+                        <span className="text-[10px] text-slate-400 block truncate">{n.subtitle}</span>
                       </div>
-                      <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-white/[0.05] text-slate-400 shrink-0">
+                      <span className="text-[9.5px] uppercase font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 shrink-0">
                         {n.type}
                       </span>
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Chat Messages */}
-              <div className="pt-2 border-t border-white/[0.06]">
-                <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  Copilot Assistance
-                </h5>
-                <div className="space-y-2">
-                  {chatMessages.map((m, idx) => (
-                    <div 
-                      key={idx}
-                      className={`p-2.5 rounded-xl text-[11.5px] leading-relaxed ${
-                        m.role === 'user' 
-                          ? 'bg-[#38BDF8]/20 border border-[#38BDF8]/30 text-white ml-4' 
-                          : 'bg-white/[0.04] border border-white/[0.06] text-slate-200 mr-4'
-                      }`}
-                    >
-                      {m.text}
-                    </div>
-                  ))}
-                  {isAiThinking && (
-                    <div className="text-[11px] text-[#38BDF8] animate-pulse flex items-center gap-1.5 p-2">
-                      <Sparkles size={12} />
-                      <span>Analyzing canvas topology...</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Copilot Input */}
-            <div className="p-3 border-t border-[#1E293B] bg-[#05080C]">
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] focus-within:border-[#38BDF8]/50">
-                <input
-                  type="text"
-                  placeholder="Ask copilot or synthesize..."
-                  value={chatPrompt}
-                  onChange={(e) => setChatPrompt(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSendCopilot();
-                  }}
-                  className="bg-transparent border-none outline-none text-xs text-white placeholder:text-slate-500 w-full"
-                />
-                
-                <button 
-                  type="button" 
-                  onClick={handleSendCopilot}
-                  className="p-1.5 rounded-lg bg-[#38BDF8] text-black hover:bg-[#38BDF8]/90 font-bold cursor-pointer"
-                  title="Send"
-                >
-                  <Send size={11} />
-                </button>
               </div>
             </div>
           </aside>

@@ -104,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'notes', name: 'Notes & Knowledge', icon: BookOpen, count: notesCount > 0 ? notesCount : undefined },
         { id: 'projects', name: 'Projects & Goals', icon: FolderKanban },
-        { id: 'mindmap', name: 'Canvas & Graph', icon: Compass }
+        { id: 'mindmap', name: 'Mind Map', icon: Compass }
       ]
     },
     {
