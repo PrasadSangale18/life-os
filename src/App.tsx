@@ -356,9 +356,9 @@ export default function App() {
       <div className="fixed inset-0 pointer-events-none z-0">
         {/* Cyber Grid */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
-        {/* Glowing Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '8s' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '12s' }} />
+        {/* Subtle Ambient Peripheral Glows (Matching Prahari - zero center color bleeding) */}
+        <div className="absolute top-0 left-[-10%] w-[40rem] h-[40rem] bg-orange-500/5 dark:bg-orange-500/5 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[35rem] h-[35rem] bg-indigo-500/5 dark:bg-indigo-500/5 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '12s', animationDelay: '2s' }} />
       </div>
 
       {/* Left Edge Hover Trigger (Claude-style hover zone when unpinned) */}
@@ -446,6 +446,7 @@ export default function App() {
           isDesktopOpen={isDesktopVisible}
           isPinned={isPinned}
           isMobile={isMobile}
+          onLogoClick={() => setActiveSection('today')}
           user={user}
         >
           <UserProfileMenu
@@ -752,7 +753,7 @@ export default function App() {
         {/* Mobile Fixed Bottom Navigation Bar - Exactly 4 Core Workspaces + Central Capture */}
         {isMobile && (
           <nav 
-            className="fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-[#05080C]/85 backdrop-blur-2xl border-t border-slate-200 dark:border-[#1E293B] flex items-center justify-around z-35 px-2 pb-[env(safe-area-inset-bottom,0px)]"
+            className="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-[#05080C] border-t border-slate-200 dark:border-[#1E293B] flex items-center justify-around z-35 px-2 pb-[env(safe-area-inset-bottom,0px)] shadow-lg"
           >
             {/* 1. To-do list */}
             <button

@@ -123,13 +123,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex flex-col flex-1 overflow-y-auto">
           {/* Brand Header */}
           <div className="h-16 flex items-center justify-between px-5 border-b border-slate-200/80 dark:border-dark-border shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FF5A1F] to-[#EA580C] flex items-center justify-center shadow-[0_2px_10px_rgba(255,90,31,0.3)] shrink-0">
+            <button 
+              type="button"
+              onClick={() => {
+                onTabChange('today');
+                if (onClose) onClose();
+              }}
+              className="flex items-center gap-3 group text-left cursor-pointer transition-transform"
+            >
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FF5A1F] to-[#EA580C] flex items-center justify-center shadow-[0_2px_10px_rgba(255,90,31,0.3)] group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(255,90,31,0.5)] transition-all shrink-0">
                 <Layers className="w-4 h-4 text-white" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-black tracking-wider text-slate-900 dark:text-white uppercase font-mono">
+                  <span className="text-xs font-black tracking-wider text-slate-900 dark:text-white uppercase font-mono group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
                     SANKALP
                   </span>
                   <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
@@ -140,7 +147,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   Autonomous Life OS
                 </span>
               </div>
-            </div>
+            </button>
 
             <div className="flex items-center gap-1">
               {onDesktopToggle && (

@@ -44,47 +44,37 @@ interface SortableTaskItemProps {
 const QUADRANT_STYLES: Record<QuadrantId, {
   accent: string;
   topBorder: string;
-  surfaceClass: string;
-  glowClass: string;
   badgeBg: string;
   badgeText: string;
   badgeBorder: string;
 }> = {
   do: {
-    accent: '#34D399', // Emerald-400
-    topBorder: 'border-t-2 border-t-emerald-500/80 shadow-[0_-4px_12px_rgba(16,185,129,0.15)]',
-    surfaceClass: 'bg-emerald-500/[0.02]',
-    glowClass: 'bg-emerald-500/10 group-hover/quadrant:bg-emerald-500/20',
-    badgeBg: 'rgba(52, 211, 153, 0.1)',
-    badgeText: '#34D399',
-    badgeBorder: 'rgba(52, 211, 153, 0.3)'
+    accent: '#10B981', // Emerald-500
+    topBorder: 'border-t-2 border-t-emerald-500',
+    badgeBg: 'rgba(16, 185, 129, 0.1)',
+    badgeText: '#10B981',
+    badgeBorder: 'rgba(16, 185, 129, 0.25)'
   },
   decide: {
-    accent: '#38BDF8', // Sky-400
-    topBorder: 'border-t-2 border-t-sky-500/80 shadow-[0_-4px_12px_rgba(56,189,248,0.15)]',
-    surfaceClass: 'bg-sky-500/[0.02]',
-    glowClass: 'bg-sky-500/10 group-hover/quadrant:bg-sky-500/20',
-    badgeBg: 'rgba(56, 189, 248, 0.1)',
-    badgeText: '#38BDF8',
-    badgeBorder: 'rgba(56, 189, 248, 0.3)'
+    accent: '#0EA5E9', // Sky-500
+    topBorder: 'border-t-2 border-t-sky-500',
+    badgeBg: 'rgba(14, 165, 233, 0.1)',
+    badgeText: '#0EA5E9',
+    badgeBorder: 'rgba(14, 165, 233, 0.25)'
   },
   delegate: {
-    accent: '#FBBF24', // Amber-400
-    topBorder: 'border-t-2 border-t-amber-500/80 shadow-[0_-4px_12px_rgba(251,191,36,0.15)]',
-    surfaceClass: 'bg-amber-500/[0.02]',
-    glowClass: 'bg-amber-500/10 group-hover/quadrant:bg-amber-500/20',
-    badgeBg: 'rgba(251, 191, 36, 0.1)',
-    badgeText: '#FBBF24',
-    badgeBorder: 'rgba(251, 191, 36, 0.3)'
+    accent: '#F59E0B', // Amber-500
+    topBorder: 'border-t-2 border-t-amber-500',
+    badgeBg: 'rgba(245, 158, 11, 0.1)',
+    badgeText: '#F59E0B',
+    badgeBorder: 'rgba(245, 158, 11, 0.25)'
   },
   delete: {
-    accent: '#FB7185', // Rose-400
-    topBorder: 'border-t-2 border-t-rose-500/80 shadow-[0_-4px_12px_rgba(251,113,133,0.15)]',
-    surfaceClass: 'bg-rose-500/[0.02]',
-    glowClass: 'bg-rose-500/10 group-hover/quadrant:bg-rose-500/20',
-    badgeBg: 'rgba(251, 113, 133, 0.1)',
-    badgeText: '#FB7185',
-    badgeBorder: 'rgba(251, 113, 133, 0.3)'
+    accent: '#F43F5E', // Rose-500
+    topBorder: 'border-t-2 border-t-rose-500',
+    badgeBg: 'rgba(244, 63, 94, 0.1)',
+    badgeText: '#F43F5E',
+    badgeBorder: 'rgba(244, 63, 94, 0.25)'
   }
 };
 
@@ -156,8 +146,7 @@ const SortableTaskItem = ({
             : 'border border-slate-300 dark:border-white/25 hover:border-slate-500 dark:hover:border-white/60 bg-white dark:bg-white/[0.03]'
         }`}
         style={{
-          backgroundColor: isDone ? qColor : undefined,
-          boxShadow: isDone ? `0 0 10px ${qColor}40` : undefined
+          backgroundColor: isDone ? qColor : undefined
         }}
       >
         {isDone && <Check size={10} color="#fff" strokeWidth={3} />}
@@ -332,26 +321,20 @@ export const QuadrantCard = ({
         isOver 
           ? 'border-[#FF5A1F] ring-2 ring-[#FF5A1F]/30 shadow-lg' 
           : 'border-slate-200 dark:border-[#1E293B] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-slate-300 dark:hover:border-slate-700'
-      } ${themeStyle.topBorder} ${themeStyle.surfaceClass}`}
+      } ${themeStyle.topBorder}`}
       style={{ 
         height: isMobile ? 'auto' : '100%',
         minHeight: isMobile ? 320 : 280,
       }}
     >
-      {/* Ambient Corner Glow */}
-      <div 
-        className={`absolute -top-12 -left-12 w-40 h-40 rounded-full blur-2xl pointer-events-none transition-all duration-500 ${themeStyle.glowClass}`} 
-      />
-
       {/* Header */}
       <div className="relative z-10 flex items-center justify-between px-4 py-3.5 border-b border-slate-100 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.01]">
         <div className="flex items-center gap-2.5">
-          {/* Glowing dot indicator */}
+          {/* Crisp dot indicator */}
           <div 
-            className="w-2 h-2 rounded-full transition-shadow duration-300"
+            className="w-2 h-2 rounded-full"
             style={{ 
-              backgroundColor: themeStyle.accent,
-              boxShadow: `0 0 10px ${themeStyle.accent}`
+              backgroundColor: themeStyle.accent
             }} 
           />
           <div>

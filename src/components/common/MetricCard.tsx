@@ -56,7 +56,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <Component
       onClick={onClick}
-      className={`group relative flex flex-col justify-between p-5 rounded-2xl text-left transition-all duration-200 outline-none overflow-hidden bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] hover:bg-slate-50 dark:hover:bg-[#161D27] hover:border-slate-300 dark:hover:border-slate-700/80 hover:shadow-[0_0_24px_rgba(249,115,22,0.15)] hover:-translate-y-0.5 shadow-xs ${className}`}
+      className={`group relative flex flex-col justify-between p-5 rounded-2xl text-left transition-all duration-200 outline-none overflow-hidden bg-white dark:bg-[#11161D] border border-slate-200 dark:border-[#1E293B] hover:bg-slate-50 dark:hover:bg-[#161D27] hover:border-slate-300 dark:hover:border-slate-700/80 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 shadow-xs ${className}`}
       style={style}
     >
       {/* Top micro-highlight */}

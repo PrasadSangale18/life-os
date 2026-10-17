@@ -29,6 +29,7 @@ interface TopBarProps {
   isDesktopOpen?: boolean;
   isPinned?: boolean;
   isMobile?: boolean;
+  onLogoClick?: () => void;
   user?: { name: string; email: string } | null;
   children?: React.ReactNode;
 }
@@ -48,6 +49,8 @@ export const TopBar: React.FC<TopBarProps> = ({
   onDesktopMouseLeave,
   isDesktopOpen,
   isPinned,
+  isMobile: _isMobile,
+  onLogoClick,
   user,
   children
 }) => {
@@ -63,7 +66,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   const initials = getInitials(user?.name);
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/70 dark:bg-[#05080C]/70 backdrop-blur-xl border-b border-slate-200 dark:border-[#1E293B] px-3 sm:px-4 md:px-8 flex items-center justify-between transition-colors">
+    <header className="sticky top-0 z-30 h-16 bg-white dark:bg-[#05080C] border-b border-slate-200 dark:border-[#1E293B] px-3 sm:px-4 md:px-8 flex items-center justify-between transition-colors shadow-xs">
       {/* Left: Sidebar Toggle + Page Title & View Selector */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Mobile Toggle Button (Clean 3 horizontal lines, borderless matching Prahari) */}
@@ -137,11 +140,15 @@ export const TopBar: React.FC<TopBarProps> = ({
         )}
       </div>
 
-      {/* Center: Absolute Centered Brand Title (Exact PRAHARI Spacing) */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none text-center">
-        <span className="text-base sm:text-lg md:text-xl font-black tracking-[0.35em] text-slate-900 dark:text-white uppercase font-mono">
+      {/* Center: Big Capital SANKALP Brand Title (Exact PRAHARI Styling & Hover) */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-auto">
+        <button
+          type="button"
+          onClick={onLogoClick}
+          className="text-base sm:text-xl md:text-2xl font-black tracking-[0.18em] sm:tracking-[0.25em] text-slate-900 dark:text-white uppercase font-mono select-none hover:text-orange-500 dark:hover:text-orange-400 transition-colors drop-shadow-sm whitespace-nowrap cursor-pointer"
+        >
           SANKALP
-        </span>
+        </button>
       </div>
 
       {/* Right Controls: Exact PRAHARI 3-item layout (Theme toggle, Bell badge, Profile pill) */}
