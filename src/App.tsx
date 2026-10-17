@@ -393,6 +393,8 @@ export default function App() {
         notesCount={totalNotesCount}
         completedCount={doneTasks}
         totalCount={pt.length}
+        user={user}
+        onSignOut={() => setUser(null)}
       />
 
       {/* Main Content Area with Dynamic Offset */}
