@@ -52,7 +52,7 @@ export const LoginScreen = ({ onSuccess }: LoginScreenProps) => {
           const u = data.session.user;
           onSuccess({
             name: u.user_metadata?.full_name || u.email?.split('@')[0] || 'User',
-            email: u.email || 'user@lifeos.local'
+            email: u.email || 'user@sankalp.local'
           });
         }
       });
@@ -412,7 +412,7 @@ export const LoginScreen = ({ onSuccess }: LoginScreenProps) => {
             <div className="auth-mode-links">
               {mode === 'signin' ? (
                 <>
-                  <span>New to Life OS?</span>
+                  <span>New to SANKALP?</span>
                   <button
                     type="button"
                     onClick={() => { setMode('signup'); setErrorMessage(''); setSuccessMessage(''); }}

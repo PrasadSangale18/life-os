@@ -71,7 +71,7 @@ export function generateExternalAIPrompt(
 
 Act as an Elite Chief of Staff, Agile Project Manager, and First-Principles Task Decomposition Specialist.
 
-I am providing you with active tasks exported from **Life OS v2**.
+I am providing you with active tasks exported from **SANKALP v2**.
 Your mission is to resolve task ambiguity, eliminate cognitive friction, and produce an ultra-clear, sequenced atomic execution plan.
 
 ## TARGET TASKS & WORKLOAD:
@@ -97,7 +97,7 @@ Format the response in clean, executive-ready Markdown with checkboxes.`;
 
 Act as a Principal Strategy Advisor and Executive Performance Coach specializing in OKRs (Objectives and Key Results) and High-Leverage Strategic Planning.
 
-Here is my active workload, goals, and knowledge base from **Life OS v2**:
+Here is my active workload, goals, and knowledge base from **SANKALP v2**:
 
 ## WORKLOAD & ASPIRATIONS:
 ${itemsFormatted || 'No items provided.'}
@@ -120,7 +120,7 @@ Format the output with clear headers, tables, and milestone timelines.`;
 
 Act as an Elite Productivity Coach and Circadian Chronobiology Specialist.
 
-Here is my active workload exported from **Life OS v2**:
+Here is my active workload exported from **SANKALP v2**:
 
 ## TODAY'S ACTIVE WORKLOAD:
 ${itemsFormatted || 'No tasks provided.'}
@@ -148,7 +148,7 @@ Format the schedule in an organized markdown table ready to paste into my daily 
 
 Act as a World-Class Innovation Architect, Design Thinking Facilitator, and Lateral Ideation Expert.
 
-Here are the concepts, ideas, and challenges from **Life OS v2**:
+Here are the concepts, ideas, and challenges from **SANKALP v2**:
 
 ## CURRENT CONCEPTS & CONTEXT:
 ${itemsFormatted || 'No context provided.'}
@@ -177,7 +177,7 @@ Deliver creative, non-obvious, high-conviction ideas formatted in clean Markdown
 
 Act as a Strategic Decision Scientist and Principal Risk Evaluator.
 
-Here are the conflicting options, tasks, or choices from **Life OS v2**:
+Here are the conflicting options, tasks, or choices from **SANKALP v2**:
 
 ## DECISION CONTEXT & ITEMS:
 ${itemsFormatted || 'No items provided.'}
@@ -197,7 +197,7 @@ ${customInstructions ? `## THE DILEMMA / CHOICE AT HAND:\n${customInstructions}\
 Provide a decisive, structured analysis in clean Markdown.`;
   }
 
-  return `# LIFE OS GENERAL PRODUCTIVITY PROMPT
+  return `# SANKALP GENERAL PRODUCTIVITY PROMPT
 ${itemsFormatted}`;
 }
 
@@ -208,7 +208,7 @@ export function exportToMarkdown(items: Item[]): string {
   const activeTasks = items.filter(i => i.type === 'task' && !i.deletedAt);
   const notes = items.filter(i => i.type !== 'task' && !i.deletedAt);
 
-  let md = `# Life OS Data Export\n`;
+  let md = `# SANKALP Data Export\n`;
   md += `Exported on: ${new Date().toLocaleString()}\n`;
   md += `Total Items: ${items.length} (Active Tasks: ${activeTasks.length}, Notes & Knowledge: ${notes.length})\n\n`;
 

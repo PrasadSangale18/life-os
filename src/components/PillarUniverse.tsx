@@ -89,7 +89,7 @@ export const PillarUniverse = ({ hoveredPillar, onHoverPillar, onSelectPillar }:
       <svg
         viewBox="0 0 480 400"
         className="universe-svg"
-        aria-label="The Life OS Universe constellation"
+        aria-label="The SANKALP Universe constellation"
         role="img"
       >
         <defs>

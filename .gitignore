@@ -29,3 +29,9 @@ dist-ssr
 /legacy/
 .vercel
 .vercel
+edge_temp_profile/
+fresh_profile*/
+scripts/test-*.cjs
+scripts/take-screenshot.cjs
+scripts/inspect-dom.cjs
+scripts/debug-*.cjs

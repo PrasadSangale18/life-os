@@ -45,7 +45,7 @@ describe('Export and Prompt-Wise AI Logic', () => {
 
   it('exports items to formatted Markdown correctly', () => {
     const md = exportToMarkdown(sampleItems);
-    expect(md).toContain('# Life OS Data Export');
+    expect(md).toContain('# SANKALP Data Export');
     expect(md).toContain('Complete HSE Safety Audit Report');
     expect(md).toContain('[CRITICAL]');
     expect(md).toContain('Verify all safety equipment');

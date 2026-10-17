@@ -95,7 +95,7 @@ export const SmartOrganizer = () => {
   // Sample Presets for Bulk Input
   const handleLoadSample = (type: 'daily' | 'project' | 'ideas') => {
     if (type === 'daily') {
-      setBulkText(`- Finalize Q3 quarterly revenue report [high priority] [financial]\n- Daily workout: 5km tempo run and stretching [physical]\n- Concept for modular Life OS dark mode interface [idea]\n- Pick up fresh groceries: apples, oat milk, spinach, matcha\n- Book dentist checkup for next Thursday afternoon [do]\n- Reading reflection: 1% compounding habits lead to 37x annual growth [journal]`);
+      setBulkText(`- Finalize Q3 quarterly revenue report [high priority] [financial]\n- Daily workout: 5km tempo run and stretching [physical]\n- Concept for modular SANKALP dark mode interface [idea]\n- Pick up fresh groceries: apples, oat milk, spinach, matcha\n- Book dentist checkup for next Thursday afternoon [do]\n- Reading reflection: 1% compounding habits lead to 37x annual growth [journal]`);
     } else if (type === 'project') {
       setBulkText(`- Setup automated CI/CD pipeline with GitHub Actions [do]\n- Research vector embeddings and semantic graph search algorithms [idea]\n- Coordinate architecture review with team on Monday 10am [delegate]\n- Optimize database index on items table for sub-10ms queries\n- Draft user release notes and changelog documentation [decide]`);
     } else {
@@ -115,7 +115,7 @@ export const SmartOrganizer = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'life_os_bulk_intake_template.csv';
+    a.download = 'sankalp_bulk_intake_template.csv';
     a.click();
     URL.revokeObjectURL(url);
     addToast('Template Downloaded', 'Fill with your tasks or thoughts and upload.', 'info');
@@ -240,7 +240,7 @@ export const SmartOrganizer = () => {
     await commitImport(batchId, finalItems);
     setCommittedStats({ tasks: taskCount, notes: noteCount });
     setBulkStage('committed');
-    addToast('Committed to Life OS', `Saved ${taskCount} tasks and ${noteCount} notes.`, 'success');
+    addToast('Committed to SANKALP', `Saved ${taskCount} tasks and ${noteCount} notes.`, 'success');
   };
 
   const handleUndoBulk = async () => {
@@ -326,7 +326,7 @@ export const SmartOrganizer = () => {
                     <span>CSV & Text Bulk Intake</span>
                   </div>
                   <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4, lineHeight: 1.5 }}>
-                    Upload or paste unorganized notes, CSV files, meeting dumps, or mixed task lists. Life OS will batch-parse and organize them into <strong>To-do list</strong> and <strong>My Notes</strong>.
+                    Upload or paste unorganized notes, CSV files, meeting dumps, or mixed task lists. SANKALP will batch-parse and organize them into <strong>To-do list</strong> and <strong>My Notes</strong>.
                   </div>
                 </div>
 
@@ -495,7 +495,7 @@ export const SmartOrganizer = () => {
                     Processing: {uploadedFileName || 'Bulk Input Queue'}
                   </div>
                   <div style={{ fontSize: 12.5, color: "var(--text-secondary)", marginTop: 2 }}>
-                    Life OS AI engine is analyzing items, classifying pillars, and determining execution quadrants...
+                    SANKALP AI engine is analyzing items, classifying pillars, and determining execution quadrants...
                   </div>
                 </div>
               </div>
@@ -532,7 +532,7 @@ export const SmartOrganizer = () => {
                     <span>{parsedBulkItems.length} Items Atomized & Categorized</span>
                   </div>
                   <div style={{ fontSize: 12.5, color: "var(--text-secondary)", marginTop: 4 }}>
-                    Review, adjust classification, and confirm adding to your Life OS.
+                    Review, adjust classification, and confirm adding to your SANKALP workspace.
                   </div>
                 </div>
 
@@ -553,7 +553,7 @@ export const SmartOrganizer = () => {
                     style={{ gap: 6, fontSize: 13, padding: "8px 18px", fontWeight: 650 }}
                   >
                     <Check size={14} />
-                    <span>✓ Add {selectedItemIds.size} Items to Life OS</span>
+                    <span>✓ Add {selectedItemIds.size} Items to SANKALP</span>
                   </button>
                 </div>
               </div>

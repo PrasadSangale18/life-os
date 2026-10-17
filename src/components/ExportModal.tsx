@@ -120,7 +120,7 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
                 Export & Data Backup
               </h2>
               <p style={{ fontSize: 12, margin: 0, color: "var(--text-secondary)", marginTop: 2 }}>
-                Safely backup your Life OS database or transfer data to other apps
+                Safely backup your SANKALP database or transfer data to other apps
               </p>
             </div>
           </div>

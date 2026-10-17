@@ -192,7 +192,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const pageTitle = SECTION_TITLES[activeSection] || 'Autonomous AI Life OS';
+    const pageTitle = SECTION_TITLES[activeSection] || 'Intelligent Workspace';
     document.title = `${pageTitle} — SANKALP`;
   }, [activeSection]);
   const [taskViewMode, setTaskViewMode] = useState<'matrix' | 'list' | 'projects' | 'inbox'>('matrix');

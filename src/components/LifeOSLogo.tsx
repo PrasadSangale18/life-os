@@ -82,7 +82,7 @@ export const LifeOSLogo = ({ variant = 'full', size = 32, className }: LifeOSLog
               lineHeight: 1.15
             }}
           >
-            AISANKALP
+            SANKALP
           </span>
           {variant === 'full' && (
             <span 

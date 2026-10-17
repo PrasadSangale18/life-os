@@ -441,7 +441,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
 
   // Reset canvases to fresh store items
   const handleResetToDefaults = () => {
-    if (window.confirm('Reset canvases to match current Life OS items? Custom nodes will be re-seeded.')) {
+    if (window.confirm('Reset canvases to match current SANKALP items? Custom nodes will be re-seeded.')) {
       const fresh = generateLifeOSCanvases(items);
       setCanvases(fresh);
       setActiveCanvasId(fresh[0].id);
@@ -1171,7 +1171,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               type="button"
               onClick={() => setShowLibraryModal(true)}
               className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition-colors cursor-pointer"
-              title="Add Life OS Item"
+              title="Add SANKALP Item"
             >
               <Plus size={15} />
             </button>

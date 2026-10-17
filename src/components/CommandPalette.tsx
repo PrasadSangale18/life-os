@@ -123,7 +123,7 @@ export const CommandPalette = ({
     const noteCount = matched.filter(m => m.type === 'note').length;
     const topItems = matched.slice(0, 3);
 
-    let summaryText = `Found ${matched.length} related records across your Life OS (${taskCount} tasks, ${noteCount} notes).`;
+    let summaryText = `Found ${matched.length} related records across your SANKALP workspace (${taskCount} tasks, ${noteCount} notes).`;
     if (qLower.includes('workout') || qLower.includes('fitness') || qLower.includes('gym')) {
       summaryText = `Physical Dimension: You have ${matched.length} active records tracking workouts, health, and fitness goals.`;
     } else if (qLower.includes('finance') || qLower.includes('money') || qLower.includes('tax')) {
@@ -254,7 +254,7 @@ export const CommandPalette = ({
             >
               <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--accent-hover)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 <Sparkles size={13} />
-                <span>Ask Life OS Copilot</span>
+                <span>Ask SANKALP Copilot</span>
               </div>
               <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.45, color: "var(--text-primary)" }}>
                 {aiSynthesis.summary}

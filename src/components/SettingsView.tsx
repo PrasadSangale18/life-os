@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import { db } from '../db';
 import { supabase, hasSupabase } from '../utils/supabaseClient';
 import { syncState, subscribeSync, triggerSync, type SyncStatus, setSyncPrivate, resolveConflict } from '../utils/syncEngine';
-import { Settings, Cloud, Database, History, AlertTriangle, Download, Upload, RotateCw, Wifi, WifiOff, Sparkles } from 'lucide-react';
+import { Settings, Cloud, Database, History, AlertTriangle, Download, Upload, RotateCw, Wifi, WifiOff, Sparkles, ShieldCheck, Lock, CheckCircle2 } from 'lucide-react';
 
 export const SettingsView = () => {
   const exportData = useStore(s => s.exportData);
@@ -13,7 +13,7 @@ export const SettingsView = () => {
 
   const [snapshots, setSnapshots] = useState<any[]>([]);
   const [backupDate, setBackupDate] = useState<string>(() => {
-    const lastBackup = localStorage.getItem('lifeos_last_backup');
+    const lastBackup = localStorage.getItem('sankalp_last_backup') || localStorage.getItem('lifeos_last_backup');
     return lastBackup ? new Date(parseInt(lastBackup)).toLocaleString() : 'Never';
   });
   
@@ -87,10 +87,11 @@ export const SettingsView = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `life-os-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `sankalp-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     
     const now = Date.now();
+    localStorage.setItem('sankalp_last_backup', now.toString());
     localStorage.setItem('lifeos_last_backup', now.toString());
     setBackupDate(new Date(now).toLocaleString());
   };
@@ -357,7 +358,7 @@ export const SettingsView = () => {
         </div>
 
         <div className="text-secondary" style={{ fontSize: 13 }}>
-          Export your entire Life OS workspace (tasks, notes, tags, metadata) to a standalone portable JSON file.
+          Export your entire SANKALP workspace (tasks, notes, tags, metadata) to a standalone portable JSON file.
         </div>
         <div className="text-meta" style={{ fontSize: 11 }}>
           Last backup: {backupDate}
@@ -377,16 +378,16 @@ export const SettingsView = () => {
 
           <button 
             onClick={async () => {
-              if (window.confirm("Seed default Life OS dataset (Prasad's authentic tasks & notes)? This will merge with your current items.")) {
+              if (window.confirm("Seed default SANKALP dataset (Prasad's authentic tasks & notes)? This will merge with your current items.")) {
                 await seedDefaultData();
-                alert("Seeded default Life OS dataset successfully!");
+                alert("Seeded default SANKALP dataset successfully!");
               }
             }} 
             className="btn-secondary" 
             style={{ gap: 6, borderColor: "rgba(0, 217, 126, 0.35)", color: "#00d97e" }}
           >
             <Sparkles size={14} color="#00d97e" />
-            <span>Load Prasad's Life OS Data</span>
+            <span>Load Prasad's SANKALP Data</span>
           </button>
         </div>
 
@@ -454,6 +455,74 @@ export const SettingsView = () => {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Data Sovereignty, Privacy & Security Posture */}
+      <div className="glass-panel" style={{ padding: "22px 26px", display: "flex", flexDirection: "column", gap: 16, border: "1px solid rgba(16, 185, 129, 0.25)", background: "linear-gradient(180deg, rgba(16, 185, 129, 0.03) 0%, var(--bg-surface) 100%)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(16, 185, 129, 0.12)", color: "#10b981", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ShieldCheck size={18} />
+            </div>
+            <div>
+              <div className="card-title" style={{ fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
+                <span>Data Sovereignty, Privacy & Security Architecture</span>
+                <span className="ui-pill" style={{ fontSize: 10, color: "#10b981", borderColor: "rgba(16, 185, 129, 0.3)" }}>
+                  Zero-Telemetry
+                </span>
+              </div>
+              <div className="text-secondary" style={{ fontSize: 12 }}>
+                SANKALP is engineered with a strict local-first, privacy-by-design architectural guarantee.
+              </div>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-tertiary)", fontSize: 11, fontFamily: "var(--font-mono)" }}>
+            <Lock size={12} color="#10b981" />
+            <span>ENCRYPTED IN TRANSIT & LOCAL AT REST</span>
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+          <div style={{ padding: "14px 16px", borderRadius: 10, background: "rgba(255, 255, 255, 0.02)", border: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 650, color: "var(--text-primary)" }}>
+              <CheckCircle2 size={14} color="#10b981" />
+              <span>100% Client-Side Storage</span>
+            </div>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
+              All database records (tasks, notes, pillars, Eisenhower matrix classifications) reside directly in your browser's IndexedDB via Dexie. No data leaves your machine without explicit consent.
+            </p>
+          </div>
+
+          <div style={{ padding: "14px 16px", borderRadius: 10, background: "rgba(255, 255, 255, 0.02)", border: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 650, color: "var(--text-primary)" }}>
+              <CheckCircle2 size={14} color="#10b981" />
+              <span>Zero Tracking & Ad Pixels</span>
+            </div>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
+              SANKALP contains 0 Google Analytics, 0 Facebook pixels, and 0 third-party telemetry beacons. Your thoughts and daily routines remain strictly private.
+            </p>
+          </div>
+
+          <div style={{ padding: "14px 16px", borderRadius: 10, background: "rgba(255, 255, 255, 0.02)", border: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 650, color: "var(--text-primary)" }}>
+              <CheckCircle2 size={14} color="#10b981" />
+              <span>Row-Level Security (RLS)</span>
+            </div>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
+              When cloud sync is active, cross-device communications use TLS 1.3 cryptographic pipes with Supabase Postgres Row-Level Security, preventing unauthorized cross-tenant data access.
+            </p>
+          </div>
+
+          <div style={{ padding: "14px 16px", borderRadius: 10, background: "rgba(255, 255, 255, 0.02)", border: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 650, color: "var(--text-primary)" }}>
+              <CheckCircle2 size={14} color="#10b981" />
+              <span>Hardened HTTP Headers</span>
+            </div>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
+              Protected against clickjacking and MIME-sniffing with Strict-Transport-Security (HSTS 2-year preload), X-Frame-Options: DENY, and restricted browser hardware permissions.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

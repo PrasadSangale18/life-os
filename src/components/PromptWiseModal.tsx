@@ -248,7 +248,7 @@ export const PromptWiseModal = ({ isOpen, onClose, initialTask }: PromptWiseModa
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
             <div>
               <label className="text-label" style={{ display: "block", marginBottom: 6, fontSize: 10.5 }}>
-                Context Scope (Data from your Life OS)
+                Context Scope (Data from your SANKALP Workspace)
               </label>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {initialTask && (
