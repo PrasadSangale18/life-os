@@ -137,7 +137,7 @@ const SortableTaskItem = ({
         {...listeners} 
         onClick={(e) => e.stopPropagation()}
         className="cursor-grab text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 mt-0.5 touch-none transition-colors"
-        title="Drag to rearrange"
+        title="Drag to move between quadrants"
       >
         <GripVertical size={13} strokeWidth={1.75} />
       </div>

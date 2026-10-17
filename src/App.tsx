@@ -361,6 +361,15 @@ export default function App() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '12s' }} />
       </div>
 
+      {/* Left Edge Hover Trigger (Claude-style hover zone when unpinned) */}
+      {!isPinned && (
+        <div 
+          onMouseEnter={handleMouseEnter}
+          className="hidden lg:block fixed left-0 top-0 bottom-0 w-4 z-40 cursor-e-resize"
+          title="Hover to peek sidebar"
+        />
+      )}
+
       {/* SANKALP Sliding Sidebar */}
       <Sidebar 
         currentTab={activeSection}
@@ -376,6 +385,8 @@ export default function App() {
         isMobile={isMobile}
         isOpen={sidebarOpen}
         isDesktopOpen={isDesktopVisible}
+        isPinned={isPinned}
+        onDesktopToggle={togglePin}
         onClose={() => setSidebarOpen(false)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}

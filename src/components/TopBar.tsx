@@ -5,11 +5,9 @@ import {
   LayoutGrid, 
   List, 
   FolderKanban, 
-  Inbox,
-  PanelLeft,
-  PanelLeftClose,
-  Menu
+  Inbox
 } from 'lucide-react';
+import { SidebarToggleButton } from './SidebarToggleButton';
 
 interface TopBarProps {
   currentView: 'matrix' | 'list' | 'projects' | 'inbox';
@@ -70,37 +68,28 @@ export const TopBar: React.FC<TopBarProps> = ({
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Mobile Toggle Button (Clean 3 horizontal lines, borderless matching Prahari) */}
         {(onMenuToggle || onToggleSidebar) && (
-          <button
-            type="button"
-            onClick={onMenuToggle || onToggleSidebar}
-            className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#161D27] border border-transparent transition-all active:scale-95 flex items-center justify-center shrink-0 cursor-pointer"
-            aria-label="Toggle navigation drawer"
-            title="Toggle Navigation"
-          >
-            <Menu size={20} strokeWidth={2.2} />
-          </button>
+          <div className="lg:hidden">
+            <SidebarToggleButton 
+              onClick={onMenuToggle || onToggleSidebar}
+              variant="menu"
+              ariaLabel="Toggle navigation drawer"
+            />
+          </div>
         )}
 
-        {/* Desktop Toggle Button (Peek-on-hover & Pin) */}
-        {(onDesktopMenuToggle || onToggleSidebar) && (
-          <button
-            type="button"
-            onClick={onDesktopMenuToggle || onToggleSidebar}
-            onMouseEnter={onDesktopMouseEnter}
-            onMouseLeave={onDesktopMouseLeave}
-            className={`hidden lg:flex w-9 h-9 rounded-xl border transition-all items-center justify-center shrink-0 group relative cursor-pointer ${
-              isDesktopOpen
-                ? 'bg-slate-100 dark:bg-[#161D27] border-orange-500/30 text-orange-500'
-                : 'border-slate-200 dark:border-[#1E293B] text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-[#11161D] hover:bg-slate-100 dark:hover:bg-[#161D27]'
-            }`}
-            title={isPinned ? 'Collapse sidebar (Ctrl+Shift+S)' : 'Pin sidebar open (Ctrl+Shift+S)'}
-          >
-            {isPinned ? (
-              <PanelLeftClose size={17} strokeWidth={2.2} className="text-[#FF5A1F]" />
-            ) : (
-              <PanelLeft size={17} strokeWidth={2.2} className={isDesktopOpen ? 'text-[#FF5A1F]' : 'group-hover:text-[#FF5A1F] transition-colors'} />
-            )}
-          </button>
+        {/* Desktop Toggle Button (Slide / Split-panel Icon with peek-on-hover & pin) */}
+        {(onDesktopMenuToggle || onToggleSidebar) && !isPinned && (
+          <div className="hidden lg:flex">
+            <SidebarToggleButton 
+              onClick={onDesktopMenuToggle || onToggleSidebar} 
+              onMouseEnter={onDesktopMouseEnter}
+              onMouseLeave={onDesktopMouseLeave}
+              isOpen={isDesktopOpen}
+              isPinned={isPinned}
+              variant="panel"
+              ariaLabel="Pin sidebar open (Ctrl+Shift+S)"
+            />
+          </div>
         )}
 
         {/* Page Title - Hidden on mobile to prevent collision with centered brand wordmark */}

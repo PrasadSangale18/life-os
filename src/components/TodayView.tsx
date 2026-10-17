@@ -130,20 +130,17 @@ export const TodayView = ({
     return [...priorityItems, ...fallback];
   }, [activeTasks]);
 
-  // Real metrics calculated from Life OS database (inspired by Prahari telemetry)
+  // Real metrics calculated from Life OS database
   const criticalTasksCount = useMemo(() => {
-    const realCritical = overdueTasks.length + activeTasks.filter(t => t.priority === 'critical' || t.quadrant === 'do').length;
-    return realCritical > 0 ? realCritical : 12;
+    return overdueTasks.length + activeTasks.filter(t => t.priority === 'critical' || t.quadrant === 'do').length;
   }, [overdueTasks, activeTasks]);
 
   const completedItemsCount = useMemo(() => {
-    const realCompleted = items.filter(t => t.status === 'done' && !t.deletedAt).length;
-    return realCompleted > 0 ? realCompleted : 88;
+    return items.filter(t => t.status === 'done' && !t.deletedAt).length;
   }, [items]);
 
   const totalAssetsCount = useMemo(() => {
-    const realTotal = items.filter(i => !i.deletedAt).length;
-    return realTotal > 0 ? realTotal : 142;
+    return items.filter(i => !i.deletedAt).length;
   }, [items]);
 
   // Pillar Execution Density across the 5 Life Pillars
@@ -165,12 +162,14 @@ export const TodayView = ({
       }
     });
 
+    const maxPillarTotal = Math.max(...Object.values(pCounts).map(p => p.pending + p.done), 1);
+
     return [
-      { id: 'physical', label: 'Physical', desc: 'Health, Vitality & Energy', pending: Math.min(Math.max(pCounts.physical.pending * 8, 25), 90), done: Math.min(Math.max(pCounts.physical.done * 10, 40), 98) },
-      { id: 'mental', label: 'Mental', desc: 'Deep Work, Focus & Learning', pending: Math.min(Math.max(pCounts.mental.pending * 8, 30), 85), done: Math.min(Math.max(pCounts.mental.done * 10, 50), 92) },
-      { id: 'financial', label: 'Financial', desc: 'Investments, Wealth & Assets', pending: Math.min(Math.max(pCounts.financial.pending * 8, 20), 80), done: Math.min(Math.max(pCounts.financial.done * 10, 35), 88) },
-      { id: 'relational', label: 'Relational', desc: 'Family, Network & Community', pending: Math.min(Math.max(pCounts.relational.pending * 8, 15), 70), done: Math.min(Math.max(pCounts.relational.done * 10, 30), 75) },
-      { id: 'spiritual', label: 'Spiritual', desc: 'Mindfulness, Purpose & Clarity', pending: Math.min(Math.max(pCounts.spiritual.pending * 8, 10), 60), done: Math.min(Math.max(pCounts.spiritual.done * 10, 25), 65) }
+      { id: 'physical', label: 'Physical', desc: 'Health, Vitality & Energy', pending: Math.round((pCounts.physical.pending / maxPillarTotal) * 100), done: Math.round((pCounts.physical.done / maxPillarTotal) * 100) },
+      { id: 'mental', label: 'Mental', desc: 'Deep Work, Focus & Learning', pending: Math.round((pCounts.mental.pending / maxPillarTotal) * 100), done: Math.round((pCounts.mental.done / maxPillarTotal) * 100) },
+      { id: 'financial', label: 'Financial', desc: 'Investments, Wealth & Assets', pending: Math.round((pCounts.financial.pending / maxPillarTotal) * 100), done: Math.round((pCounts.financial.done / maxPillarTotal) * 100) },
+      { id: 'relational', label: 'Relational', desc: 'Family, Network & Community', pending: Math.round((pCounts.relational.pending / maxPillarTotal) * 100), done: Math.round((pCounts.relational.done / maxPillarTotal) * 100) },
+      { id: 'spiritual', label: 'Spiritual', desc: 'Mindfulness, Purpose & Clarity', pending: Math.round((pCounts.spiritual.pending / maxPillarTotal) * 100), done: Math.round((pCounts.spiritual.done / maxPillarTotal) * 100) }
     ];
   }, [items]);
 
@@ -566,7 +565,7 @@ export const TodayView = ({
                 strokeWidth="18"
                 fill="transparent"
                 strokeDasharray="389"
-                strokeDashoffset="105"
+                strokeDashoffset={totalAssetsCount > 0 ? Math.max(389 - (389 * (completedItemsCount / totalAssetsCount)), 0) : 389}
                 strokeLinecap="round"
                 className="transition-all duration-700"
               />
@@ -579,7 +578,7 @@ export const TodayView = ({
                 strokeWidth="18"
                 fill="transparent"
                 strokeDasharray="389"
-                strokeDashoffset="284"
+                strokeDashoffset={totalAssetsCount > 0 ? Math.max(389 - (389 * (criticalTasksCount / totalAssetsCount)), 0) : 389}
                 strokeLinecap="round"
                 className="transition-all duration-700"
               />

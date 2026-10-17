@@ -24,6 +24,7 @@ export interface Item {
   // Phase 5 specific
   cleanedTitle?: string;
   cleanedBody?: string;
+  rawBody?: string;
   splitFromId?: string;
   isArchived?: boolean;
   isPriority?: boolean;

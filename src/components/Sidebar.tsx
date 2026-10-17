@@ -15,12 +15,15 @@ import {
   BarChart3,
   Zap
 } from 'lucide-react';
+import { SidebarToggleButton } from './SidebarToggleButton';
 
 interface SidebarProps {
   currentTab: string;
   onTabChange: (tab: string) => void;
   isOpen: boolean;            // Mobile open state
   isDesktopOpen: boolean;     // Desktop (pinned || hovered) state
+  isPinned?: boolean;
+  onDesktopToggle?: () => void;
   onClose: () => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -49,6 +52,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onTabChange,
   isOpen,
   isDesktopOpen,
+  isPinned = false,
+  onDesktopToggle,
   onClose,
   onMouseEnter,
   onMouseLeave,
@@ -137,16 +142,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             </div>
 
-            {onClose && (
-              <button
-                type="button"
-                onClick={onClose}
-                className="lg:hidden p-1.5 rounded-lg border border-slate-200 dark:border-dark-border text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer"
-                title="Close Navigation"
-              >
-                <ChevronLeft size={16} />
-              </button>
-            )}
+            <div className="flex items-center gap-1">
+              {onDesktopToggle && (
+                <div className="hidden lg:flex">
+                  <SidebarToggleButton 
+                    onClick={onDesktopToggle} 
+                    isOpen={isDesktopOpen} 
+                    isPinned={isPinned}
+                    variant="panel"
+                    ariaLabel={isPinned ? "Collapse sidebar (Ctrl+Shift+S)" : "Pin sidebar (Ctrl+Shift+S)"}
+                  />
+                </div>
+              )}
+              {onClose && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="lg:hidden p-1.5 rounded-lg border border-slate-200 dark:border-dark-border text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer"
+                  title="Close Navigation"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+              )}
+            </div>
           </div>
 
         {/* Categorized Navigation Groups */}

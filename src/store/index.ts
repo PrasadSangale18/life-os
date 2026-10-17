@@ -330,12 +330,14 @@ export const useStore = create<LifeOSState>((set) => ({
     const item = await db.items.get(id);
     if (!item) return;
     const rawText = item.rawText ?? item.title;
+    const rawBody = item.rawBody !== undefined ? item.rawBody : item.body;
     await useStore.getState().updateItem(id, {
       title: cleanedTitle,
       body: cleanedBody !== undefined ? cleanedBody : item.body,
       cleanedTitle,
       cleanedBody,
-      rawText
+      rawText,
+      rawBody
     });
   },
 
@@ -344,6 +346,7 @@ export const useStore = create<LifeOSState>((set) => ({
     if (!item) return;
     await useStore.getState().updateItem(id, {
       title: item.rawText || item.title,
+      body: item.rawBody !== undefined ? item.rawBody : item.body,
       cleanedTitle: undefined,
       cleanedBody: undefined
     });
