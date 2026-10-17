@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from './store';
 import { Dashboard } from './components/Dashboard';
@@ -47,12 +47,114 @@ import {
 } from 'lucide-react';
 import './App.css';
 
+const PATH_TO_SECTION: Record<string, string> = {
+  '/': 'dashboard',
+  '/dashboard': 'dashboard',
+  '/today': 'today',
+  '/tasks': 'tasks',
+  '/matrix': 'tasks',
+  '/todo': 'tasks',
+  '/calendar': 'calendar',
+  '/focus': 'focus',
+  '/habits': 'habits',
+  '/notes': 'notes',
+  '/projects': 'projects',
+  '/goals': 'goals',
+  '/organizer': 'organizer',
+  '/canvas': 'mindmap',
+  '/mindmap': 'mindmap',
+  '/journal': 'journal',
+  '/analytics': 'analytics',
+  '/import': 'import',
+  '/review': 'review',
+  '/settings': 'settings',
+  '/trash': 'trash',
+};
+
+const SECTION_TO_PATH: Record<string, string> = {
+  dashboard: '/',
+  today: '/today',
+  tasks: '/tasks',
+  calendar: '/calendar',
+  focus: '/focus',
+  habits: '/habits',
+  notes: '/notes',
+  projects: '/projects',
+  goals: '/goals',
+  organizer: '/organizer',
+  mindmap: '/canvas',
+  journal: '/journal',
+  analytics: '/analytics',
+  import: '/import',
+  review: '/review',
+  settings: '/settings',
+  trash: '/trash',
+};
+
+const SECTION_TITLES: Record<string, string> = {
+  dashboard: 'Dashboard',
+  today: 'Executive Daily Briefing',
+  tasks: 'To-do & Matrix',
+  calendar: 'Calendar & Schedule',
+  focus: 'Flow Cockpit',
+  habits: 'Habits & Routines',
+  notes: 'My Notes',
+  projects: 'Projects Kanban',
+  goals: 'Goals & Milestones',
+  organizer: 'Smart AI Organizer',
+  mindmap: 'Canvas & Graph',
+  journal: 'Daily Journal',
+  analytics: 'Productivity Analytics',
+  import: 'CSV Bulk Import',
+  review: 'Weekly Operating Review',
+  settings: 'Settings & Storage',
+  trash: 'Trash & Archive'
+};
+
+const getInitialSection = (): string => {
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname.replace(/\/+$/, '') || '/';
+    if (PATH_TO_SECTION[path]) {
+      return PATH_TO_SECTION[path];
+    }
+  }
+  return 'dashboard';
+};
+
 export default function App() {
   const { isLoaded, init, user, setUser, addItem, updateItem, showPrivate, setShowPrivate } = useStore();
 
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeSection, setActiveSection] = useState<string>("dashboard");
+  const [activeSection, setActiveSectionState] = useState<string>(getInitialSection);
+
+  const setActiveSection = useCallback((sec: string) => {
+    setActiveSectionState(sec);
+    if (typeof window !== 'undefined') {
+      const targetPath = SECTION_TO_PATH[sec] || '/';
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState({ section: sec }, '', targetPath);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      const path = window.location.pathname.replace(/\/+$/, '') || '/';
+      const sec = PATH_TO_SECTION[path] || e.state?.section || 'dashboard';
+      setActiveSectionState(sec);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    const pageTitle = SECTION_TITLES[activeSection] || 'Autonomous AI Life OS';
+    document.title = `${pageTitle} — SANKALP`;
+  }, [activeSection]);
   const [taskViewMode, setTaskViewMode] = useState<'matrix' | 'list' | 'projects' | 'inbox'>('matrix');
   const [activePillar, setActivePillar] = useState<PillarId>("physical");
   const [showUtilitiesModal, setShowUtilitiesModal] = useState(false);
